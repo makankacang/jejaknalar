@@ -1,0 +1,11 @@
+﻿{
+  "ok": true,
+  "data": {
+    "student_session_id": "00000000-0000-4000-8000-000000000001",
+    "access_code": "ABC123",
+    "recovery_token": "RECOV789",
+    "class_id": "00000000-0000-4000-8000-000000000010",
+    "class_name": "Kelas VII A - Demo"
+  },
+  "request_id": "req-fixture-session"
+}

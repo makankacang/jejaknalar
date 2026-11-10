@@ -1,0 +1,13 @@
+﻿{
+  "ok": true,
+  "data": {
+    "class_id": "00000000-0000-4000-8000-000000000010",
+    "objectives": [
+      { "code": "LO-001", "description": "Menemukan bukti dalam teks", "evidence_count": 12, "status": "developing" }
+    ],
+    "students": [
+      { "display_name": "Siswa Demo 1", "attempts": 2, "last_path": "developing" }
+    ]
+  },
+  "request_id": "req-fixture-report"
+}

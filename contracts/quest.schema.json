@@ -1,0 +1,42 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jejaknalar.local/contracts/quest.schema.json",
+  "title": "QuestSchema",
+  "version": "1.0",
+  "type": "object",
+  "required": ["schema_version", "quest_id", "quest_version_id", "objective_ids", "template", "scene_id", "steps", "variants"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "quest_id":      { "type": "string", "pattern": "^QUEST-[A-Z0-9-]+$" },
+    "quest_version_id": { "type": "string", "pattern": "^QV-[A-Z0-9-]+$" },
+    "objective_ids": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "string", "pattern": "^LO-[A-Z0-9-]+$" }
+    },
+    "template": { "type": "string", "enum": ["evidence_hunt"] },
+    "scene_id": { "type": "string", "minLength": 1 },
+    "steps": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id":   { "type": "string" },
+          "type": { "type": "string", "enum": ["read_document", "select_evidence"] },
+          "ref":     { "type": "string" },
+          "item_id": { "type": "string" }
+        }
+      }
+    },
+    "variants": {
+      "type": "object",
+      "required": ["needs_support", "developing", "ready_for_extension"],
+      "properties": {
+        "needs_support":       { "type": "string" },
+        "developing":          { "type": "string" },
+        "ready_for_extension": { "type": "string" }
+      }
+    }
+  }
+}

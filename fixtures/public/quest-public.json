@@ -1,0 +1,21 @@
+﻿{
+  "ok": true,
+  "data": {
+    "schema_version": "1.0",
+    "quest_id": "QUEST-001",
+    "quest_version_id": "QV-001",
+    "objective_ids": ["LO-001"],
+    "template": "evidence_hunt",
+    "scene_id": "school_library",
+    "steps": [
+      { "id": "s1", "type": "read_document", "ref": "DOC-001" },
+      { "id": "s2", "type": "select_evidence", "item_id": "Q-001" }
+    ],
+    "variants": {
+      "needs_support": "QVAR-S",
+      "developing": "QVAR-D",
+      "ready_for_extension": "QVAR-E"
+    }
+  },
+  "request_id": "req-fixture-quest-public"
+}

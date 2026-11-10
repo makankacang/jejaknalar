@@ -1,0 +1,14 @@
+﻿{
+  "ok": true,
+  "data": {
+    "attempt_id": "00000000-0000-4000-8000-000000000099",
+    "status": "scored",
+    "score": 80,
+    "feedback": [
+      { "item_id": "Q-001", "correct": true,  "message": "Benar" },
+      { "item_id": "Q-002", "correct": false, "message": "Periksa kembali bukti yang kamu pilih." }
+    ],
+    "next_path": "developing"
+  },
+  "request_id": "req-fixture-assessment"
+}
