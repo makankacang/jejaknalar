@@ -7,3 +7,17 @@ dist/
 supabase/.branches
 supabase/.temp
 fixtures/private-test/*.answer.json
+
+# Day 1: protect all local secrets and generated files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+.day1-backup/

@@ -1,27 +1,22 @@
 name: CI
-
 on:
-  pull_request:
-    branches: [develop, main]
   push:
     branches: [develop]
+  pull_request:
+    branches: [develop, main]
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
-
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - name: Validate contracts
-        run: |
-          npx --yes @redocly/cli@latest lint contracts/api.openapi.yaml
-          npx --yes ajv-cli@5 validate -s contracts/quest.schema.json -d fixtures/public/quest-public.json --spec=draft2020 || true
+      - run: npm run contract:lint
+      - run: npm run build
