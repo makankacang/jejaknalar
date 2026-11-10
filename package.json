@@ -2,13 +2,20 @@
   "name": "jejaknalar",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["apps/web"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspace=apps/web",
-    "typecheck": "npm run typecheck --workspace=apps/web",
-    "lint": "npm run lint --workspace=apps/web",
-    "test": "npm run test --workspace=apps/web",
-    "contract:lint": "node scripts/validate-contracts.mjs"
+    "dev": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/web",
+    "typecheck": "npm run typecheck -w apps/web",
+    "lint": "npm run lint -w apps/web",
+    "test": "npm run test -w apps/web",
+    "contract:lint": "node scripts/validate-contracts.mjs && redocly lint contracts/api.openapi.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.77.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }
