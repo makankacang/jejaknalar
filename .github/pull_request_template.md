@@ -1,4 +1,4 @@
-﻿# Pull Request
+# Pull Request
 
 ## Ticket
 <!-- contoh: B-01 -->
