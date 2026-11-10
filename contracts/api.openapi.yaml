@@ -1,15 +1,22 @@
-﻿openapi: 3.0.3
+openapi: 3.0.3
 info:
   title: JejakNalar API
   version: "1.0"
   description: |
     Kontrak logis Sprint 0. Nama /api/... dipetakan ke /functions/v1/... pada Supabase.
+  license:
+    name: Proprietary
+    url: https://jejaknalar.example/license
 
 servers:
-  - url: http://localhost:54321/functions/v1
-    description: Local Supabase
-  - url: https://PROJECT_REF.supabase.co/functions/v1
+  - url: https://{projectRef}.supabase.co/functions/v1
     description: Staging
+    variables:
+      projectRef:
+        default: project-ref
+        description: Supabase project reference
+
+security: []
 
 components:
   securitySchemes:
@@ -27,15 +34,21 @@ components:
       type: object
       required: [ok, data, request_id]
       properties:
-        ok: { type: boolean, enum: [true] }
-        data: { type: object }
-        request_id: { type: string }
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          type: object
+        request_id:
+          type: string
 
     ErrorEnvelope:
       type: object
       required: [ok, error, request_id]
       properties:
-        ok: { type: boolean, enum: [false] }
+        ok:
+          type: boolean
+          enum: [false]
         error:
           type: object
           required: [code, message]
@@ -43,56 +56,87 @@ components:
             code:
               type: string
               enum: [VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, RATE_LIMITED, AI_UNAVAILABLE, CONFLICT, INTERNAL_ERROR]
-            message: { type: string }
-        request_id: { type: string }
+            message:
+              type: string
+        request_id:
+          type: string
 
     JoinClassRequest:
       type: object
       required: [class_code, display_name]
       properties:
-        class_code:  { type: string, pattern: '^[A-Z0-9]{6}$' }
-        display_name: { type: string, minLength: 1, maxLength: 80 }
+        class_code:
+          type: string
+          pattern: '^[A-Z0-9]{6}$'
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 80
 
-    JoinClassResponse:
+    JoinClassData:
       type: object
       required: [student_session_id, access_code, recovery_token, class_id]
       properties:
-        student_session_id: { type: string, format: uuid }
-        access_code:        { type: string, minLength: 6 }
-        recovery_token:     { type: string, minLength: 8 }
-        class_id:           { type: string, format: uuid }
-        class_name:         { type: string }
+        student_session_id:
+          type: string
+          format: uuid
+        access_code:
+          type: string
+          minLength: 6
+        recovery_token:
+          type: string
+          minLength: 8
+        class_id:
+          type: string
+          format: uuid
+        class_name:
+          type: string
 
     SubmitAssessmentRequest:
       type: object
       required: [quest_version_id, idempotency_key, answers]
       properties:
-        quest_version_id: { type: string }
-        idempotency_key:  { type: string, format: uuid }
+        quest_version_id:
+          type: string
+        idempotency_key:
+          type: string
+          format: uuid
         answers:
           type: array
           items:
             type: object
             required: [item_id, value]
             properties:
-              item_id: { type: string }
-              value:   { type: string }
+              item_id:
+                type: string
+              value:
+                type: string
 
-    SubmitAssessmentResponse:
+    SubmitAssessmentData:
       type: object
       required: [attempt_id, status, score, feedback, next_path]
       properties:
-        attempt_id: { type: string, format: uuid }
-        status:     { type: string, enum: [scored] }
-        score:      { type: integer, minimum: 0, maximum: 100 }
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [scored]
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
         feedback:
           type: array
           items:
             type: object
             properties:
-              item_id: { type: string }
-              correct: { type: boolean }
-              message: { type: string }
+              item_id:
+                type: string
+              correct:
+                type: boolean
+              message:
+                type: string
         next_path:
           type: string
           enum: [needs_support, developing, ready_for_extension, need_more_evidence]
@@ -102,23 +146,28 @@ components:
       description: Tidak memiliki akses
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
     RateLimited:
       description: Batas request tercapai
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
     ValidationError:
       description: Request tidak valid
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
 
 paths:
   /classes:
     post:
+      operationId: createClass
       summary: Buat kelas (guru)
-      security: [{ teacherBearer: [] }]
+      security:
+        - teacherBearer: []
       requestBody:
         required: true
         content:
@@ -127,96 +176,151 @@ paths:
               type: object
               required: [name, grade]
               properties:
-                name:  { type: string }
-                grade: { type: integer, minimum: 7, maximum: 9 }
+                name:
+                  type: string
+                grade:
+                  type: integer
+                  minimum: 7
+                  maximum: 9
       responses:
-        '201': { description: Kelas dibuat }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: Kelas dibuat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /classes/{id}/join:
     post:
+      operationId: joinClass
       summary: Join kelas (siswa, tanpa akun)
+      security: []
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/JoinClassRequest' }
+            schema:
+              $ref: '#/components/schemas/JoinClassRequest'
       responses:
         '201':
           description: Sesi siswa dibuat (access_code & recovery_token ditampilkan sekali)
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok: { type: boolean }
-                  data: { $ref: '#/components/schemas/JoinClassResponse' }
-                  request_id: { type: string }
-        '404': { description: Kode kelas tidak ditemukan }
-        '409': { description: Nama sudah dipakai dalam kelas }
-        '429': { $ref: '#/components/responses/RateLimited' }
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/JoinClassData'
+        '404':
+          description: Kode kelas tidak ditemukan
+        '409':
+          description: Nama sudah dipakai dalam kelas
+        '429':
+          $ref: '#/components/responses/RateLimited'
 
   /student/quests/{id}:
     get:
+      operationId: getPublicQuest
       summary: Ambil quest publik (tanpa answer key)
-      security: [{ studentAccessCode: [] }]
+      security:
+        - studentAccessCode: []
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        '200': { description: Quest payload (public) }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '404': { description: Quest tidak ditemukan }
+        '200':
+          description: Quest payload (public)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Quest tidak ditemukan
 
   /assessments/submit:
     post:
+      operationId: submitAssessment
       summary: Submit jawaban assessment
-      security: [{ studentAccessCode: [] }]
+      security:
+        - studentAccessCode: []
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/SubmitAssessmentRequest' }
+            schema:
+              $ref: '#/components/schemas/SubmitAssessmentRequest'
       responses:
         '201':
           description: Hasil scoring
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok: { type: boolean }
-                  data: { $ref: '#/components/schemas/SubmitAssessmentResponse' }
-                  request_id: { type: string }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '422': { $ref: '#/components/responses/ValidationError' }
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SubmitAssessmentData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /quests/generate:
     post:
+      operationId: generateQuest
       summary: Generate quest (guru)
-      security: [{ teacherBearer: [] }]
+      security:
+        - teacherBearer: []
       responses:
-        '200': { description: Draft quest }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '429': { $ref: '#/components/responses/RateLimited' }
-        '503': { description: AI_UNAVAILABLE }
+        '200':
+          description: Draft quest
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: AI_UNAVAILABLE
 
   /quests/publish:
     post:
+      operationId: publishQuest
       summary: Publish draft quest (guru)
-      security: [{ teacherBearer: [] }]
+      security:
+        - teacherBearer: []
       responses:
-        '201': { description: Quest versi immutable dibuat }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '201':
+          description: Quest versi immutable dibuat
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   /teacher/classes/{id}/report:
     get:
+      operationId: getTeacherReport
       summary: Laporan pembelajaran per kelas (guru)
-      security: [{ teacherBearer: [] }]
+      security:
+        - teacherBearer: []
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        '200': { description: Ringkasan learning evidence }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: Ringkasan learning evidence
+        '401':
+          $ref: '#/components/responses/Unauthorized'
