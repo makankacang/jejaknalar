@@ -37,7 +37,17 @@ async function onFileSelected(file: File) {
 | DOCX | `{ id: "DOC-P-003", kind: "paragraph", paragraphIndex: 3, section?, text }` | `paragraphIndex` menghitung paragraf **berisi teks** mulai 1. Tidak ada nomor halaman. `section` = heading terdekat di atasnya. |
 
 `extractedText` PDF diberi penanda `[Halaman N]` per halaman berisi teks; DOCX digabung per paragraf dengan baris kosong.
-`documentId` = `doc_` + 16 heks SHA-256 isi file (sama untuk isi sama → cocok untuk cache C-02).
+`documentId` = `doc_` + 16 heks SHA-256 byte isi file (byte identik menghasilkan ID sama; ini bukan `text_version`).
+
+### Stabilitas referensi dan versioning (kontrak C4)
+
+- `sourceMap[].id` adalah locator yang stabil **di dalam satu hasil parse**, bukan ID permanen lintas dokumen atau lintas versi.
+- PDF memakai `PDF-P-NNN`, dengan nomor halaman asli sebagai `page`; satu entri dibuat untuk setiap halaman, termasuk halaman kosong.
+- DOCX memakai `DOC-P-NNN`; `paragraphIndex` menghitung paragraf berisi teks mulai dari 1, termasuk heading dan paragraf tabel yang diekstrak. Nilai ini bukan nomor halaman. `section` adalah heading terdekat yang mendahului paragraf.
+- Jangan menggunakan `sourceMap[].id` sebagai primary key database. Simpan referensi bersama identitas modul dan `text_version` yang memiliki snapshot tersebut.
+- `text_version` ditetapkan dan dikelola backend, bukan dibuat oleh parser. Backend harus menyimpan `extractedText` dan `sourceMap` sebagai satu snapshot atomik untuk versi yang sama.
+- Bila guru mengoreksi hasil preview, backend harus membuat `text_version` baru dan menyimpan `extractedText` serta `sourceMap` yang sudah diselaraskan. Jangan mencampur teks versi baru dengan peta sumber versi lama, dan jangan membawa referensi sumber lama ke versi baru tanpa pemetaan ulang.
+- Analyzer dapat memeriksa konsistensi struktur, kecocokan teks, ID, halaman/paragraf dan kutipan dalam snapshot yang diterimanya. Analyzer tidak dapat membuktikan sendiri bahwa suatu `text_version` di database benar-benar menunjuk snapshot tersebut; pengikatan versi itu tanggung jawab backend.
 
 ## Batas
 
