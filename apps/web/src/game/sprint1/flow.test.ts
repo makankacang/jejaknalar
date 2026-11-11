@@ -49,7 +49,7 @@ describe('PIC D Sprint 1: Evidence Hunt vertical slice', () => {
     const { quest, content } = prepareEvidenceHunt(questFixtureV1);
     let finish!: (value: ApiSuccessV1<SubmitAssessmentDataV1>) => void;
     const pending = new Promise<ApiSuccessV1<SubmitAssessmentDataV1>>(resolve => { finish = resolve; });
-    const spy = vi.fn((_input: SubmitAssessmentRequestV1) => pending);
+    const spy = vi.fn(() => pending);
     const f = new QuestFlow(quest, content, { submitAnswers: spy } as AssessmentPortV1);
     advance(f); const first = f.submit(); const second = f.submit();
     expect(spy).toHaveBeenCalledTimes(1);
