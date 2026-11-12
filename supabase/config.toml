@@ -427,3 +427,6 @@ enabled = true
 
 [functions.analysis-worker]
 verify_jwt = false
+
+[functions.student-api]
+verify_jwt = false
