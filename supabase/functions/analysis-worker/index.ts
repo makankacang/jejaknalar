@@ -1,16 +1,17 @@
-import { createClient } from 'npm:@supabase/supabase-js@2.46.2';
-import { OpenRouterModel } from '../_shared/ai/providers/openrouter-model.ts';
-import type { LearningAnalyzerModel } from '../_shared/ai/learning-analyzer/types.ts';
+// deno-lint-ignore no-import-prefix
+import { createClient } from "npm:@supabase/supabase-js@2.46.2";
+import { OpenRouterModel } from "../_shared/ai/providers/openrouter-model.ts";
+import type { LearningAnalyzerModel } from "../_shared/ai/learning-analyzer/types.ts";
 import {
   analyzeLearningObjectives,
   GeminiRestModel,
-  LearningAnalyzerError,
   isLearningAnalyzerError,
-} from '../_shared/ai/learning-analyzer/index.ts';
+  LearningAnalyzerError,
+} from "../_shared/ai/learning-analyzer/index.ts";
 import type {
   DocumentParseResult,
   LearningAnalysisResult,
-} from '../_shared/ai/learning-analyzer/index.ts';
+} from "../_shared/ai/learning-analyzer/index.ts";
 
 type ClaimedJob = {
   analysis_job_id: string;
@@ -23,8 +24,8 @@ function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
     },
   });
 }
@@ -33,8 +34,8 @@ function json(status: number, body: unknown): Response {
 async function secretsEqual(a: string, b: string): Promise<boolean> {
   const encoder = new TextEncoder();
   const [hashA, hashB] = await Promise.all([
-    crypto.subtle.digest('SHA-256', encoder.encode(a)),
-    crypto.subtle.digest('SHA-256', encoder.encode(b)),
+    crypto.subtle.digest("SHA-256", encoder.encode(a)),
+    crypto.subtle.digest("SHA-256", encoder.encode(b)),
   ]);
 
   const left = new Uint8Array(hashA);
@@ -49,52 +50,52 @@ async function secretsEqual(a: string, b: string): Promise<boolean> {
 }
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return json(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+  if (req.method !== "POST") {
+    return json(405, { ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
   // Worker is server-to-server only, never a teacher-facing endpoint.
-  const expectedSecret = Deno.env.get('ANALYSIS_WORKER_SECRET') ?? '';
+  const expectedSecret = Deno.env.get("ANALYSIS_WORKER_SECRET") ?? "";
 
   if (expectedSecret.length < 32) {
-    return json(503, { ok: false, error: 'WORKER_NOT_CONFIGURED' });
+    return json(503, { ok: false, error: "WORKER_NOT_CONFIGURED" });
   }
 
-  const providedSecret = req.headers.get('x-worker-secret') ?? '';
+  const providedSecret = req.headers.get("x-worker-secret") ?? "";
 
   if (
     !providedSecret ||
     providedSecret.length > 512 ||
     !(await secretsEqual(providedSecret, expectedSecret))
   ) {
-    return json(401, { ok: false, error: 'UNAUTHORIZED' });
+    return json(401, { ok: false, error: "UNAUTHORIZED" });
   }
 
-  const url = Deno.env.get('SUPABASE_URL');
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  const provider =
-    Deno.env.get('AI_PROVIDER')?.trim().toLowerCase() || 'gemini';
+  const provider = Deno.env.get("AI_PROVIDER")?.trim().toLowerCase() ||
+    "gemini";
 
   // Do not claim a job until the selected provider is configured.
   if (!url || !serviceKey) {
     return json(503, {
       ok: false,
-      error: 'WORKER_NOT_CONFIGURED',
+      error: "WORKER_NOT_CONFIGURED",
     });
   }
 
   let model: LearningAnalyzerModel;
 
   try {
-    if (provider === 'gemini') {
-      const apiKey = Deno.env.get('GEMINI_API_KEY');
-      const modelName = Deno.env.get('GEMINI_MODEL');
+    if (provider === "gemini") {
+      const apiKey = Deno.env.get("GEMINI_API_KEY");
+      const modelName = Deno.env.get("GEMINI_MODEL");
 
       if (!apiKey || !modelName) {
         return json(503, {
           ok: false,
-          error: 'WORKER_NOT_CONFIGURED',
+          error: "WORKER_NOT_CONFIGURED",
         });
       }
 
@@ -103,14 +104,14 @@ Deno.serve(async (req) => {
         model: modelName,
         timeoutMs: 60_000,
       });
-    } else if (provider === 'openrouter') {
-      const apiKey = Deno.env.get('OPENROUTER_API_KEY');
-      const modelName = Deno.env.get('OPENROUTER_MODEL');
+    } else if (provider === "openrouter") {
+      const apiKey = Deno.env.get("OPENROUTER_API_KEY");
+      const modelName = Deno.env.get("OPENROUTER_MODEL");
 
       if (!apiKey || !modelName) {
         return json(503, {
           ok: false,
-          error: 'WORKER_NOT_CONFIGURED',
+          error: "WORKER_NOT_CONFIGURED",
         });
       }
 
@@ -122,13 +123,13 @@ Deno.serve(async (req) => {
     } else {
       return json(503, {
         ok: false,
-        error: 'UNSUPPORTED_AI_PROVIDER',
+        error: "UNSUPPORTED_AI_PROVIDER",
       });
     }
   } catch {
     return json(503, {
       ok: false,
-      error: 'MODEL_NOT_CONFIGURED',
+      error: "MODEL_NOT_CONFIGURED",
     });
   }
 
@@ -141,14 +142,14 @@ Deno.serve(async (req) => {
 
   // Atomic claim: queued -> processing.
   const { data: claimedRows, error: claimError } = await db.rpc(
-    'b03_claim_next_analysis_job',
+    "b03_claim_next_analysis_job",
   );
 
   if (claimError) {
-    console.error('[B-03 worker] Claim failed', {
+    console.error("[B-03 worker] Claim failed", {
       code: claimError.code,
     });
-    return json(500, { ok: false, error: 'CLAIM_FAILED' });
+    return json(500, { ok: false, error: "CLAIM_FAILED" });
   }
 
   const job = (claimedRows as ClaimedJob[] | null)?.[0];
@@ -156,7 +157,7 @@ Deno.serve(async (req) => {
   if (!job) {
     return json(200, {
       ok: true,
-      data: { status: 'idle', message: 'Tidak ada job queued' },
+      data: { status: "idle", message: "Tidak ada job queued" },
     });
   }
 
@@ -170,36 +171,36 @@ Deno.serve(async (req) => {
   try {
     // Read the exact immutable snapshot attached to this job.
     const { data: snapshot, error: snapshotError } = await db
-      .from('module_text_versions')
+      .from("module_text_versions")
       .select(
-        'document_id,filename,format,mime_type,size_bytes,' +
-          'extracted_text,source_map,metadata,warnings',
+        "document_id,filename,format,mime_type,size_bytes,extracted_text,source_map,metadata,warnings",
       )
-      .eq('module_id', job.module_id)
-      .eq('text_version', job.text_version)
+      .eq("module_id", job.module_id)
+      .eq("text_version", job.text_version)
       .maybeSingle();
 
     if (snapshotError) {
-      throw new Error('Snapshot database query failed');
+      throw new Error("Snapshot database query failed");
     }
 
     if (!snapshot) {
       throw new LearningAnalyzerError(
-        'INVALID_INPUT',
-        'Snapshot materi tidak ditemukan.',
+        "INVALID_INPUT",
+        "Snapshot materi tidak ditemukan.",
       );
     }
 
     const document: DocumentParseResult = {
-      documentId: snapshot.document_id ?? '',
-      filename: snapshot.filename ?? '',
-      format: snapshot.format as DocumentParseResult['format'],
-      mimeType: snapshot.mime_type ?? '',
-      sizeBytes:
-        snapshot.size_bytes == null ? Number.NaN : Number(snapshot.size_bytes),
+      documentId: snapshot.document_id ?? "",
+      filename: snapshot.filename ?? "",
+      format: snapshot.format as DocumentParseResult["format"],
+      mimeType: snapshot.mime_type ?? "",
+      sizeBytes: snapshot.size_bytes == null
+        ? Number.NaN
+        : Number(snapshot.size_bytes),
       extractedText: snapshot.extracted_text,
-      sourceMap: snapshot.source_map as DocumentParseResult['sourceMap'],
-      metadata: snapshot.metadata as DocumentParseResult['metadata'],
+      sourceMap: snapshot.source_map as DocumentParseResult["sourceMap"],
+      metadata: snapshot.metadata as DocumentParseResult["metadata"],
       warnings: snapshot.warnings as string[],
     };
 
@@ -220,13 +221,13 @@ Deno.serve(async (req) => {
         retryable: error.retryable,
       };
     } else {
-      console.error('[B-03 worker] Unexpected processing error', {
+      console.error("[B-03 worker] Unexpected processing error", {
         analysis_job_id: job.analysis_job_id,
       });
 
       failure = {
-        code: 'INTERNAL_ERROR',
-        message: 'Analisis belum dapat diselesaikan.',
+        code: "INTERNAL_ERROR",
+        message: "Analisis belum dapat diselesaikan.",
         retryable: true,
       };
     }
@@ -234,11 +235,11 @@ Deno.serve(async (req) => {
 
   // One database transaction saves objectives and finalizes the job.
   const { data: finished, error: finishError } = await db.rpc(
-    'b03_finish_analysis_job',
+    "b03_finish_analysis_job",
     {
       p_job_id: job.analysis_job_id,
       p_attempt_count: job.attempt_count,
-      p_outcome: failure ? 'failed' : result!.status,
+      p_outcome: failure ? "failed" : result!.status,
       p_objectives: result?.objectives ?? [],
       p_warnings: result?.warnings ?? [],
       p_error_code: failure?.code ?? null,
@@ -248,14 +249,34 @@ Deno.serve(async (req) => {
   );
 
   if (finishError || finished !== true) {
-    console.error('[B-03 worker] Finalization failed', {
+    console.error("[B-03 worker] Finalization failed", {
       analysis_job_id: job.analysis_job_id,
       code: finishError?.code,
     });
 
     return json(500, {
       ok: false,
-      error: 'FINALIZATION_FAILED',
+      error: "FINALIZATION_FAILED",
+    });
+  }
+
+  // B-04: Finalization may schedule a retry instead of failing the job.
+  // Read the actual persisted state before reporting the outcome.
+  const { data: savedJob, error: savedJobError } = await db
+    .from("analysis_jobs")
+    .select("status,result_status,retryable,next_attempt_at")
+    .eq("id", job.analysis_job_id)
+    .single();
+
+  if (savedJobError || !savedJob) {
+    console.error("[B-04 worker] Final job status query failed", {
+      analysis_job_id: job.analysis_job_id,
+      code: savedJobError?.code,
+    });
+
+    return json(500, {
+      ok: false,
+      error: "FINAL_STATUS_READ_FAILED",
     });
   }
 
@@ -263,9 +284,15 @@ Deno.serve(async (req) => {
     ok: true,
     data: {
       analysis_job_id: job.analysis_job_id,
-      status: failure ? 'failed' : 'completed',
-      result_status: result?.status ?? null,
-      objective_count: result?.objectives.length ?? 0,
+      status: savedJob.status,
+      result_status: savedJob.result_status,
+      objective_count: savedJob.status === "completed"
+        ? (result?.objectives.length ?? 0)
+        : 0,
+      retryable: savedJob.retryable,
+      next_attempt_at: savedJob.status === "queued"
+        ? savedJob.next_attempt_at
+        : null,
     },
   });
 });
