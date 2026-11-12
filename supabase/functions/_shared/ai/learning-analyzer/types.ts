@@ -1,5 +1,13 @@
-import type { DocumentParseResult, DocumentSourceReference } from "./document-types.ts";
-export type { DocumentFormat, DocumentParseResult, DocumentSourceReference } from "./document-types.ts";
+import type {
+  DocumentParseResult,
+  DocumentSourceReference,
+} from "./document-types.ts";
+import type { AIModel, AIModelRequest } from "../core/model.ts";
+export type {
+  DocumentFormat,
+  DocumentParseResult,
+  DocumentSourceReference,
+} from "./document-types.ts";
 
 export interface LearningAnalysisContext {
   grade?: 7 | 8 | 9;
@@ -21,18 +29,18 @@ export type LearningAnalysisStatus = "completed" | "insufficient_evidence";
 
 export type LearningObjectiveSourceReference =
   | {
-      source_type: "pdf";
-      source_map_id: string;
-      page: number;
-      excerpt: string;
-    }
+    source_type: "pdf";
+    source_map_id: string;
+    page: number;
+    excerpt: string;
+  }
   | {
-      source_type: "docx";
-      source_map_id: string;
-      paragraph_index: number;
-      section?: string;
-      excerpt: string;
-    };
+    source_type: "docx";
+    source_map_id: string;
+    paragraph_index: number;
+    section?: string;
+    excerpt: string;
+  };
 
 /** Draft objective only. PIC B assigns the persistent objective ID after saving. */
 export interface LearningObjective {
@@ -75,14 +83,8 @@ export interface RawLearningAnalyzerResponse {
   warnings: string[];
 }
 
-export interface LearningAnalyzerModelRequest {
-  system_instruction: string;
-  prompt: string;
-  response_json_schema: Record<string, unknown>;
-}
-
-export interface LearningAnalyzerModel {
-  generateStructuredOutput(request: LearningAnalyzerModelRequest): Promise<unknown>;
-}
+/** Backwards-compatible C-02 names; new AI tasks should use AIModel directly. */
+export type LearningAnalyzerModelRequest = AIModelRequest;
+export type LearningAnalyzerModel = AIModel;
 
 export type LearningAnalyzerSource = DocumentSourceReference;
