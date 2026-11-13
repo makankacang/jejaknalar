@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-import-prefix
-import { type Context, Hono } from "npm:hono@4.6.14";
-import { createClient } from "npm:@supabase/supabase-js@2.46.2";
-import { validatePublicQuestV1 } from "../_shared/quest-validation.ts";
+import { type Context, Hono } from 'npm:hono@4.6.14';
+import { createClient } from 'npm:@supabase/supabase-js@2.46.2';
+import { validatePublicQuestV1 } from '../_shared/quest-validation.ts';
+import { publicLoIdToUuid } from './lo-identity.ts';
 
 export const questPublishRoutes = new Hono();
 
@@ -21,33 +22,33 @@ function fail(
   );
 }
 
-questPublishRoutes.post("/publish", async (c) => {
+questPublishRoutes.post('/publish', async (c) => {
   const requestId = crypto.randomUUID();
 
-  const bearer = /^Bearer\s+(\S+)$/i.exec(c.req.header("authorization") ?? "");
+  const bearer = /^Bearer\s+(\S+)$/i.exec(c.req.header('authorization') ?? '');
 
   if (!bearer) {
-    return fail(c, 401, "UNAUTHORIZED", "Token guru diperlukan", requestId);
+    return fail(c, 401, 'UNAUTHORIZED', 'Token guru diperlukan', requestId);
   }
 
-  const url = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const url = Deno.env.get('SUPABASE_URL');
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!url || !anonKey || !serviceKey) {
     return fail(
       c,
       500,
-      "INTERNAL_ERROR",
-      "Konfigurasi server belum siap",
+      'INTERNAL_ERROR',
+      'Konfigurasi server belum siap',
       requestId,
     );
   }
 
   const body: unknown = await c.req.json().catch(() => null);
 
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return fail(c, 422, "VALIDATION_ERROR", "JSON tidak valid", requestId);
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    return fail(c, 422, 'VALIDATION_ERROR', 'JSON tidak valid', requestId);
   }
 
   const input = body as Record<string, unknown>;
@@ -55,21 +56,21 @@ questPublishRoutes.post("/publish", async (c) => {
   const questVersionId = input.quest_version_id;
 
   // Never accept arbitrary quest content from the publishing request.
-  const allowedKeys = new Set(["class_id", "quest_version_id"]);
+  const allowedKeys = new Set(['class_id', 'quest_version_id']);
 
   if (
     Object.keys(input).some((key) => !allowedKeys.has(key)) ||
-    typeof classId !== "string" ||
+    typeof classId !== 'string' ||
     !uuid.test(classId) ||
-    typeof questVersionId !== "string" ||
+    typeof questVersionId !== 'string' ||
     questVersionId.length > 100 ||
     !/^QV-[A-Z0-9-]+$/.test(questVersionId)
   ) {
     return fail(
       c,
       422,
-      "VALIDATION_ERROR",
-      "class_id atau quest_version_id tidak valid",
+      'VALIDATION_ERROR',
+      'class_id atau quest_version_id tidak valid',
       requestId,
     );
   }
@@ -86,28 +87,28 @@ questPublishRoutes.post("/publish", async (c) => {
   );
 
   if (authError || !identity.user) {
-    return fail(c, 401, "UNAUTHORIZED", "Sesi guru tidak valid", requestId);
+    return fail(c, 401, 'UNAUTHORIZED', 'Sesi guru tidak valid', requestId);
   }
 
   // Teacher JWT + class RLS enforce ownership.
   const { data: ownedClass, error: classError } = await teacherDb
-    .from("classes")
-    .select("id")
-    .eq("id", classId)
+    .from('classes')
+    .select('id')
+    .eq('id', classId)
     .maybeSingle();
 
   if (classError) {
     return fail(
       c,
       500,
-      "INTERNAL_ERROR",
-      "Gagal memverifikasi kelas",
+      'INTERNAL_ERROR',
+      'Gagal memverifikasi kelas',
       requestId,
     );
   }
 
   if (!ownedClass) {
-    return fail(c, 404, "NOT_FOUND", "Kelas tidak ditemukan", requestId);
+    return fail(c, 404, 'NOT_FOUND', 'Kelas tidak ditemukan', requestId);
   }
 
   const admin = createClient(url, serviceKey, {
@@ -116,16 +117,16 @@ questPublishRoutes.post("/publish", async (c) => {
 
   // Only an approved draft belonging to this teacher and class is usable.
   const { data: draft, error: draftError } = await admin
-    .from("quest_review_drafts")
-    .select("quest_id,quest_version_id,public_payload")
-    .eq("class_id", classId)
-    .eq("quest_version_id", questVersionId)
-    .eq("approved_by", identity.user.id)
-    .eq("status", "approved")
+    .from('quest_review_drafts')
+    .select('quest_id,quest_version_id,public_payload')
+    .eq('class_id', classId)
+    .eq('quest_version_id', questVersionId)
+    .eq('approved_by', identity.user.id)
+    .eq('status', 'approved')
     .maybeSingle();
 
   if (draftError) {
-    console.error("[B06] Approved draft lookup failed", {
+    console.error('[B06] Approved draft lookup failed', {
       requestId,
       code: draftError.code,
     });
@@ -133,8 +134,8 @@ questPublishRoutes.post("/publish", async (c) => {
     return fail(
       c,
       500,
-      "INTERNAL_ERROR",
-      "Gagal memverifikasi persetujuan quest",
+      'INTERNAL_ERROR',
+      'Gagal memverifikasi persetujuan quest',
       requestId,
     );
   }
@@ -143,8 +144,8 @@ questPublishRoutes.post("/publish", async (c) => {
     return fail(
       c,
       404,
-      "NOT_FOUND",
-      "Draft yang disetujui tidak ditemukan",
+      'NOT_FOUND',
+      'Draft yang disetujui tidak ditemukan',
       requestId,
     );
   }
@@ -159,8 +160,100 @@ questPublishRoutes.post("/publish", async (c) => {
     return fail(
       c,
       422,
-      "VALIDATION_ERROR",
-      "Konten draft approved tidak valid",
+      'VALIDATION_ERROR',
+      'Konten draft approved tidak valid',
+      requestId,
+    );
+  }
+
+  // B12: Every public LO ID must resolve to a real, approved
+  // Learning Objective belonging to this teacher.
+  const publicObjectiveIds = quest.objective_ids;
+  const resolvedIds = publicObjectiveIds.map(publicLoIdToUuid);
+
+  if (
+    publicObjectiveIds.length === 0 ||
+    resolvedIds.some((id) => id === null) ||
+    new Set(resolvedIds).size !== resolvedIds.length
+  ) {
+    return fail(
+      c,
+      422,
+      'VALIDATION_ERROR',
+      'Learning Objective ID tidak valid atau duplikat',
+      requestId,
+    );
+  }
+
+  const objectiveUuids = resolvedIds.filter((id): id is string => id !== null);
+
+  const { data: objectives, error: objectiveError } = await admin
+    .from('learning_objectives')
+    .select('id,module_id,review_status')
+    .in('id', objectiveUuids);
+
+  if (objectiveError) {
+    console.error('[B12] Objective lookup failed', {
+      requestId,
+      code: objectiveError.code,
+    });
+
+    return fail(
+      c,
+      500,
+      'INTERNAL_ERROR',
+      'Gagal memverifikasi Learning Objectives',
+      requestId,
+    );
+  }
+
+  if (
+    !objectives ||
+    objectives.length !== objectiveUuids.length ||
+    objectives.some((objective) => objective.review_status !== 'approved')
+  ) {
+    return fail(
+      c,
+      409,
+      'CONFLICT',
+      'Learning Objectives belum disetujui atau tidak valid',
+      requestId,
+    );
+  }
+
+  const moduleIds = [
+    ...new Set(objectives.map((objective) => objective.module_id)),
+  ];
+
+  // Query with the teacher JWT, not the service role.
+  // RLS and owner_uid must both agree on module ownership.
+  const { data: ownedModules, error: moduleError } = await teacherDb
+    .from('modules')
+    .select('id')
+    .in('id', moduleIds)
+    .eq('owner_uid', identity.user.id);
+
+  if (moduleError) {
+    console.error('[B12] Module ownership lookup failed', {
+      requestId,
+      code: moduleError.code,
+    });
+
+    return fail(
+      c,
+      500,
+      'INTERNAL_ERROR',
+      'Gagal memverifikasi kepemilikan modul',
+      requestId,
+    );
+  }
+
+  if ((ownedModules?.length ?? 0) !== moduleIds.length) {
+    return fail(
+      c,
+      409,
+      'CONFLICT',
+      'Learning Objectives tidak tersedia untuk guru ini',
       requestId,
     );
   }
@@ -168,7 +261,7 @@ questPublishRoutes.post("/publish", async (c) => {
   // Insert the exact reviewed payload, not content provided by the client.
   // The database trigger independently checks approval and equality.
   const { data: published, error: insertError } = await admin
-    .from("published_quest_versions")
+    .from('published_quest_versions')
     .insert({
       class_id: classId,
       quest_id: draft.quest_id,
@@ -176,36 +269,36 @@ questPublishRoutes.post("/publish", async (c) => {
       approved_by: identity.user.id,
       public_payload: draft.public_payload,
     })
-    .select("quest_version_id,published_at")
+    .select('quest_version_id,published_at')
     .single();
 
-  if (insertError?.code === "23505") {
+  if (insertError?.code === '23505') {
     return fail(
       c,
       409,
-      "CONFLICT",
-      "Versi quest sudah pernah diterbitkan",
+      'CONFLICT',
+      'Versi quest sudah pernah diterbitkan',
       requestId,
     );
   }
 
-  if (insertError?.code === "42501") {
+  if (insertError?.code === '42501') {
     return fail(
       c,
       409,
-      "CONFLICT",
-      "Persetujuan quest tidak lagi memenuhi syarat",
+      'CONFLICT',
+      'Persetujuan quest tidak lagi memenuhi syarat',
       requestId,
     );
   }
 
   if (insertError || !published) {
-    console.error("[B06] Quest publish failed", {
+    console.error('[B06] Quest publish failed', {
       requestId,
       code: insertError?.code,
     });
 
-    return fail(c, 500, "INTERNAL_ERROR", "Gagal menerbitkan quest", requestId);
+    return fail(c, 500, 'INTERNAL_ERROR', 'Gagal menerbitkan quest', requestId);
   }
 
   return c.json(
