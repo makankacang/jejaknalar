@@ -1,7 +1,8 @@
 import { LearningAnalyzerError } from "./errors.ts";
-import type { LearningAnalyzerModel, LearningAnalyzerModelRequest } from "./types.ts";
+import type { AIModel, AIModelRequest } from "../core/model.ts";
 
-const GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_API_BASE_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models";
 
 export interface GeminiRestModelOptions {
   apiKey: string;
@@ -20,7 +21,7 @@ interface GeminiGenerateContentResponse {
 }
 
 /** Server-side REST caller. Construct only from a trusted server environment, never from VITE_* values. */
-export class GeminiRestModel implements LearningAnalyzerModel {
+export class GeminiRestModel implements AIModel {
   private readonly apiKey: string;
   private readonly model: string;
   private readonly timeoutMs: number;
@@ -43,13 +44,15 @@ export class GeminiRestModel implements LearningAnalyzerModel {
     this.maxOutputTokens = options.maxOutputTokens ?? 4096;
   }
 
-  async generateStructuredOutput(request: LearningAnalyzerModelRequest): Promise<unknown> {
+  async generateStructuredOutput(request: AIModelRequest): Promise<unknown> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
       const response = await this.fetchImpl(
-        `${GEMINI_API_BASE_URL}/${encodeURIComponent(this.model)}:generateContent`,
+        `${GEMINI_API_BASE_URL}/${
+          encodeURIComponent(this.model)
+        }:generateContent`,
         {
           method: "POST",
           headers: {
@@ -58,7 +61,9 @@ export class GeminiRestModel implements LearningAnalyzerModel {
           },
           signal: controller.signal,
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: request.system_instruction }] },
+            systemInstruction: {
+              parts: [{ text: request.system_instruction }],
+            },
             contents: [{ role: "user", parts: [{ text: request.prompt }] }],
             generationConfig: {
               responseMimeType: "application/json",
@@ -72,6 +77,12 @@ export class GeminiRestModel implements LearningAnalyzerModel {
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new LearningAnalyzerError(
+            "MODEL_CONFIGURATION_ERROR",
+            "Autentikasi Gemini gagal. Periksa konfigurasi secret provider.",
+          );
+        }
         if (response.status === 429 || response.status >= 500) {
           throw new LearningAnalyzerError(
             "MODEL_UNAVAILABLE",
@@ -81,45 +92,79 @@ export class GeminiRestModel implements LearningAnalyzerModel {
         }
         throw new LearningAnalyzerError(
           "MODEL_REQUEST_FAILED",
-          `Permintaan Gemini ditolak (HTTP ${response.status}). Periksa konfigurasi model dan structured output.`,
+          `Permintaan Gemini ditolak (HTTP ${response.status}).`,
         );
       }
 
-      const payload = await response.json() as GeminiGenerateContentResponse;
+      let payload: GeminiGenerateContentResponse;
+      try {
+        payload = await response.json() as GeminiGenerateContentResponse;
+      } catch (error) {
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Gemini mengembalikan payload yang bukan JSON valid.",
+          { cause: error },
+        );
+      }
       if (payload.promptFeedback?.blockReason) {
-        throw new LearningAnalyzerError("MODEL_INVALID_RESPONSE", "Permintaan analisis ditolak oleh safety filter Gemini.");
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Permintaan analisis ditolak oleh safety filter Gemini.",
+        );
       }
 
       const candidate = payload.candidates?.[0];
       if (!candidate) {
-        throw new LearningAnalyzerError("MODEL_INVALID_RESPONSE", "Gemini tidak mengembalikan candidate hasil analisis.");
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Gemini tidak mengembalikan candidate hasil analisis.",
+        );
       }
       if (candidate.finishReason === "MAX_TOKENS") {
-        throw new LearningAnalyzerError("MODEL_INVALID_RESPONSE", "Output Gemini terpotong karena batas token. Kurangi ukuran materi atau sesuaikan konfigurasi model.");
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Output Gemini terpotong karena batas token. Kurangi ukuran materi atau sesuaikan konfigurasi model.",
+        );
       }
 
-      const text = candidate.content?.parts?.map((part) => part.text ?? "").join("").trim();
+      const text = candidate.content?.parts?.map((part) => part.text ?? "")
+        .join("").trim();
       if (!text) {
-        throw new LearningAnalyzerError("MODEL_INVALID_RESPONSE", "Gemini mengembalikan output kosong.");
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Gemini mengembalikan output kosong.",
+        );
       }
 
       try {
         return JSON.parse(text) as unknown;
       } catch (error) {
-        throw new LearningAnalyzerError("MODEL_INVALID_RESPONSE", "Output Gemini bukan JSON yang valid.", { cause: error });
+        throw new LearningAnalyzerError(
+          "MODEL_INVALID_RESPONSE",
+          "Output Gemini bukan JSON yang valid.",
+          { cause: error },
+        );
       }
     } catch (error) {
       if (error instanceof LearningAnalyzerError) throw error;
       if (controller.signal.aborted) {
-        throw new LearningAnalyzerError("MODEL_TIMEOUT", "Permintaan Gemini melewati batas waktu.", {
+        throw new LearningAnalyzerError(
+          "MODEL_TIMEOUT",
+          "Permintaan Gemini melewati batas waktu.",
+          {
+            retryable: true,
+            cause: error,
+          },
+        );
+      }
+      throw new LearningAnalyzerError(
+        "MODEL_UNAVAILABLE",
+        "Tidak dapat terhubung ke layanan Gemini.",
+        {
           retryable: true,
           cause: error,
-        });
-      }
-      throw new LearningAnalyzerError("MODEL_UNAVAILABLE", "Tidak dapat terhubung ke layanan Gemini.", {
-        retryable: true,
-        cause: error,
-      });
+        },
+      );
     } finally {
       clearTimeout(timeout);
     }

@@ -1,0 +1,125 @@
+{
+  "bundle_schema_version": "0.1-draft",
+  "quest_version_id": "QV-STORY-DRAFT-001",
+  "source_document_versions": [
+    {
+      "document_id": "doc_bi_credibility_demo",
+      "text_version": "TEXT-V1"
+    }
+  ],
+  "registry_version": "0.2.0-draft",
+  "world_preset": "school",
+  "start_room_id": "library",
+  "title": "Menyelidiki Kredibilitas Informasi",
+  "opening": "Perpustakaan sekolah menerima dua laporan dengan klaim berbeda. Pemain diminta memeriksa sumber dan menentukan informasi mana yang memiliki dukungan bukti.",
+  "learning_context": {
+    "grade": 8,
+    "subject": "Bahasa Indonesia",
+    "topic": "Analisis dan kredibilitas informasi"
+  },
+  "missions": [
+    {
+      "mission_id": "MIS-CREDIBILITY-01",
+      "objective_ids": ["LO-BI-CRED-01"],
+      "required": true,
+      "room_id": "library",
+      "prerequisites": [],
+      "activity_ids": ["ACT-COMPARE-SOURCES-01"]
+    }
+  ],
+  "dialogues": [
+    {
+      "npc_id": "npc-contract-example-librarian",
+      "room_id": "library",
+      "start_node_id": "start",
+      "nodes": [
+        {
+          "node_id": "start",
+          "text": "Aku menemukan dua laporan yang menyampaikan klaim berbeda. Bisakah kamu membantu memeriksa sumbernya?",
+          "choices": [
+            {
+              "choice_id": "inspect-sources",
+              "label": "Aku akan membandingkan sumbernya.",
+              "next_node_id": "task-intro"
+            }
+          ]
+        },
+        {
+          "node_id": "task-intro",
+          "text": "Perhatikan siapa yang menerbitkan informasi, kapan diterbitkan, dan bukti apa yang mendukung klaimnya.",
+          "source_refs": [
+            {
+              "document_id": "doc_bi_credibility_demo",
+              "text_version": "TEXT-V1",
+              "source_map_id": "PDF-P-001",
+              "locator": {"kind": "pdf_page", "page": 1},
+              "excerpt": "Kredibilitas informasi perlu diperiksa melalui sumber, konteks, dan bukti pendukung."
+            }
+          ],
+          "choices": []
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "activity_id": "ACT-COMPARE-SOURCES-01",
+      "room_id": "library",
+      "object_id": "object-contract-example-report-desk",
+      "template": "investigate",
+      "objective_ids": ["LO-BI-CRED-01"],
+      "instruction": "Bandingkan dua sumber informasi. Identifikasi asal informasi dan bukti yang mendukung setiap klaim sebelum menentukan sumber yang lebih dapat dipercaya.",
+      "source_refs": [
+        {
+          "document_id": "doc_bi_credibility_demo",
+          "text_version": "TEXT-V1",
+          "source_map_id": "PDF-P-001",
+          "locator": {"kind": "pdf_page", "page": 1},
+          "excerpt": "Kredibilitas informasi perlu diperiksa melalui sumber, konteks, dan bukti pendukung."
+        }
+      ],
+      "evidence_ids": ["EVD-CREDIBILITY-01"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EVD-CREDIBILITY-01",
+      "mission_id": "MIS-CREDIBILITY-01",
+      "room_id": "library",
+      "object_id": "object-contract-example-report-desk",
+      "objective_ids": ["LO-BI-CRED-01"],
+      "title": "Kriteria kredibilitas informasi",
+      "summary": "Sumber, konteks, dan bukti pendukung digunakan untuk menilai kredibilitas informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_bi_credibility_demo",
+          "text_version": "TEXT-V1",
+          "source_map_id": "PDF-P-001",
+          "locator": {"kind": "pdf_page", "page": 1},
+          "excerpt": "Kredibilitas informasi perlu diperiksa melalui sumber, konteks, dan bukti pendukung."
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "hint_id": "HINT-CREDIBILITY-01",
+      "activity_id": "ACT-COMPARE-SOURCES-01",
+      "level": 1,
+      "text": "Mulailah dengan memeriksa siapa yang menerbitkan setiap informasi."
+    }
+  ],
+  "feedback": [
+    {
+      "feedback_id": "FEEDBACK-CREDIBILITY-SUPPORT-01",
+      "activity_id": "ACT-COMPARE-SOURCES-01",
+      "path": "needs_support",
+      "text": "Coba periksa kembali asal informasi dan bukti yang digunakan sebelum menarik kesimpulan."
+    }
+  ],
+  "endings": {
+    "needs_support": "Pustakawan membantu pemain memeriksa ulang sumber sebelum menyelesaikan laporan.",
+    "developing": "Pemain merevisi kesimpulan setelah menemukan konteks tambahan.",
+    "ready_for_extension": "Pemain menerapkan kriteria kredibilitas pada laporan dari konteks yang berbeda."
+  }
+}
