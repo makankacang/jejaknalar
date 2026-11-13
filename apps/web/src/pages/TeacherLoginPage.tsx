@@ -1,0 +1,283 @@
+
+import { useState, type FormEvent } from 'react';
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
+import { useAuth } from '../lib/auth/AuthProvider';
+
+interface RedirectState {
+  from?: {
+    pathname?: string;
+  };
+}
+
+export default function TeacherLoginPage(): React.JSX.Element {
+  const { user, loading, mode, configurationError, signIn } = useAuth();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirectState = location.state as RedirectState | null;
+  const requestedPath = redirectState?.from?.pathname;
+
+  const destination =
+    requestedPath?.startsWith('/') &&
+      !requestedPath.startsWith('//') &&
+      requestedPath !== '/login'
+      ? requestedPath
+      : '/teacher';
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError('');
+    setSubmitting(true);
+
+    try {
+      await signIn(email, password);
+      navigate(destination, { replace: true });
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Login gagal. Silakan coba kembali.',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main style={styles.centered}>
+        Memeriksa sesi pengguna...
+      </main>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/teacher" replace />;
+  }
+
+  return (
+    <main style={styles.page}>
+      <section style={styles.card}>
+        <Link to="/" style={styles.brand}>
+          JejakNalar
+        </Link>
+
+        <span style={styles.eyebrow}>RUANG GURU</span>
+
+        <h1 style={styles.title}>Selamat datang kembali</h1>
+
+        <p style={styles.description}>
+          Masuk untuk mengelola kelas dan mengembangkan pengalaman
+          belajar berbasis quest.
+        </p>
+
+        {mode === 'mock' && (
+          <div style={styles.mockNotice}>
+            <strong>Mode demonstrasi lokal</strong>
+            <p>
+              Gunakan email dan password apa saja yang tidak kosong.
+              Login ini tidak memverifikasi identitas melalui Supabase.
+            </p>
+          </div>
+        )}
+
+        {configurationError && mode === 'live' && (
+          <div role="alert" style={styles.error}>
+            {configurationError}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={styles.field}>
+            <label htmlFor="teacher-email" style={styles.label}>
+              Email
+            </label>
+
+            <input
+              id="teacher-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="nama@email.com"
+              autoComplete="username"
+              required
+              style={styles.input}
+            />
+          </div>
+
+          <div style={styles.field}>
+            <label htmlFor="teacher-password" style={styles.label}>
+              Password
+            </label>
+
+            <input
+              id="teacher-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Masukkan password"
+              autoComplete="current-password"
+              required
+              style={styles.input}
+            />
+          </div>
+
+          {error && (
+            <div role="alert" style={styles.error}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              ...styles.submitButton,
+              opacity: submitting ? 0.6 : 1,
+              cursor: submitting ? 'wait' : 'pointer',
+            }}
+          >
+            {submitting ? 'Memproses...' : 'Masuk ke JejakNalar'}
+          </button>
+        </form>
+
+        <p style={styles.footer}>
+          Dengan masuk, Anda dapat mengakses ruang pengelolaan
+          pembelajaran JejakNalar.
+        </p>
+
+        <Link to="/" style={styles.backLink}>
+          ← Kembali ke Beranda
+        </Link>
+      </section>
+    </main>
+  );
+}
+
+const styles = {
+  page: {
+    minHeight: '100vh',
+    display: 'grid',
+    placeItems: 'center',
+    padding: '24px',
+    boxSizing: 'border-box' as const,
+    background: '#f8fafc',
+    color: '#172033',
+    fontFamily: 'system-ui, sans-serif',
+  },
+  centered: {
+    minHeight: '100vh',
+    display: 'grid',
+    placeItems: 'center',
+    color: '#64748b',
+  },
+  card: {
+    width: '100%',
+    maxWidth: '430px',
+    padding: '34px',
+    boxSizing: 'border-box' as const,
+    border: '1px solid #e2e8f0',
+    borderRadius: '15px',
+    background: '#ffffff',
+    boxShadow: '0 8px 30px rgba(15,23,42,0.05)',
+  },
+  brand: {
+    display: 'block',
+    marginBottom: '34px',
+    color: '#172033',
+    fontWeight: 800,
+    fontSize: '20px',
+    textDecoration: 'none',
+  },
+  eyebrow: {
+    color: '#64748b',
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+  },
+  title: {
+    margin: '10px 0',
+    fontSize: '27px',
+    lineHeight: 1.3,
+  },
+  description: {
+    color: '#64748b',
+    fontSize: '13px',
+    lineHeight: 1.7,
+    marginBottom: '25px',
+  },
+  mockNotice: {
+    padding: '13px',
+    marginBottom: '20px',
+    borderRadius: '8px',
+    background: '#fffbeb',
+    color: '#92400e',
+    fontSize: '12px',
+    lineHeight: 1.6,
+  },
+  field: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '7px',
+    marginBottom: '17px',
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#334155',
+  },
+  input: {
+    padding: '12px',
+    border: '1px solid #cbd5e1',
+    borderRadius: '8px',
+    fontSize: '14px',
+    outlineColor: '#64748b',
+  },
+  error: {
+    padding: '12px',
+    marginBottom: '15px',
+    borderRadius: '8px',
+    background: '#fef2f2',
+    color: '#b91c1c',
+    fontSize: '12px',
+    lineHeight: 1.6,
+  },
+  submitButton: {
+    width: '100%',
+    padding: '13px',
+    marginTop: '7px',
+    border: 'none',
+    borderRadius: '8px',
+    background: '#1e293b',
+    color: '#ffffff',
+    fontSize: '13px',
+    fontWeight: 700,
+  },
+  footer: {
+    marginTop: '21px',
+    color: '#94a3b8',
+    fontSize: '11px',
+    lineHeight: 1.6,
+    textAlign: 'center' as const,
+  },
+  backLink: {
+    display: 'block',
+    marginTop: '20px',
+    color: '#64748b',
+    fontSize: '12px',
+    textAlign: 'center' as const,
+    textDecoration: 'none',
+  },
+};

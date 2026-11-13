@@ -1,9 +1,72 @@
-export default function App() {
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import PublicDemoPage from './pages/PublicDemoPage';
+import TeacherDashboardPage from './pages/TeacherDashboardPage';
+import TeacherLoginPage from './pages/TeacherLoginPage';
+import TeacherModulesPage from './pages/TeacherModulesPage';
+import TeacherModulePreviewPage from './pages/TeacherModulePreviewPage';
+import StudentPlaceholderPage from './pages/StudentPlaceholderPage';
+import NotFoundPage from './pages/NotFoundPage';
+import TeacherModuleUploadPage from './pages/TeacherModuleUploadPage';
+import TopNavLayout from './shared-ui/layouts/TopNavLayout';
+import { AuthProvider } from './lib/auth/AuthProvider';
+import ProtectedRoute from './lib/auth/ProtectedRoute';
+import TeacherLearningObjectivesPage from './pages/TeacherLearningObjectivesPage';
+
+export default function App(): React.JSX.Element {
   return (
-    <main style={{ maxWidth: 720, margin: '64px auto', padding: '0 24px', fontFamily: 'system-ui' }}>
-      <h1>JejakNalar</h1>
-      <p>Fondasi website siap untuk pengembangan paralel oleh PIC A, B, C, dan D.</p>
-      <p>Status: Sprint 0 — belum terhubung ke backend produksi.</p>
-    </main>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/demo" element={<PublicDemoPage />} />
+          <Route path="/login" element={<TeacherLoginPage />} />
+
+          {/* Protected teacher routes */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <TopNavLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              path="/teacher"
+              element={<TeacherDashboardPage />}
+            />
+
+            <Route
+              path="/teacher/modules"
+              element={<TeacherModulesPage />}
+            />
+
+            <Route
+              path="/teacher/modules/upload"
+              element={<TeacherModuleUploadPage />}
+            />
+
+            <Route
+              path="/teacher/modules/review"
+              element={<TeacherLearningObjectivesPage />}
+            />
+
+            <Route
+              path="/teacher/modules/:moduleId/preview"
+              element={<TeacherModulePreviewPage />}
+            />
+          </Route>
+
+          {/* Student routes */}
+          <Route
+            path="/student/join"
+            element={<StudentPlaceholderPage />}
+          />
+
+          {/* Catch-all */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

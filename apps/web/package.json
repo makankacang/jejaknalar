@@ -22,10 +22,12 @@
     "vitest": "^2.1.0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "mammoth": "^1.13.0",
     "pdfjs-dist": "^6.5.438",
     "phaser": "^3.90.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
   }
 }
