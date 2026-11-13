@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: JejakNalar API
-  version: "1.0"
+  version: '1.0'
   description: |
     Kontrak logis Sprint 0. Nama /api/... dipetakan ke /functions/v1/... pada Supabase.
   license:
@@ -55,7 +55,17 @@ components:
           properties:
             code:
               type: string
-              enum: [VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, RATE_LIMITED, AI_UNAVAILABLE, CONFLICT, INTERNAL_ERROR]
+              enum:
+                [
+                  VALIDATION_ERROR,
+                  UNAUTHORIZED,
+                  FORBIDDEN,
+                  NOT_FOUND,
+                  RATE_LIMITED,
+                  AI_UNAVAILABLE,
+                  CONFLICT,
+                  INTERNAL_ERROR,
+                ]
             message:
               type: string
         request_id:
@@ -139,7 +149,8 @@ components:
                 type: string
         next_path:
           type: string
-          enum: [needs_support, developing, ready_for_extension, need_more_evidence]
+          enum:
+            [needs_support, developing, ready_for_extension, need_more_evidence]
 
   responses:
     Unauthorized:
@@ -323,4 +334,290 @@ paths:
         '200':
           description: Ringkasan learning evidence
         '401':
+          $ref:
+            '#/components/responses/Unauthorized'
+
+            # B03: Store a C-01 parser snapshot before running C-02.
+  /api/modules/{module_id}/text-versions:
+    post:
+      operationId: createModuleTextVersion
+      summary: Simpan hasil parsing C-01 sebagai snapshot versi baru
+      description: |
+        Memerlukan JWT guru pemilik modul.
+        Backend membuat text_version UUID dan version_no.
+        extractedText dan sourceMap disimpan bersama dalam satu snapshot.
+      security:
+        - teacherBearer: []
+      parameters:
+        - name: module_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [document]
+              properties:
+                document:
+                  type: object
+                  required:
+                    - documentId
+                    - filename
+                    - format
+                    - mimeType
+                    - sizeBytes
+                    - extractedText
+                    - sourceMap
+                    - metadata
+                    - warnings
+                  properties:
+                    documentId:
+                      type: string
+                      maxLength: 200
+                    filename:
+                      type: string
+                      maxLength: 255
+                    format:
+                      type: string
+                      enum: [pdf, docx]
+                    mimeType:
+                      type: string
+                    sizeBytes:
+                      type: integer
+                      minimum: 0
+                    extractedText:
+                      type: string
+                      minLength: 1
+                      maxLength: 1000000
+                    sourceMap:
+                      type: array
+                      minItems: 1
+                      items:
+                        type: object
+                        required: [id, kind, text]
+                        properties:
+                          id:
+                            type: string
+                          kind:
+                            type: string
+                            enum: [page, paragraph]
+                          page:
+                            type: integer
+                            minimum: 1
+                          paragraphIndex:
+                            type: integer
+                            minimum: 1
+                          section:
+                            type: string
+                          text:
+                            type: string
+                    metadata:
+                      type: object
+                      properties:
+                        pageCount:
+                          type: integer
+                          minimum: 0
+                        paragraphCount:
+                          type: integer
+                          minimum: 0
+                    warnings:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        '201':
+          description: Snapshot berhasil dibuat
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, data, request_id]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [module_id, text_version, version_no]
+                    properties:
+                      module_id:
+                        type: string
+                        format: uuid
+                      text_version:
+                        type: string
+                        format: uuid
+                      version_no:
+                        type: integer
+                        minimum: 1
+                  request_id:
+                    type: string
+        '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Modul tidak ditemukan atau bukan milik guru
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          description: Gagal menyimpan snapshot
+
+  # B03: Queue asynchronous Learning Objective analysis.
+  /api/modules/analyze:
+    post:
+      operationId: enqueueModuleAnalysis
+      summary: Mulai analisis Learning Objectives
+      description: |
+        Snapshot harus sudah dibuat sebelumnya.
+        Jika terdapat job queued atau processing untuk snapshot yang sama,
+        API mengembalikan analysis_job_id yang sudah ada.
+      security:
+        - teacherBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [module_id, text_version]
+              properties:
+                module_id:
+                  type: string
+                  format: uuid
+                text_version:
+                  type: string
+                  format: uuid
+      responses:
+        '202':
+          description: Job dibuat atau job aktif digunakan kembali
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, data, request_id]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [analysis_job_id, status]
+                    properties:
+                      analysis_job_id:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum: [queued, processing]
+                  request_id:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Modul atau snapshot tidak ditemukan
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          description: Gagal membuat analysis job
+
+  # B03: Poll asynchronous analysis result.
+  /api/analysis-jobs/{analysis_job_id}:
+    get:
+      operationId: getModuleAnalysisJob
+      summary: Ambil status dan hasil analisis Learning Objectives
+      security:
+        - teacherBearer: []
+      parameters:
+        - name: analysis_job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status job beserta hasil jika sudah selesai
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, data, request_id]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required:
+                      - analysis_job_id
+                      - module_id
+                      - text_version
+                      - status
+                      - result_status
+                      - warnings
+                      - objectives
+                      - failure
+                    properties:
+                      analysis_job_id:
+                        type: string
+                        format: uuid
+                      module_id:
+                        type: string
+                        format: uuid
+                      text_version:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum: [queued, processing, completed, failed]
+                      result_status:
+                        type: string
+                        nullable: true
+                      warnings:
+                        type: array
+                        items:
+                          type: string
+                      objectives:
+                        type: array
+                        description: Kosong sampai job completed
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            statement:
+                              type: string
+                            basis:
+                              type: string
+                              enum: [explicit, inferred]
+                            source_references:
+                              type: array
+                              items:
+                                type: object
+                            review_status:
+                              type: string
+                              enum: [pending, approved, rejected]
+                      failure:
+                        type: object
+                        nullable: true
+                        properties:
+                          code:
+                            type: string
+                          message:
+                            type: string
+                          retryable:
+                            type: boolean
+                  request_id:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Job tidak ditemukan atau bukan milik guru
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          description: Gagal mengambil analysis job
