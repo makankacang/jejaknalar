@@ -12,6 +12,7 @@
 
 import { type Context, Hono } from "npm:hono@4.6.14";
 import { cors } from "npm:hono@4.6.14/cors";
+import { validatePublicQuestV1 } from "../_shared/quest-validation.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.46.2";
 import {
   authenticateStudentAccessCode,
@@ -538,6 +539,73 @@ app.post("/assessments/submit", async (c) => {
   });
 
   try {
+    // B06: Only accept answers for a published quest in this student's class.
+    const { data: publishedQuest, error: questError } = await admin
+      .from("published_quest_versions")
+      .select("public_payload")
+      .eq("quest_version_id", questVersionId)
+      .eq("class_id", auth.session.class_id)
+      .maybeSingle();
+
+    if (questError) {
+      console.error("[B06] Assessment quest lookup failed", {
+        requestId,
+        code: questError.code,
+      });
+
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Gagal memverifikasi quest",
+        requestId,
+      );
+    }
+
+    if (!publishedQuest) {
+      return responseError(
+        c,
+        404,
+        "NOT_FOUND",
+        "Quest tidak ditemukan",
+        requestId,
+      );
+    }
+
+    const publicQuest = validatePublicQuestV1(publishedQuest.public_payload);
+
+    if (!publicQuest || publicQuest.quest_version_id !== questVersionId) {
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Konten quest tidak valid",
+        requestId,
+      );
+    }
+
+    const allowedItemIds = new Set<string>();
+
+    for (const step of publicQuest.steps) {
+      if (step.type === "select_evidence") {
+        allowedItemIds.add(step.item_id);
+      }
+    }
+
+    for (const answer of answers) {
+      const itemId = (answer as Record<string, unknown>).item_id;
+
+      if (typeof itemId !== "string" || !allowedItemIds.has(itemId)) {
+        return responseError(
+          c,
+          422,
+          "VALIDATION_ERROR",
+          "Item assessment tidak tersedia pada quest ini",
+          requestId,
+        );
+      }
+    }
+
     const { data, error } = await admin.rpc("b05_create_assessment_attempt", {
       p_student_session_id: auth.session.id,
       p_quest_version_id: questVersionId,
@@ -983,6 +1051,128 @@ app.put("/checkpoints/:quest_version_id", async (c) => {
     });
   } catch {
     console.error("[B-05] Unexpected checkpoint save error", {
+      requestId,
+    });
+
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Terjadi kesalahan server",
+      requestId,
+    );
+  }
+});
+
+/**
+ * B06: GET published QuestV1 for the authenticated student's class.
+ * Never return private rubrics or answer keys.
+ */
+app.get("/student/quests/:id", async (c) => {
+  const requestId = crypto.randomUUID();
+  c.header("Cache-Control", "no-store");
+
+  const auth = await authenticateStudentAccessCode(
+    c.req.header("x-student-access-code"),
+  );
+
+  if (!auth.ok) {
+    return responseError(
+      c,
+      auth.reason === "UNAUTHORIZED" ? 401 : 500,
+      auth.reason,
+      auth.reason === "UNAUTHORIZED"
+        ? "Sesi siswa tidak valid"
+        : "Gagal memverifikasi sesi siswa",
+      requestId,
+    );
+  }
+
+  const questVersionId = c.req.param("id");
+
+  if (questVersionId.length > 120 || !/^QV-[A-Z0-9-]+$/.test(questVersionId)) {
+    return responseError(
+      c,
+      422,
+      "VALIDATION_ERROR",
+      "ID versi quest tidak valid",
+      requestId,
+    );
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!url || !serviceKey) {
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Konfigurasi server belum siap",
+      requestId,
+    );
+  }
+
+  try {
+    const admin = createClient(url, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    const { data, error } = await admin
+      .from("published_quest_versions")
+      .select("public_payload")
+      .eq("quest_version_id", questVersionId)
+      .eq("class_id", auth.session.class_id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[B06] Quest read failed", {
+        requestId,
+        code: error.code,
+      });
+
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Gagal mengambil quest",
+        requestId,
+      );
+    }
+
+    if (!data) {
+      return responseError(
+        c,
+        404,
+        "NOT_FOUND",
+        "Quest tidak ditemukan",
+        requestId,
+      );
+    }
+
+    // Revalidate before responding to prevent leaking unexpected fields.
+    const quest = validatePublicQuestV1(data.public_payload);
+
+    if (!quest || quest.quest_version_id !== questVersionId) {
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Konten quest tidak valid",
+        requestId,
+      );
+    }
+
+    return c.json({
+      ok: true,
+      data: quest,
+      request_id: requestId,
+    });
+  } catch {
+    console.error("[B06] Unexpected quest read failure", {
       requestId,
     });
 
