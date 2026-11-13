@@ -12,6 +12,7 @@
 import { teacherReportRoutes } from "./teacher-report.ts";
 import { type Context, Hono } from "npm:hono@4.6.14";
 import { cors } from "npm:hono@4.6.14/cors";
+import { moduleSnapshotRoutes } from "./module-snapshots.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.46.2";
 import { questReviewRoutes } from "./quest-review.ts";
 import { questPublishRoutes } from "./quest-publish.ts";
@@ -625,5 +626,8 @@ if (Deno.env.get("B06_ENABLE_QUEST_DEMO_ROUTES") === "true") {
 
 // B08: Teacher-owned class reports.
 app.route("/classes", teacherReportRoutes);
+
+// B03 follow-up: Teacher-owned C-01 parser snapshots.
+app.route("/modules", moduleSnapshotRoutes);
 
 Deno.serve(app.fetch);
