@@ -28,3 +28,12 @@ export type {
   StoryTaskTemplate,
   StoryWorldPreset,
 } from './story-bundle/types';
+
+export {
+  validateC04PairedBinding,
+  type C04BindingIssue,
+  type C04BindingIssueCode,
+  type C04BindingValidationResult,
+  type C04ExplicitPairedBinding,
+  type C04PairedBindingInput,
+} from './paired-binding';
