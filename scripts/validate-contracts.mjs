@@ -10,6 +10,41 @@ const has2020 = String(schema.$schema || '').includes('2020-12');
 const ajv = has2020 ? new Ajv2020({ allErrors: true, strict: false }) : new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
+
+// Story Bundle is a proposal-only companion contract; QuestV1 remains unchanged.
+const storyBundleSchema = read('contracts/story-bundle.schema.json');
+const storyBundleAjv = new Ajv2020({ allErrors: true, strict: false });
+const validateStoryBundle = storyBundleAjv.compile(storyBundleSchema);
+const storyBundleFixture = read('fixtures/contracts/story-bundle-draft-v0.1.json');
+if (!validateStoryBundle(storyBundleFixture)) {
+  console.error(JSON.stringify(validateStoryBundle.errors, null, 2));
+  throw new Error('story-bundle-draft-v0.1.json tidak sesuai Story Bundle Draft v0.1 schema');
+}
+
+// Structural negative probes: the draft must reject incomplete provenance,
+// unsupported world values, and private assessment fields in public content.
+const invalidStoryBundleCases = [
+  {
+    ...storyBundleFixture,
+    world_preset: 'space',
+  },
+  {
+    ...storyBundleFixture,
+    tasks: storyBundleFixture.tasks.map((task) => ({
+      ...task,
+      source_refs: task.source_refs.map(({ locator, ...sourceRef }) => sourceRef),
+    })),
+  },
+  {
+    ...storyBundleFixture,
+    answer_key: 'must-not-be-public',
+  },
+];
+for (const [index, candidate] of invalidStoryBundleCases.entries()) {
+  if (validateStoryBundle(candidate)) {
+    throw new Error(`Story Bundle negative probe ${index + 1} unexpectedly passed`);
+  }
+}
 const dir = 'fixtures/public';
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
 if (!files.length) throw new Error('Tidak ada public fixture JSON');
@@ -34,4 +69,4 @@ for (const file of files) {
     throw new Error(`${file}: field privat ditemukan dalam public fixture`);
   }
 }
-console.log(`OK: ${files.length} fixture JSON terbaca; quest-public tervalidasi.`);
+console.log(`OK: ${files.length} public fixture JSON terbaca; quest-public dan Story Bundle Draft v0.1 tervalidasi.`);
