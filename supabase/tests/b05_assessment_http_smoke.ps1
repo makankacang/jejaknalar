@@ -121,6 +121,62 @@ VALUES (
   '$classId', '$teacherId',
   'B05 Assessment HTTP Test', 7, '$classCode'
 );
+
+-- B06 compatibility: create an approved and published quest.
+INSERT INTO public.quest_review_drafts (
+  class_id, quest_id, quest_version_id,
+  submitted_by, public_payload
+)
+VALUES (
+  '$classId',
+  'QUEST-B05-ASSESSMENT-TEST',
+  'QV-DEMO-001',
+  '$teacherId',
+  jsonb_build_object(
+    'schema_version', '1.0',
+    'quest_id', 'QUEST-B05-ASSESSMENT-TEST',
+    'quest_version_id', 'QV-DEMO-001',
+    'objective_ids', jsonb_build_array('LO-B05-TEST'),
+    'template', 'evidence_hunt',
+    'scene_id', 'school_library',
+    'steps', jsonb_build_array(
+      jsonb_build_object(
+        'id', 'read-01',
+        'type', 'read_document',
+        'ref', 'DOC-001'
+      ),
+      jsonb_build_object(
+        'id', 'evidence-01',
+        'type', 'select_evidence',
+        'item_id', 'ITEM-001'
+      )
+    ),
+    'variants', jsonb_build_object(
+      'needs_support', 'QVAR-S',
+      'developing', 'QVAR-D',
+      'ready_for_extension', 'QVAR-E'
+    )
+  )
+);
+
+UPDATE public.quest_review_drafts
+SET status = 'approved',
+    approved_by = '$teacherId'
+WHERE class_id = '$classId'
+  AND quest_version_id = 'QV-DEMO-001';
+
+INSERT INTO public.published_quest_versions (
+  class_id, quest_id, quest_version_id,
+  approved_by, public_payload
+)
+SELECT
+  class_id, quest_id, quest_version_id,
+  approved_by, public_payload
+FROM public.quest_review_drafts
+WHERE class_id = '$classId'
+  AND quest_version_id = 'QV-DEMO-001'
+  AND status = 'approved';
+
 COMMIT;
 "@
 
@@ -266,7 +322,35 @@ COMMIT;
 finally {
   if ($fixtureCreated) {
     # Deleting the class cascades to sessions and assessments.
-    Invoke-LocalSql "BEGIN; DELETE FROM public.classes WHERE id = '$classId'; DELETE FROM auth.users WHERE id = '$teacherId'; COMMIT;" | Out-Null
+    $cleanupSql = @"
+    BEGIN;
+
+    -- Local test cleanup: temporarily disable immutable guards.
+    ALTER TABLE public.published_quest_versions
+      DISABLE TRIGGER b06_guard_published_quest_trigger;
+
+    DELETE FROM public.published_quest_versions
+    WHERE class_id = '$classId';
+
+    ALTER TABLE public.published_quest_versions
+      ENABLE TRIGGER b06_guard_published_quest_trigger;
+
+    ALTER TABLE public.quest_review_drafts
+      DISABLE TRIGGER b06_guard_quest_review_draft_trigger;
+
+    DELETE FROM public.quest_review_drafts
+    WHERE class_id = '$classId';
+
+    ALTER TABLE public.quest_review_drafts
+      ENABLE TRIGGER b06_guard_quest_review_draft_trigger;
+
+    DELETE FROM public.classes WHERE id = '$classId';
+    DELETE FROM auth.users WHERE id = '$teacherId';
+
+    COMMIT;
+"@
+
+    Invoke-LocalSql $cleanupSql | Out-Null
 
     Write-Host 'B05_ASSESSMENT_SYNTHETIC_DATA_CLEANED'
   }

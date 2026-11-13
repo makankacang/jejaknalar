@@ -1,0 +1,98 @@
+{
+  "private_assessment_spec_version": "0.1-fixture-draft",
+  "exposure": "backend_only",
+  "fixture_only": true,
+  "not_a_final_B07_contract": true,
+  "quest_id": "QUEST-FIXTURE-BI-CRED-001",
+  "quest_version_id": "QV-FIXTURE-BI-CRED-001",
+  "objective_ids": [
+    "LO-FIXTURE-BI-CRED-001"
+  ],
+  "items": [
+    {
+      "item_id": "ITEM-FIXTURE-BI-CRED-001",
+      "activity_id": "ACT-FIXTURE-BI-CRED-001",
+      "evidence_id": "EVD-FIXTURE-BI-CRED-001",
+      "objective_id": "LO-FIXTURE-BI-CRED-001",
+      "response_type": "constructed_response",
+      "submission_value_type": "string",
+      "prompt": "Bandingkan kredibilitas Sumber A dan Sumber B. Jelaskan keterlacakan penerbit/pengirim, perbedaan tanggal dan lokasi kegiatan, dukungan informasi yang tersedia, serta apa yang perlu diverifikasi sebelum pengumuman diteruskan.",
+      "max_points": 4,
+      "scoring_mode": "analytic_rubric",
+      "rubric": [
+        {
+          "criterion_id": "RUBRIC-FIXTURE-01",
+          "criterion": "source_traceability",
+          "points": 1,
+          "full_credit_anchor": "Membedakan bahwa A menyebut penerbit OSIS dan kanal papan pengumuman, sedangkan B adalah pesan terusan dengan pengirim yang tidak dapat diverifikasi.",
+          "zero_credit_anchor": "Tidak mengidentifikasi atau tertukar mengenai penerbit/pengirim kedua sumber."
+        },
+        {
+          "criterion_id": "RUBRIC-FIXTURE-02",
+          "criterion": "claim_detail_comparison",
+          "points": 1,
+          "full_credit_anchor": "Menunjukkan perbedaan rincian jadwal: Jumat 20 November 2026 pukul 08.00 di halaman sekolah versus Sabtu 21 November 2026 pukul 09.00 di lapangan basket.",
+          "zero_credit_anchor": "Tidak menyebut perbedaan inti atau mengubah rincian sumber."
+        },
+        {
+          "criterion_id": "RUBRIC-FIXTURE-03",
+          "criterion": "supporting_reference_quality",
+          "points": 1,
+          "full_credit_anchor": "Mencatat B tidak menyertakan tautan ke pengumuman resmi/dokumen pendukung; A lebih terlacak karena menyebut OSIS dan papan pengumuman, tetapi fixture tidak menyertakan verifikasi independen bahwa isi A benar.",
+          "zero_credit_anchor": "Menganggap keberadaan pesan/penampilan formal sebagai bukti kebenaran tanpa memeriksa rujukan."
+        },
+        {
+          "criterion_id": "RUBRIC-FIXTURE-04",
+          "criterion": "calibrated_conclusion_and_verification",
+          "points": 1,
+          "full_credit_anchor": "Tidak mengklaim salah satu isi pasti benar; menyarankan konfirmasi kepada OSIS/guru atau kanal resmi dan memeriksa pengumuman asli sebelum menyebarkan.",
+          "zero_credit_anchor": "Menyimpulkan secara pasti tanpa dasar atau tidak mengusulkan langkah verifikasi."
+        }
+      ],
+      "private_answer_key": {
+        "source_a": {
+          "publisher": "OSIS SMP JejakNalar (synthetic)",
+          "publication_date": "2026-11-10",
+          "channel": "Papan pengumuman OSIS",
+          "event_date": "2026-11-20",
+          "event_day": "Jumat",
+          "event_time": "08.00 WIB",
+          "event_location": "halaman sekolah",
+          "supporting_reference": "Tidak ada dokumen/tautan pembanding eksternal yang disertakan pada fixture."
+        },
+        "source_b": {
+          "sender": "Tidak dapat diverifikasi dari salinan pesan",
+          "publication_date": "2026-11-11",
+          "channel": "Pesan yang diteruskan di grup kelas",
+          "event_date": "2026-11-21",
+          "event_day": "Sabtu",
+          "event_time": "09.00 WIB",
+          "event_location": "lapangan basket",
+          "supporting_reference": "Pesan diteruskan tanpa tautan ke pengumuman resmi atau dokumen pendukung."
+        },
+        "key_interpretation": "Sumber A memiliki provenance yang lebih dapat ditelusuri berdasarkan identitas OSIS dan kanal papan pengumuman yang tertulis. Namun, hal itu belum membuktikan secara independen bahwa seluruh detail A benar. Sumber B tidak mengungkap pengirim asal dan tidak menyediakan rujukan pendukung. Karena kedua sumber bertentangan, siswa harus melakukan konfirmasi kepada OSIS/guru atau kanal resmi sebelum meneruskan informasi."
+      },
+      "accepted_answer_variants": [
+        "Sebut A lebih dapat ditelusuri, bukan pasti benar; B pengirimnya tidak diketahui karena pesan terusan.",
+        "Menerima istilah pengumuman resmi hanya bila siswa tetap menyebut perlunya verifikasi langsung. Tidak memberi poin penuh bila siswa mengklaim A pasti benar hanya karena menyebut OSIS.",
+        "Menerima variasi frasa halaman sekolah/halaman sekolah, lapangan basket/lapangan basket sekolah, dan bentuk tanggal yang ekuivalen selama fakta tidak berubah."
+      ],
+      "insufficient_evidence_rule": {
+        "status": "insufficient_evidence",
+        "when": "Respons kosong/tidak relevan/tidak menyebut pengamatan yang dapat dihubungkan ke kedua sumber, atau hanya menyatakan tidak tahu tanpa alasan atau bukti.",
+        "score": "null (no score assigned until sufficient evidence exists)",
+        "is_adaptive_path": false,
+        "note": "insufficient_evidence adalah status kecukupan bukti, bukan jalur keempat BedaJalur."
+      },
+      "score_output_for_B07_tests": {
+        "raw_points_range": [
+          0,
+          4
+        ],
+        "criteria_breakdown": "one point per rubric criterion; PIC B owns the actual scorer implementation and normalization",
+        "mastery_thresholds": "not defined here; 60/80 thresholds remain provisional and are not encoded in this fixture",
+        "adaptive_path": "not assigned by this single-item fixture; PIC B/B08 must aggregate independent evidence across activities before assigning a path"
+      }
+    }
+  ]
+}

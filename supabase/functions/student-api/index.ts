@@ -12,6 +12,7 @@
 
 import { type Context, Hono } from "npm:hono@4.6.14";
 import { cors } from "npm:hono@4.6.14/cors";
+import { validatePublicQuestV1 } from "../_shared/quest-validation.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.46.2";
 import {
   authenticateStudentAccessCode,
@@ -538,6 +539,73 @@ app.post("/assessments/submit", async (c) => {
   });
 
   try {
+    // B06: Only accept answers for a published quest in this student's class.
+    const { data: publishedQuest, error: questError } = await admin
+      .from("published_quest_versions")
+      .select("public_payload")
+      .eq("quest_version_id", questVersionId)
+      .eq("class_id", auth.session.class_id)
+      .maybeSingle();
+
+    if (questError) {
+      console.error("[B06] Assessment quest lookup failed", {
+        requestId,
+        code: questError.code,
+      });
+
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Gagal memverifikasi quest",
+        requestId,
+      );
+    }
+
+    if (!publishedQuest) {
+      return responseError(
+        c,
+        404,
+        "NOT_FOUND",
+        "Quest tidak ditemukan",
+        requestId,
+      );
+    }
+
+    const publicQuest = validatePublicQuestV1(publishedQuest.public_payload);
+
+    if (!publicQuest || publicQuest.quest_version_id !== questVersionId) {
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Konten quest tidak valid",
+        requestId,
+      );
+    }
+
+    const allowedItemIds = new Set<string>();
+
+    for (const step of publicQuest.steps) {
+      if (step.type === "select_evidence") {
+        allowedItemIds.add(step.item_id);
+      }
+    }
+
+    for (const answer of answers) {
+      const itemId = (answer as Record<string, unknown>).item_id;
+
+      if (typeof itemId !== "string" || !allowedItemIds.has(itemId)) {
+        return responseError(
+          c,
+          422,
+          "VALIDATION_ERROR",
+          "Item assessment tidak tersedia pada quest ini",
+          requestId,
+        );
+      }
+    }
+
     const { data, error } = await admin.rpc("b05_create_assessment_attempt", {
       p_student_session_id: auth.session.id,
       p_quest_version_id: questVersionId,
@@ -610,7 +678,10 @@ app.post("/assessments/submit", async (c) => {
 
     if (
       typeof attempt.attempt_id !== "string" ||
-      attempt.status !== "pending_scoring" ||
+      typeof attempt.status !== "string" ||
+      !["pending_scoring", "scored", "insufficient_evidence"].includes(
+        attempt.status,
+      ) ||
       typeof attempt.replayed !== "boolean"
     ) {
       return responseError(
@@ -627,12 +698,12 @@ app.post("/assessments/submit", async (c) => {
         ok: true,
         data: {
           attempt_id: attempt.attempt_id,
-          status: "pending_scoring",
+          status: attempt.status,
           replayed: attempt.replayed,
         },
         request_id: requestId,
       },
-      202,
+      attempt.status === "pending_scoring" ? 202 : 200,
     );
   } catch {
     console.error("[B-05] Unexpected assessment error", {
@@ -983,6 +1054,303 @@ app.put("/checkpoints/:quest_version_id", async (c) => {
     });
   } catch {
     console.error("[B-05] Unexpected checkpoint save error", {
+      requestId,
+    });
+
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Terjadi kesalahan server",
+      requestId,
+    );
+  }
+});
+
+/**
+ * B06: GET published QuestV1 for the authenticated student's class.
+ * Never return private rubrics or answer keys.
+ */
+app.get("/student/quests/:id", async (c) => {
+  const requestId = crypto.randomUUID();
+  c.header("Cache-Control", "no-store");
+
+  const auth = await authenticateStudentAccessCode(
+    c.req.header("x-student-access-code"),
+  );
+
+  if (!auth.ok) {
+    return responseError(
+      c,
+      auth.reason === "UNAUTHORIZED" ? 401 : 500,
+      auth.reason,
+      auth.reason === "UNAUTHORIZED"
+        ? "Sesi siswa tidak valid"
+        : "Gagal memverifikasi sesi siswa",
+      requestId,
+    );
+  }
+
+  const questVersionId = c.req.param("id");
+
+  if (questVersionId.length > 120 || !/^QV-[A-Z0-9-]+$/.test(questVersionId)) {
+    return responseError(
+      c,
+      422,
+      "VALIDATION_ERROR",
+      "ID versi quest tidak valid",
+      requestId,
+    );
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!url || !serviceKey) {
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Konfigurasi server belum siap",
+      requestId,
+    );
+  }
+
+  try {
+    const admin = createClient(url, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    const { data, error } = await admin
+      .from("published_quest_versions")
+      .select("public_payload")
+      .eq("quest_version_id", questVersionId)
+      .eq("class_id", auth.session.class_id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[B06] Quest read failed", {
+        requestId,
+        code: error.code,
+      });
+
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Gagal mengambil quest",
+        requestId,
+      );
+    }
+
+    if (!data) {
+      return responseError(
+        c,
+        404,
+        "NOT_FOUND",
+        "Quest tidak ditemukan",
+        requestId,
+      );
+    }
+
+    // Revalidate before responding to prevent leaking unexpected fields.
+    const quest = validatePublicQuestV1(data.public_payload);
+
+    if (!quest || quest.quest_version_id !== questVersionId) {
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Konten quest tidak valid",
+        requestId,
+      );
+    }
+
+    return c.json({
+      ok: true,
+      data: quest,
+      request_id: requestId,
+    });
+  } catch {
+    console.error("[B06] Unexpected quest read failure", {
+      requestId,
+    });
+
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Terjadi kesalahan server",
+      requestId,
+    );
+  }
+});
+
+/**
+ * B07: Read assessment status and safe scoring summary.
+ * GET /student-api/assessments/:attempt_id/result
+ *
+ * Only the student who owns the attempt may read it.
+ * Never expose private rubrics, answer keys, or raw scoring evidence.
+ */
+app.get("/assessments/:attempt_id/result", async (c) => {
+  const requestId = crypto.randomUUID();
+  c.header("Cache-Control", "no-store");
+
+  const auth = await authenticateStudentAccessCode(
+    c.req.header("x-student-access-code"),
+  );
+
+  if (!auth.ok) {
+    return responseError(
+      c,
+      auth.reason === "UNAUTHORIZED" ? 401 : 500,
+      auth.reason,
+      auth.reason === "UNAUTHORIZED"
+        ? "Sesi siswa tidak valid"
+        : "Gagal memverifikasi sesi siswa",
+      requestId,
+    );
+  }
+
+  const attemptId = c.req.param("attempt_id");
+
+  if (!uuidPattern.test(attemptId)) {
+    return responseError(
+      c,
+      422,
+      "VALIDATION_ERROR",
+      "ID assessment tidak valid",
+      requestId,
+    );
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!url || !serviceKey) {
+    return responseError(
+      c,
+      500,
+      "INTERNAL_ERROR",
+      "Konfigurasi server belum siap",
+      requestId,
+    );
+  }
+
+  try {
+    const admin = createClient(url, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Bind the attempt to the authenticated student session.
+    const { data: attempt, error: attemptError } = await admin
+      .from("assessment_attempts")
+      .select("id,quest_version_id,status")
+      .eq("id", attemptId)
+      .eq("student_session_id", auth.session.id)
+      .maybeSingle();
+
+    if (attemptError) {
+      console.error("[B07] Assessment lookup failed", {
+        requestId,
+        code: attemptError.code,
+      });
+
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Gagal mengambil assessment",
+        requestId,
+      );
+    }
+
+    if (!attempt) {
+      return responseError(
+        c,
+        404,
+        "NOT_FOUND",
+        "Assessment tidak ditemukan",
+        requestId,
+      );
+    }
+
+    if (
+      !["pending_scoring", "scored", "insufficient_evidence"].includes(
+        attempt.status,
+      )
+    ) {
+      return responseError(
+        c,
+        500,
+        "INTERNAL_ERROR",
+        "Status assessment tidak valid",
+        requestId,
+      );
+    }
+
+    let score: number | null = null;
+    let scoredAt: string | null = null;
+
+    if (attempt.status !== "pending_scoring") {
+      const { data: result, error: resultError } = await admin
+        .from("assessment_scoring_results")
+        .select("outcome,score,scored_at")
+        .eq("attempt_id", attemptId)
+        .maybeSingle();
+
+      if (resultError || !result) {
+        return responseError(
+          c,
+          500,
+          "INTERNAL_ERROR",
+          "Hasil scoring tidak tersedia",
+          requestId,
+        );
+      }
+
+      if (
+        result.outcome !== attempt.status ||
+        (attempt.status === "scored" &&
+          (typeof result.score !== "number" ||
+            !Number.isInteger(result.score) ||
+            result.score < 0 ||
+            result.score > 100)) ||
+        (attempt.status === "insufficient_evidence" && result.score !== null)
+      ) {
+        return responseError(
+          c,
+          500,
+          "INTERNAL_ERROR",
+          "Hasil scoring tidak konsisten",
+          requestId,
+        );
+      }
+
+      score = result.score;
+      scoredAt = result.scored_at;
+    }
+
+    return c.json({
+      ok: true,
+      data: {
+        attempt_id: attempt.id,
+        quest_version_id: attempt.quest_version_id,
+        status: attempt.status,
+        score,
+        scored_at: scoredAt,
+      },
+      request_id: requestId,
+    });
+  } catch {
+    console.error("[B07] Unexpected assessment result error", {
       requestId,
     });
 

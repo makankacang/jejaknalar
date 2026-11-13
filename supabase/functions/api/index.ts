@@ -10,6 +10,8 @@
 import { Hono, type Context } from 'npm:hono@4.6.14';
 import { cors } from 'npm:hono@4.6.14/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2.46.2';
+import { questReviewRoutes } from './quest-review.ts';
+import { questPublishRoutes } from './quest-publish.ts';
 
 const app = new Hono().basePath('/api');
 const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 unambiguous chars
@@ -607,5 +609,12 @@ app.post('/modules/analyze', async (c) => {
     202,
   );
 });
+
+// B06: Experimental quest workflow.
+// Disabled by default; enable only for controlled local HTTP tests.
+if (Deno.env.get('B06_ENABLE_QUEST_DEMO_ROUTES') === 'true') {
+  app.route('/quests', questReviewRoutes);
+  app.route('/quests', questPublishRoutes);
+}
 
 Deno.serve(app.fetch);
