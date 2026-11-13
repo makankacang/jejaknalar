@@ -4,7 +4,7 @@ Modul server-side yang menganalisis hasil parser C-01 dan mengusulkan Learning O
 
 ## Batas ownership
 
-- PIC C memiliki prompt, analyzer core, model caller Gemini, normalisasi output, dan validasi source reference.
+- PIC C memiliki prompt, analyzer core, shared AI model contract, provider adapters, normalisasi output, dan validasi source reference.
 - PIC B memiliki Edge Function entrypoint, auth, RLS, job lifecycle, persistence, rate limit, API envelope, serta kontrak OpenAPI.
 - PIC A mengonsumsi hasil melalui API dan menyediakan review/edit/approval oleh guru.
 - PIC D menentukan kemampuan game; C-02 tidak membuat quest atau mekanik game.
@@ -69,9 +69,11 @@ Model internal hanya mengembalikan `source_id` dan kutipan verbatim. Kode C-02 m
 
 DOCX tidak diberi nomor halaman. Kutipan dibandingkan dengan teks sumber setelah normalisasi Unicode dan whitespace. Referensi yang tidak ditemukan tidak diterima.
 
-## Gemini REST caller
+## Provider adapters
 
-`GeminiRestModel` memakai `generateContent` REST dan structured JSON output. `apiKey` dan `model` wajib diberikan oleh server melalui secret/config, bukan ditulis ke source. Model dibuat configurable melalui `GEMINI_MODEL`; jangan mengunci nama model yang belum disetujui/diaktifkan pada project AI tim.
+`GeminiRestModel` dan `OpenRouterModel` mengimplementasikan kontrak bersama `AIModel` dari `../core/model.ts`. Keduanya mengembalikan `unknown` setelah parsing respons provider; analyzer tetap menjadi gerbang validasi schema, evidence, dan source reference. Nama `LearningAnalyzerModel` dan `LearningAnalyzerModelRequest` dipertahankan sebagai compatibility alias untuk kode C-02 dan worker B-03.
+
+`GeminiRestModel` memakai `generateContent` REST dan structured JSON output. `OpenRouterModel` memakai Chat Completions dan saat ini mengarahkan JSON melalui prompt; dukungan native structured output dapat ditambahkan setelah pengujian per model. `apiKey` dan `model` wajib diberikan oleh server melalui secret/config, bukan ditulis ke source. Model dibuat configurable melalui `GEMINI_MODEL`; jangan mengunci nama model yang belum disetujui/diaktifkan pada project AI tim.
 
 Tidak ada automatic retry atau caching pada modul ini. Pemetaan error ke envelope API (`AI_UNAVAILABLE`, `VALIDATION_ERROR`, dan lain-lain), quota guard, caching, serta job status dikelola PIC B/C-04 sesuai kesepakatan.
 
