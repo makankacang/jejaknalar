@@ -192,4 +192,53 @@ describe("GeminiRestModel error mapping", () => {
       retryable: false,
     });
   });
+
+  it("maps HTTP 429 to retryable provider unavailable", async () => {
+    const model = new GeminiRestModel({
+      apiKey: "test-only-key",
+      model: "test-model",
+      fetchImpl: async () =>
+        new Response("private provider detail", { status: 429 }),
+    });
+
+    await expect(
+      model.generateStructuredOutput(geminiRequest),
+    ).rejects.toMatchObject({
+      code: "MODEL_UNAVAILABLE",
+      retryable: true,
+      message: "Gemini sedang tidak tersedia atau kuota request tercapai.",
+    });
+  });
+
+  it("maps request abort to retryable timeout", async () => {
+    const fetchImpl: typeof fetch = (_input, init) =>
+      new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+
+        if (!signal) {
+          reject(new Error("Missing abort signal"));
+          return;
+        }
+
+        signal.addEventListener(
+          "abort",
+          () => reject(new Error("Simulated request abort")),
+          { once: true },
+        );
+      });
+
+    const model = new GeminiRestModel({
+      apiKey: "test-only-key",
+      model: "test-model",
+      timeoutMs: 5,
+      fetchImpl,
+    });
+
+    await expect(
+      model.generateStructuredOutput(geminiRequest),
+    ).rejects.toMatchObject({
+      code: "MODEL_TIMEOUT",
+      retryable: true,
+    });
+  });
 });
