@@ -1,3 +1,5 @@
+// Fail closed until a reviewed server-only scoring engine is implemented.
+const SCORING_ENGINE_IMPLEMENTED = false;
 // deno-lint-ignore no-import-prefix
 import { createClient } from "npm:@supabase/supabase-js@2.46.2";
 import { prepareAssessmentScoring } from "../_shared/rules/assessment/b07-scoring-input.ts";
@@ -42,6 +44,9 @@ Deno.serve(async (req) => {
   });
   if (Deno.env.get("ASSESSMENT_SCORING_ENGINE_READY") !== "true") {
     return json(503, { ok: false, error: "SCORING_ENGINE_NOT_READY" });
+  }
+  if (!SCORING_ENGINE_IMPLEMENTED) {
+    return json(503, { ok: false, error: "SCORING_ENGINE_NOT_IMPLEMENTED" });
   }
   const { data: claims, error: claimError } = await db.rpc(
     "b07_claim_scoring_attempt",
