@@ -3,7 +3,7 @@ import { transitionGameState, type GameEvent, type GameState } from '../sprint0/
 import { makeLearningEvent, type LearningEvent, type EventType } from '../sprint0/learning-events';
 import type { QuestV1 } from '../sprint0/contract-v1';
 import type { AssessmentPortV1, ApiSuccessV1, SubmitAssessmentDataV1, SubmitAssessmentRequestV1 } from '../sprint0/repositories-v1';
-import type { SceneContent } from './content';
+import { reasoningQuestions, type SceneContent } from './content';
 
 export type OverlayKind = 'npc' | 'document' | null;
 export interface QuestSnapshot {
@@ -11,6 +11,9 @@ export interface QuestSnapshot {
   overlay: OverlayKind;
   hasReadDocument: boolean;
   selectedEvidenceId: string | null;
+  answers: Record<string, string>;
+  hintsUsed: number;
+  attemptCount: number;
   busy: boolean;
   submitError: string | null;
   result: SubmitAssessmentDataV1 | null;
@@ -22,6 +25,9 @@ export class QuestFlow {
   private overlay: OverlayKind = null;
   private hasReadDocument = false;
   private selectedEvidenceId: string | null = null;
+  private answers: Record<string, string> = {};
+  private hintsUsed = 0;
+  private attemptCount = 1;
   private busy = false;
   private submitError: string | null = null;
   private result: SubmitAssessmentDataV1 | null = null;
@@ -43,7 +49,7 @@ export class QuestFlow {
   getSnapshot(): QuestSnapshot {
     return {
       state: this.state, overlay: this.overlay, hasReadDocument: this.hasReadDocument,
-      selectedEvidenceId: this.selectedEvidenceId, busy: this.busy,
+      selectedEvidenceId: this.selectedEvidenceId, answers: { ...this.answers }, hintsUsed: this.hintsUsed, attemptCount: this.attemptCount, busy: this.busy,
       submitError: this.submitError, result: this.result, events: [...this.events],
     };
   }
@@ -90,21 +96,41 @@ export class QuestFlow {
     if (this.state !== 'ASSESSMENT' ||
         !this.content.document.paragraphs.some(p => p.id === paragraphId)) return;
     this.selectedEvidenceId = paragraphId;
+    this.answers[this.content.challenge.itemId] = paragraphId;
     this.log('EVIDENCE_SELECTED', { paragraph_id: paragraphId }); this.notify();
+  }
+  selectAnswer(itemId: string, choice: string): void {
+    if (this.state !== 'ASSESSMENT') return;
+    const item = reasoningQuestions.find(q => q.id === itemId);
+    if (!item || !item.options.some(o => o.id === choice)) return;
+    this.answers[itemId] = choice;
+    this.log('EVIDENCE_SELECTED', { item_id: itemId, choice });
+  }
+  retry(): void {
+    if (this.state !== 'FEEDBACK' && this.state !== 'ADAPTIVE_TRANSITION' && this.state !== 'COMPLETED') return;
+    const fromFeedback = this.state === 'FEEDBACK';
+    this.move('RETRY');
+    if (!fromFeedback) this.move('CHALLENGE_START');
+    this.move('ASSESSMENT_START');
+    this.selectedEvidenceId = null; this.answers = {}; this.result = null;
+    this.pendingRequest = null; this.submitError = null; this.hintsUsed = 0;
+    this.attemptCount += 1;
+    this.log('CHALLENGE_RETRIED', { attempt_count: this.attemptCount });
   }
   hint(): void {
     if (this.state !== 'ASSESSMENT') return;
+    this.hintsUsed += 1;
     this.log('HINT_REQUESTED', { item_id: this.content.challenge.itemId });
   }
   /** Retry with SAME immutable request & UUID if network previously failed. */
   async submit(): Promise<void> {
     if (this.busy) return;
     if (this.state === 'ASSESSMENT') {
-      if (!this.selectedEvidenceId) throw new Error('Pilih kutipan sebelum mengirim');
+      if (!this.selectedEvidenceId || reasoningQuestions.some(q => !this.answers[q.id])) return;
       this.pendingRequest = {
         quest_version_id: this.quest.quest_version_id,
         idempotency_key: crypto.randomUUID(),
-        answers: [{ item_id: this.content.challenge.itemId, value: this.selectedEvidenceId }],
+        answers: Object.entries(this.answers).map(([item_id, value]) => ({ item_id, value })),
       };
       this.move('SUBMIT');
       this.log('ANSWER_SUBMITTED', { item_id: this.content.challenge.itemId });
