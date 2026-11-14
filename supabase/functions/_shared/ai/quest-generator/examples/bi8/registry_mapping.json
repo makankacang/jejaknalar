@@ -1,0 +1,59 @@
+{
+  "artifact_type": "BI8_REGISTRY_MAPPING",
+  "status": "ID_AND_TASKSLOT_MATCH_IN_SUPPLIED_DESIGN_MOCK; PRODUCTION_RUNTIME_NOT_CERTIFIED",
+  "registry_file_version": "1.4-mock-complete",
+  "registry_file_status": "DESIGN_MOCK_NOT_PRODUCTION",
+  "previously_observed_registry_pin": "D-school-1.4-sprint2-1",
+  "version_discrepancy": "The D audit/previous C03 registry check observed D-school-1.4-sprint2-1 as the code-side registry pin, while the supplied JSON export itself states 1.4-mock-complete and DESIGN_MOCK_NOT_PRODUCTION. Story Bundle uses the observed code-side pin for candidate pairing. PIC B final close-out must get explicit confirmation from D against the merged branch.",
+  "scene_id_separation": {
+    "questv1_scene_id": "school_library",
+    "world_start_room_id": "school.library",
+    "alias_assumed": false,
+    "note": "Legacy Sprint 1 scene is not the same ID as Sprint 2 room."
+  },
+  "activities": [
+    {
+      "activity_id": "ACT-BI8-REDAKSI-OBSERVE-01",
+      "room_id": "school.library",
+      "room_exists": true,
+      "room_exists_in_supplied_mock": true,
+      "object_id": "school.library.guestbook",
+      "object_exists": true,
+      "object_exists_in_supplied_mock": true,
+      "object_task_in_json": "book",
+      "task_slot_from_prior_D_audit": "observe",
+      "expected_story_template": "observe",
+      "npc_id": "school.npc.librarian",
+      "npc_exists": true,
+      "npc_exists_in_supplied_mock": true,
+      "npc_name": "Bu Maya",
+      "slot_mapping_basis": "C03_EXPECTED_VS_ACTUAL_REGISTRY.md / PIC D audit; runtime source not re-run in this environment",
+      "registry_verdict": "DATA_MATCH_IN_SUPPLIED_MOCK_AND_PRIOR_D_AUDIT; RUNTIME_NOT_CERTIFIED"
+    },
+    {
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "room_id": "school.staff_room",
+      "room_exists": true,
+      "room_exists_in_supplied_mock": true,
+      "object_id": "school.staff_room.teacher_note",
+      "object_exists": true,
+      "object_exists_in_supplied_mock": true,
+      "object_task_in_json": "document",
+      "task_slot_from_prior_D_audit": "investigate",
+      "expected_story_template": "investigate",
+      "npc_id": "school.npc.staff",
+      "npc_exists": true,
+      "npc_exists_in_supplied_mock": true,
+      "npc_name": "Pak Arif",
+      "slot_mapping_basis": "C03_EXPECTED_VS_ACTUAL_REGISTRY.md / PIC D audit; runtime source not re-run in this environment",
+      "registry_verdict": "DATA_MATCH_IN_SUPPLIED_MOCK_AND_PRIOR_D_AUDIT; RUNTIME_NOT_CERTIFIED"
+    }
+  ],
+  "variants": {
+    "needs_support": "Baca kembali kartu kriteria, lalu tandai bagian teks yang menunjukkan ciri paragraf.",
+    "developing": "Klasifikasi awalmu sudah terbentuk. Perkuat jawaban dengan bukti yang lebih spesifik dari setiap paragraf.",
+    "ready_for_extension": "Audit selesai. Coba gunakan kriteria yang sama untuk menemukan contoh paragraf lain dalam teks laporan hasil observasi.",
+    "source": "QuestV1 schema required keys; the content strings are authored in this package; runtime interpretation remains with D."
+  },
+  "effective_registry_pin_observed_in_D_audit": "D-school-1.4-sprint2-1"
+}

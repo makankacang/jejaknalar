@@ -1,0 +1,71 @@
+{
+  "artifact_type": "BI8_LOCAL_SOURCE_MANIFEST_FOR_TESTS",
+  "status": "LOCAL_PARSER_CONTENT_CONFIRMED; STAGING_SOURCE_MAP_EQUIVALENCE_PENDING_PIC_B",
+  "origin": "PIC_C01 DocumentParseResult.json generated from supplied BI8 DOCX",
+  "document": {
+    "document_id": "doc_a305829d3917b4ca",
+    "filename": "FIX MA 2627 BINDO KLS 8 BAB 1.docx",
+    "format": "docx",
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size_bytes": 361816,
+    "metadata": {
+      "paragraphCount": 923
+    },
+    "warnings": [
+      "4 gambar diabaikan (hanya teks yang diekstrak; OCR belum didukung).",
+      "36 tabel diratakan menjadi paragraf; struktur baris/kolom tidak dipertahankan.",
+      "Tidak ditemukan judul (heading); referensi bagian (section) tidak tersedia."
+    ]
+  },
+  "staging_reference_from_pic_b": {
+    "document_id": "doc_a305829d3917b4ca",
+    "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+    "note": "These values are the final integration identity from PIC B. This manifest does not prove the local DOC-P IDs resolve in the staging snapshot. PIC B must verify source map IDs and text_version together."
+  },
+  "source_map_verified_in_staging": false,
+  "teacher_approval": {
+    "paragraph_a": "PENDING_EXPLICIT_TEACHER_CONFIRMATION",
+    "paragraph_b": "PENDING_EXPLICIT_TEACHER_CONFIRMATION; proposed classification eksposisi"
+  },
+  "sources": [
+    {
+      "id": "DOC-P-559",
+      "kind": "paragraph",
+      "paragraphIndex": 559,
+      "text": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+    },
+    {
+      "id": "DOC-P-599",
+      "kind": "paragraph",
+      "paragraphIndex": 599,
+      "text": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+    },
+    {
+      "id": "DOC-P-596",
+      "kind": "paragraph",
+      "paragraphIndex": 596,
+      "text": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan."
+    }
+  ],
+  "trusted_registry_candidate": {
+    "version": "D-school-1.4-sprint2-1",
+    "worldPreset": "school",
+    "startRoomId": "school.library",
+    "roomIds": [
+      "school.library",
+      "school.staff_room",
+      "school.discussion_hall"
+    ],
+    "npcIds": [
+      "school.npc.librarian",
+      "school.npc.staff",
+      "school.npc.moderator"
+    ],
+    "objectIds": [
+      "school.library.guestbook",
+      "school.staff_room.teacher_note",
+      "school.discussion_hall.case_board"
+    ],
+    "status": "PROVISIONAL_CODE_SIDE_PIN; D CONFIRMATION REQUIRED; PROVIDED REGISTRY JSON IS DESIGN MOCK NOT PRODUCTION"
+  }
+}
