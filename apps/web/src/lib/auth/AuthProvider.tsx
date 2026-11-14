@@ -27,7 +27,10 @@ interface AuthContextValue {
     loading: boolean;
     mode: AuthMode;
     configurationError: string | null;
+    passwordRecoveryReady: boolean;
     signIn: (email: string, password: string) => Promise<void>;
+    requestPasswordReset: (email: string) => Promise<void>;
+    updatePassword: (password: string) => Promise<void>;
     signOut: () => Promise<void>;
 }
 
@@ -82,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [configurationError, setConfigurationError] =
         useState<string | null>(null);
+    const [passwordRecoveryReady, setPasswordRecoveryReady] = useState(false);
 
     useEffect(() => {
         if (mode === 'mock') {
@@ -104,8 +108,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        } = supabase.auth.onAuthStateChange((event, session) => {
             if (active) {
+                if (event === 'PASSWORD_RECOVERY' && session) {
+                    setPasswordRecoveryReady(true);
+                }
+
+                if (event === 'SIGNED_OUT') {
+                    setPasswordRecoveryReady(false);
+                }
+
                 setUser(
                     session?.user ? mapSupabaseUser(session.user) : null,
                 );
@@ -189,6 +201,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         [mode],
     );
 
+
+    const requestPasswordReset = useCallback(
+        async (email: string) => {
+            const normalizedEmail = email.trim();
+
+            if (!normalizedEmail) {
+                throw new Error('Email wajib diisi.');
+            }
+
+            if (mode !== 'live') {
+                throw new Error('Password recovery hanya tersedia pada mode LIVE.');
+            }
+
+            if (!isSupabaseConfigured()) {
+                throw new Error('Supabase belum dikonfigurasi.');
+            }
+
+            const redirectTo = `${window.location.origin}/reset-password`;
+
+            const { error } = await getSupabaseClient().auth.resetPasswordForEmail(
+                normalizedEmail,
+                { redirectTo },
+            );
+
+            if (error) throw error;
+        },
+        [mode],
+    );
+
+    const updatePassword = useCallback(
+        async (password: string) => {
+            if (!password) {
+                throw new Error('Password baru wajib diisi.');
+            }
+
+            if (mode !== 'live') {
+                throw new Error('Penggantian password hanya tersedia pada mode LIVE.');
+            }
+
+            if (!isSupabaseConfigured()) {
+                throw new Error('Supabase belum dikonfigurasi.');
+            }
+
+            const { error } = await getSupabaseClient().auth.updateUser({
+                password,
+            });
+
+            if (error) throw error;
+        },
+        [mode],
+    );
     const signOut = useCallback(async () => {
         if (mode === 'mock') {
             sessionStorage.removeItem(MOCK_SESSION_KEY);
@@ -209,10 +272,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             loading,
             mode,
             configurationError,
+            passwordRecoveryReady,
             signIn,
+            requestPasswordReset,
+            updatePassword,
             signOut,
         }),
-        [user, loading, mode, configurationError, signIn, signOut],
+        [user, loading, mode, configurationError, passwordRecoveryReady, signIn, requestPasswordReset, updatePassword, signOut],
     );
 
     return (
