@@ -430,3 +430,6 @@ verify_jwt = false
 
 [functions.student-api]
 verify_jwt = false
+
+[functions.assessment-scoring-worker]
+verify_jwt = false
