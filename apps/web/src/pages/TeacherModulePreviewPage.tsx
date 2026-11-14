@@ -48,6 +48,15 @@ export default function TeacherModulePreviewPage() {
 
                 {!loading && module && (
                     <>
+                        <div role="note" style={styles.demoNotice}>
+                            <strong>DEMO / DATA SIMULASI</strong>
+                            <p>
+                                Halaman preview ini masih menggunakan MockModuleRepository.
+                                Informasi modul yang ditampilkan merupakan data demonstrasi,
+                                bukan detail modul live dari Supabase Staging.
+                            </p>
+                        </div>
+
                         <span style={styles.eyebrow}>PRATINJAU MODUL</span>
                         <section style={styles.panel}>
                             <div style={styles.badges}>
@@ -129,6 +138,16 @@ const styles = {
         borderRadius: '14px',
         background: '#ffffff',
         boxShadow: '0 3px 12px rgba(15, 23, 42, 0.035)',
+    },
+    demoNotice: {
+        padding: '14px 17px',
+        marginBottom: '20px',
+        border: '1px solid #fcd34d',
+        borderRadius: '10px',
+        background: '#fffbeb',
+        color: '#92400e',
+        fontSize: '12px',
+        lineHeight: 1.7,
     },
     badges: {
         display: 'flex',

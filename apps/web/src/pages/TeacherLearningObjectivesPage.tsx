@@ -332,6 +332,15 @@ export default function TeacherLearningObjectivesPage() {
                     </div>
                 )}
 
+                <div role="note" style={styles.reviewSimulationNotice}>
+                    <strong>DEMO / SIMULASI — REVIEW BELUM TERSIMPAN</strong>
+                    <p>
+                        Edit, Approve, Reject, dan perubahan status di halaman ini hanya
+                        mengubah tampilan pada sesi browser. Keputusan review belum dikirim
+                        atau disimpan ke backend Supabase dan belum menjadi persetujuan resmi.
+                    </p>
+                </div>
+
                 {objectives.length > 0 ? (
                     <section style={styles.objectiveList}>
                         {objectives.map((objective) => (
@@ -421,7 +430,7 @@ export default function TeacherLearningObjectivesPage() {
                                         onClick={() => editObjective(objective)}
                                         disabled={editingId === objective.id}
                                     >
-                                        Edit
+                                        Edit (DEMO)
                                     </button>
                                     {objective.status === 'rejected' ? (
                                         <button
@@ -429,7 +438,7 @@ export default function TeacherLearningObjectivesPage() {
                                             style={styles.secondaryButton}
                                             onClick={() => updateStatus(objective.id, 'pending')}
                                         >
-                                            Kembalikan ke Pending
+                                            Kembalikan ke Pending (DEMO)
                                         </button>
                                     ) : (
                                         <>
@@ -441,7 +450,7 @@ export default function TeacherLearningObjectivesPage() {
                                                 }
                                                 disabled={editingId === objective.id}
                                             >
-                                                Reject
+                                                Reject (DEMO)
                                             </button>
                                             <button
                                                 type="button"
@@ -451,7 +460,7 @@ export default function TeacherLearningObjectivesPage() {
                                                 }
                                                 disabled={editingId === objective.id}
                                             >
-                                                Approve
+                                                Approve (DEMO)
                                             </button>
                                         </>
                                     )}
@@ -586,6 +595,16 @@ const styles = {
         background: '#eff6ff',
         color: '#1e40af',
         borderRadius: '9px',
+        fontSize: '12px',
+        lineHeight: 1.7,
+    },
+    reviewSimulationNotice: {
+        padding: '14px 17px',
+        marginTop: '16px',
+        border: '1px solid #fcd34d',
+        borderRadius: '9px',
+        background: '#fffbeb',
+        color: '#92400e',
         fontSize: '12px',
         lineHeight: 1.7,
     },

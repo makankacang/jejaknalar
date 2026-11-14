@@ -89,6 +89,15 @@ export default function TeacherModulesPage() {
                     </div>
                 </header>
 
+                <div role="note" style={styles.demoNotice}>
+                    <strong>DEMO / DATA SIMULASI</strong>
+                    <p>
+                        Katalog ini masih menggunakan MockModuleRepository.
+                        Modul yang ditampilkan merupakan data demonstrasi,
+                        bukan daftar modul live dari Supabase Staging.
+                    </p>
+                </div>
+
                 <section style={styles.toolbar}>
                     <div style={styles.searchWrapper}>
                         <label htmlFor="module-search" style={styles.srOnly}>
@@ -249,6 +258,16 @@ const styles = {
         color: '#475569',
         fontSize: '12px',
         fontWeight: 600,
+    },
+    demoNotice: {
+        padding: '14px 17px',
+        marginBottom: '20px',
+        border: '1px solid #fcd34d',
+        borderRadius: '10px',
+        background: '#fffbeb',
+        color: '#92400e',
+        fontSize: '12px',
+        lineHeight: 1.7,
     },
     toolbar: {
         display: 'flex',
