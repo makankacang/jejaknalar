@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { TARGET_LABELS, type InteractionTarget, type ProximityState } from '../../../game/sprint1/proximity';
 import { PhaserStage } from './PhaserStage';
-import { prepareEvidenceHunt } from '../../../game/sprint1/content';
+import { prepareEvidenceHunt, reasoningQuestions, practiceByPath } from '../../../game/sprint1/content';
 import { QuestFlow, type QuestSnapshot } from '../../../game/sprint1/flow';
-import { MockQuestRepositoryV1, MockAssessmentRepositoryV1 } from '../../../game/sprint0/repositories-v1';
+import { MockQuestRepositoryV1 } from '../../../game/sprint0/repositories-v1';
+import { DemoAssessmentRepository } from '../../../game/sprint1/demo-repository';
 import type { LearningPath } from '../../../game/sprint0/types';
 
 const adaptiveText: Record<LearningPath, { title: string; description: string }> = {
@@ -22,24 +24,41 @@ function useQuestSnapshot(flow: QuestFlow | null): QuestSnapshot | null {
 }
 
 /** Halaman mandiri PIC D; tidak mengedit routing milik PIC A. */
-export function StudentQuestPage({ demoPath = 'need_more_evidence' }: { demoPath?: LearningPath }) {
+export function StudentQuestPage() {
   const [flow, setFlow] = useState<QuestFlow | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(false);
+  const [repository, setRepository] = useState<DemoAssessmentRepository | null>(null);
+  const [reload, setReload] = useState(0);
+  const [practice, setPractice] = useState<LearningPath | null>(null);
+  const [failNext, setFailNext] = useState(false);
+  const [nearby, setNearby] = useState<ProximityState>({ npc: false, document: false, challenge: false });
+  const [rangeNotice, setRangeNotice] = useState<string | null>(null);
   const snapshot = useQuestSnapshot(flow);
+  const activePanel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (snapshot?.state === 'EXPLORING') {
+      document.querySelector<HTMLElement>('.jn-game-canvas')?.focus({ preventScroll: true });
+    } else if (snapshot?.state !== 'SUBMITTING') {
+      activePanel.current?.focus({ preventScroll: true });
+      activePanel.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [snapshot?.state, snapshot?.overlay]);
   useEffect(() => {
     let mounted = true;
+    setLoadingError(null);
     new MockQuestRepositoryV1().getPublishedQuest('QUEST-DEMO-001')
       .then(payload => {
         if (!mounted) return;
         const { quest, content } = prepareEvidenceHunt(payload);
-        const game = new QuestFlow(quest, content, new MockAssessmentRepositoryV1(demoPath));
+        const repo = new DemoAssessmentRepository(() => ({ hintsUsed: game.getSnapshot().hintsUsed, attemptCount: game.getSnapshot().attemptCount }));
+        const game: QuestFlow = new QuestFlow(quest, content, repo);
+        setRepository(repo);
         setFlow(game);
         game.start();
       })
       .catch(() => { if (mounted) setLoadingError('Quest tidak tersedia. Periksa mock data dan referensi scene.'); });
     return () => { mounted = false; };
-  }, [demoPath]);
+  }, [reload]);
 
   const content = flow?.content;
   return <main className="jn-main">
@@ -50,17 +69,44 @@ export function StudentQuestPage({ demoPath = 'need_more_evidence' }: { demoPath
       </div>
       <span className="jn-tag">DEMO DATA SINTETIS · TANPA AI</span>
     </header>
-    {loadingError && <div className="jn-error" role="alert">{loadingError}</div>}
+    {loadingError && <div className="jn-error" role="alert">{loadingError}<button onClick={() => setReload(n => n + 1)}>Muat ulang quest</button></div>}
+    {!flow && !loadingError && <p role="status">Memuat petualangan…</p>}
     {flow && snapshot && content && <>
       <section className="jn-layout">
         <div className="jn-map-card">
           <div className="jn-card-title">Ruang Perpustakaan <span>{snapshot.state}</span></div>
-          <PhaserStage onNpc={() => flow.interactNpc()} onDocument={() => flow.openDocument()} onChallenge={() => flow.openChallenge()} />
-          <p className="jn-tip">Gerakkan karakter dengan WASD / panah, atau klik/tap peta. Klik NPC, dokumen, atau tantangan untuk berinteraksi.</p>
+          <PhaserStage
+            isExploring={() => flow.getSnapshot().state === 'EXPLORING'}
+            onNpc={() => flow.interactNpc()}
+            onDocument={() => flow.openDocument()}
+            onChallenge={() => {
+              if (!flow.getSnapshot().hasReadDocument) {
+                setRangeNotice('Baca dokumen dahulu sebelum memulai tantangan.');
+                return;
+              }
+              flow.openChallenge();
+            }}
+            onProximityChange={(next) => { setNearby(next); setRangeNotice(null); }}
+            onOutOfRange={(target: InteractionTarget) => {
+              setRangeNotice(`Kamu terlalu jauh dari ${TARGET_LABELS[target]}. Dekati objek dahulu.`);
+            }}
+          />
+          <p className="jn-tip">Gerakkan karakter dengan WASD / panah atau klik/tap lantai. Saat dekat, klik objek atau tekan E untuk berinteraksi. Klik objek dari jauh tidak akan membuka dialog.</p>
+          <div className="jn-range" role="status" aria-live="polite">
+            {rangeNotice ?? (
+              nearby.npc || nearby.document || nearby.challenge
+                ? `Dalam jangkauan: ${[
+                    nearby.npc ? TARGET_LABELS.npc : null,
+                    nearby.document ? TARGET_LABELS.document : null,
+                    nearby.challenge ? TARGET_LABELS.challenge : null,
+                  ].filter(Boolean).join(', ')}. Klik objek / tekan E.`
+                : 'Belum dekat objek interaktif. Bergeraklah menuju Bu Rani, dokumen, atau tantangan.'
+            )}
+          </div>
           <div className="jn-actions">
-            <button onClick={() => flow.interactNpc()} disabled={snapshot.state !== 'EXPLORING'}>Bicara dengan NPC</button>
-            <button onClick={() => flow.openDocument()} disabled={snapshot.state !== 'EXPLORING'}>Buka dokumen</button>
-            <button onClick={() => flow.openChallenge()} disabled={!snapshot.hasReadDocument || snapshot.state !== 'EXPLORING'}>Kerjakan tantangan</button>
+            <button onClick={() => { if (nearby.npc) flow.interactNpc(); }} disabled={!nearby.npc || snapshot.state !== 'EXPLORING'}>Bicara dengan NPC</button>
+            <button onClick={() => { if (nearby.document) flow.openDocument(); }} disabled={!nearby.document || snapshot.state !== 'EXPLORING'}>Buka dokumen</button>
+            <button onClick={() => { if (nearby.challenge && snapshot.hasReadDocument) flow.openChallenge(); }} disabled={!nearby.challenge || !snapshot.hasReadDocument || snapshot.state !== 'EXPLORING'}>Kerjakan tantangan</button>
           </div>
         </div>
         <aside className="jn-info-card">
@@ -75,20 +121,21 @@ export function StudentQuestPage({ demoPath = 'need_more_evidence' }: { demoPath
           </ol>
           <div className="jn-progress">Dokumen dibaca: <strong>{snapshot.hasReadDocument ? 'Sudah' : 'Belum'}</strong></div>
           <div className="jn-progress">Learning events lokal: <strong>{snapshot.events.length}</strong></div>
-          <p className="jn-tip">Learning events belum tersimpan di server. Nilai mock bukan nilai akademik.</p>
+          <p className="jn-tip">Demo lokal tanpa akun: progres hanya selama tab ini terbuka. Skor latihan bukan nilai akademik resmi.</p>
         </aside>
       </section>
-      {snapshot.overlay === 'npc' && <section className="jn-panel" role="dialog" aria-label="Dialog pustakawan">
+      {snapshot.overlay === 'npc' && <section ref={activePanel} tabIndex={-1} className="jn-panel" role="dialog" aria-label="Dialog pustakawan">
         <h2>{content.npc.name}</h2><p>{content.npc.message}</p>
         <button onClick={() => flow.closeInteraction()}>Tutup dialog</button>
       </section>}
-      {snapshot.overlay === 'document' && <section className="jn-panel" role="dialog" aria-label="Dokumen perpustakaan">
+      {snapshot.overlay === 'document' && <section ref={activePanel} tabIndex={-1} className="jn-panel" role="dialog" aria-label="Dokumen perpustakaan">
         <h2>{content.document.title}</h2>
         {content.document.paragraphs.map(p => <p key={p.id}><strong>{p.id}</strong> — {p.text}</p>)}
         <button onClick={() => flow.closeInteraction()}>Saya sudah membaca</button>
       </section>}
-      {(snapshot.state === 'ASSESSMENT' || snapshot.state === 'SUBMITTING') && <section className="jn-panel" aria-label="Assessment Evidence Hunt">
-        <h2>Challenge: Pilih Bukti</h2><p>{content.challenge.prompt}</p>
+      {(snapshot.state === 'ASSESSMENT' || snapshot.state === 'SUBMITTING') && <section ref={activePanel} tabIndex={-1} className="jn-panel" aria-label="Assessment Evidence Hunt">
+        <h2>Tantangan · Percobaan {snapshot.attemptCount}</h2>
+        {practice && <div className="jn-practice"><h3>{practiceByPath[practice].title}</h3><p>{practiceByPath[practice].passage}</p><p>{practiceByPath[practice].guidance}</p></div>}<p>{content.challenge.prompt}</p>
         <fieldset disabled={snapshot.state !== 'ASSESSMENT'}>
           <legend>Pilih kutipan yang menurutmu relevan:</legend>
           {content.document.paragraphs.map(p => <label key={p.id} className="jn-option">
@@ -96,26 +143,32 @@ export function StudentQuestPage({ demoPath = 'need_more_evidence' }: { demoPath
             <span>{p.text}</span>
           </label>)}
         </fieldset>
+        {reasoningQuestions.map(q => <fieldset key={q.id} disabled={snapshot.state !== 'ASSESSMENT'}>
+          <legend>{q.prompt}</legend>
+          {q.options.map(o => <label key={o.id} className="jn-option"><input type="radio" name={q.id} checked={snapshot.answers[q.id] === o.id} onChange={() => flow.selectAnswer(q.id, o.id)}/><span>{o.text}</span></label>)}
+        </fieldset>)}
         {snapshot.state === 'ASSESSMENT' && <div className="jn-actions">
-          <button className="jn-primary" disabled={!snapshot.selectedEvidenceId || snapshot.busy} onClick={() => void flow.submit()}>Kirim jawaban</button>
-          <button onClick={() => { flow.hint(); setShowHint(true); }}>Petunjuk</button>
+          <button className="jn-primary" disabled={!snapshot.selectedEvidenceId || reasoningQuestions.some(q => !snapshot.answers[q.id]) || snapshot.busy} onClick={() => void flow.submit()}>Kirim jawaban</button>
+          <button onClick={() => flow.hint()} disabled={snapshot.hintsUsed >= 2}>Petunjuk</button>
         </div>}
-        {showHint && <p className="jn-tip">Petunjuk: perhatikan bagian laporan yang menyediakan angka atau fakta yang dapat dibandingkan.</p>}
+        {snapshot.hintsUsed > 0 && <p className="jn-tip">{snapshot.hintsUsed === 1 ? 'Petunjuk 1: cari dua angka dari periode berbeda. Apa yang berubah?' : 'Petunjuk 2: pisahkan bukti kenaikan jumlah dari klaim penyebab. Data sebagian peserta tidak mewakili semua siswa.'}</p>}
         {snapshot.state === 'SUBMITTING' && <p aria-live="polite">{snapshot.busy ? 'Mengirim jawaban...' : 'Menunggu pengiriman ulang.'}</p>}
         {snapshot.submitError && <div className="jn-error" role="alert">{snapshot.submitError}<button onClick={() => void flow.submit()} disabled={snapshot.busy}>Coba lagi</button></div>}
       </section>}
-      {snapshot.state === 'FEEDBACK' && snapshot.result && <section className="jn-panel" aria-live="polite">
-        <h2>Feedback Assessment</h2><p><strong>SIMULASI.</strong> Skor mock {snapshot.result.score} adalah placeholder, bukan penilaian jawaban yang sebenarnya.</p>
+      {snapshot.state === 'FEEDBACK' && snapshot.result && <section ref={activePanel} tabIndex={-1} className="jn-panel" aria-live="polite">
+        <h2>Feedback Assessment</h2><p><strong>SIMULASI.</strong> Skor latihan lokal: {snapshot.result.score}/100. Dihitung oleh aturan deterministik pada server demo lokal, bukan nilai resmi Supabase.</p>
         {snapshot.result.feedback.map((item, index) => <p key={item.item_id ?? index}>{item.message}</p>)}
-        <button className="jn-primary" onClick={() => flow.nextPath()}>Lihat BedaJalur</button>
+        <div className="jn-actions"><button className="jn-primary" onClick={() => flow.nextPath()}>Lihat BedaJalur</button><button onClick={() => flow.retry()}>Perbaiki jawaban</button></div>
       </section>}
-      {snapshot.state === 'ADAPTIVE_TRANSITION' && snapshot.result && <section className="jn-panel">
+      {snapshot.state === 'ADAPTIVE_TRANSITION' && snapshot.result && <section ref={activePanel} tabIndex={-1} className="jn-panel">
         <h2>BedaJalur: {adaptiveText[snapshot.result.next_path].title}</h2>
         <p>{adaptiveText[snapshot.result.next_path].description}</p>
-        <p className="jn-tip">Rekomendasi simulasi dipilih dari dropdown preview. Logika server dan konten varian asli menunggu integrasi PIC B/C.</p>
-        <button className="jn-primary" onClick={() => flow.finish()}>Selesaikan misi</button>
+        <p className="jn-tip">Rekomendasi latihan berasal dari tiga aktivitas, petunjuk, dan percobaan. Ini bukan label kemampuan tetap. Konten latihan masih draf untuk ditinjau guru/PIC C.</p>
+        <div className="jn-practice"><h3>{practiceByPath[snapshot.result.next_path].title}</h3><p>{practiceByPath[snapshot.result.next_path].passage}</p><p>{practiceByPath[snapshot.result.next_path].guidance}</p></div>
+        <div className="jn-actions"><button className="jn-primary" onClick={() => { setPractice(snapshot.result!.next_path); flow.retry(); }}>Latihan ulang dengan bantuan jalur ini</button><button onClick={() => flow.finish()}>Selesaikan misi</button></div>
       </section>}
-      {snapshot.state === 'COMPLETED' && <section className="jn-panel"><h2>Petualangan selesai!</h2><p>Kamu berhasil menelusuri misi hingga tahap BedaJalur. Progress ini hanya ada di memori browser.</p></section>}
+      {snapshot.state === 'COMPLETED' && <section ref={activePanel} tabIndex={-1} className="jn-panel"><h2>Petualangan selesai!</h2><p>Kamu berhasil menelusuri misi hingga tahap BedaJalur. Progres ini hanya ada di memori browser.</p><button onClick={() => { setPractice(null); flow.retry(); }}>Latihan lagi</button></section>}
+      <details className="jn-panel"><summary>Pengujian pengiriman demo</summary><p>Aktifkan sebelum mengirim untuk menguji kegagalan jaringan satu kali. Klik Coba lagi setelah pesan gagal muncul.</p><label><input type="checkbox" checked={failNext} disabled={snapshot.state === 'SUBMITTING'} onChange={e => { setFailNext(e.target.checked); if (repository) repository.failNext = e.target.checked; }}/> Gagalkan pengiriman berikutnya sekali</label><p>Flag habis setelah satu kegagalan. Matikan lalu aktifkan lagi untuk mengulang simulasi.</p></details>
     </>}
   </main>;
 }

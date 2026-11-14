@@ -1,0 +1,308 @@
+{
+  "bundle_schema_version": "0.1-draft",
+  "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+  "source_document_versions": [
+    {
+      "document_id": "doc_a305829d3917b4ca",
+      "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2"
+    }
+  ],
+  "registry_version": "D-school-1.4-sprint2-1",
+  "world_preset": "school",
+  "start_room_id": "school.library",
+  "title": "Misi Redaksi: Deskripsi atau Eksposisi?",
+  "opening": "Redaksi majalah sekolah sedang menyiapkan edisi baru. Sebelum diterbitkan, dua paragraf laporan hasil observasi harus diperiksa. Bantu tim redaksi mengenali ciri paragraf, membandingkan contoh, dan menyusun klasifikasi berdasarkan bukti dari teks.",
+  "learning_context": {
+    "grade": 8,
+    "subject": "Bahasa Indonesia",
+    "topic": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam teks laporan hasil observasi",
+    "curriculum": "Kurikulum Merdeka"
+  },
+  "missions": [
+    {
+      "mission_id": "MSN-REDAKSI-KONSEP",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "required": true,
+      "room_id": "school.library",
+      "prerequisites": [],
+      "activity_ids": [
+        "ACT-REDAKSI-KONSEP"
+      ]
+    },
+    {
+      "mission_id": "MSN-REDAKSI-PERBANDINGAN",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "required": true,
+      "room_id": "school.staff_room",
+      "prerequisites": [
+        "MSN-REDAKSI-KONSEP"
+      ],
+      "activity_ids": [
+        "ACT-REDAKSI-PERBANDINGAN"
+      ]
+    },
+    {
+      "mission_id": "MSN-REDAKSI-KLASIFIKASI",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "required": true,
+      "room_id": "school.discussion_hall",
+      "prerequisites": [
+        "MSN-REDAKSI-PERBANDINGAN"
+      ],
+      "activity_ids": [
+        "ACT-REDAKSI-KLASIFIKASI"
+      ]
+    }
+  ],
+  "dialogues": [
+    {
+      "npc_id": "school.npc.librarian",
+      "room_id": "school.library",
+      "start_node_id": "NODE-REDAKSI-OPENING",
+      "nodes": [
+        {
+          "node_id": "NODE-REDAKSI-OPENING",
+          "text": "Selamat datang di tim redaksi. Kita perlu memeriksa dua paragraf sebelum majalah sekolah diterbitkan. Mulailah dengan membaca panduan, kemudian bandingkan contoh dan tentukan jenis paragraf berdasarkan bukti tekstual.",
+          "choices": [
+            {
+              "choice_id": "CHOICE-REDAKSI-START",
+              "label": "Mulai memeriksa panduan redaksi",
+              "unlock_mission_id": "MSN-REDAKSI-KONSEP"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "activity_id": "ACT-REDAKSI-KONSEP",
+      "room_id": "school.library",
+      "object_id": "school.library.guestbook",
+      "template": "observe",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "instruction": "Amati panduan redaksi. Temukan perbedaan utama paragraf deskripsi dan eksposisi. Perhatikan apakah paragraf berfokus menggambarkan keadaan atau menyampaikan informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ],
+      "evidence_ids": [
+        "EVD-REDAKSI-KONSEP"
+      ]
+    },
+    {
+      "activity_id": "ACT-REDAKSI-PERBANDINGAN",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "template": "investigate",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "instruction": "Periksa dua contoh paragraf. Pada contoh sepeda Mira, temukan detail yang menggambarkan objek. Pada contoh sepeda motor, temukan informasi dan data yang disampaikan. Catat perbedaan cara kedua paragraf menyajikan informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer."
+        }
+      ],
+      "evidence_ids": [
+        "EVD-REDAKSI-PERBANDINGAN"
+      ]
+    },
+    {
+      "activity_id": "ACT-REDAKSI-KLASIFIKASI",
+      "room_id": "school.discussion_hall",
+      "object_id": "school.discussion_hall.case_board",
+      "template": "decide",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "instruction": "Tentukan jenis masing-masing paragraf: deskripsi atau eksposisi. Untuk setiap pilihan, tunjukkan bagian teks yang menjadi bukti dan jelaskan alasan klasifikasimu berdasarkan kriteria dari panduan redaksi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer."
+        }
+      ],
+      "evidence_ids": [
+        "EVD-REDAKSI-KLASIFIKASI"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EVD-REDAKSI-KONSEP",
+      "mission_id": "MSN-REDAKSI-KONSEP",
+      "room_id": "school.library",
+      "object_id": "school.library.guestbook",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Kriteria deskripsi dan eksposisi",
+      "summary": "Catatan konsep yang membedakan paragraf berdasarkan cara menggambarkan keadaan dan informasi yang dikandungnya.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    },
+    {
+      "evidence_id": "EVD-REDAKSI-PERBANDINGAN",
+      "mission_id": "MSN-REDAKSI-PERBANDINGAN",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Dua contoh paragraf",
+      "summary": "Pasangan contoh tentang sepeda Mira dan sepeda motor untuk dibandingkan berdasarkan cara penyajian informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer."
+        }
+      ]
+    },
+    {
+      "evidence_id": "EVD-REDAKSI-KLASIFIKASI",
+      "mission_id": "MSN-REDAKSI-KLASIFIKASI",
+      "room_id": "school.discussion_hall",
+      "object_id": "school.discussion_hall.case_board",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Catatan klasifikasi redaksi",
+      "summary": "Catatan hasil klasifikasi dua paragraf beserta bukti tekstual dan alasan yang diberikan peserta didik. Ini adalah target evidence, bukan hasil siswa yang sudah tersimpan.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596,
+            "section": "Bab 1, Subbab 5: Mengidentifikasi paragraf deskripsi dan eksposisi dalam LHO"
+          },
+          "excerpt": "Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer."
+        }
+      ]
+    }
+  ],
+  "endings": {
+    "needs_support": "Redaksi meminta kamu membaca kembali panduan dan membandingkan ciri kedua paragraf sebelum menyampaikan klasifikasi.",
+    "developing": "Klasifikasi awal sudah terbentuk. Periksa kembali bukti tekstual agar alasanmu semakin jelas.",
+    "ready_for_extension": "Klasifikasi dan bukti sudah siap ditinjau. Redaksi dapat melanjutkan penyuntingan berdasarkan alasan yang kamu berikan."
+  }
+}
