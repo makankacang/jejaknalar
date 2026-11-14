@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "quest_id": "QUEST-BI8-B1S5-REDAKSI-001",
+  "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+  "objective_ids": [
+    "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+  ],
+  "template": "evidence_hunt",
+  "scene_id": "school_library",
+  "steps": [
+    {
+      "id": "read-bi8-subbab5",
+      "type": "read_document",
+      "ref": "doc_a305829d3917b4ca"
+    },
+    {
+      "id": "submit-bi8-classification",
+      "type": "select_evidence",
+      "item_id": "ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001"
+    }
+  ],
+  "variants": {
+    "needs_support": "QVAR-S",
+    "developing": "QVAR-D",
+    "ready_for_extension": "QVAR-E"
+  }
+}
