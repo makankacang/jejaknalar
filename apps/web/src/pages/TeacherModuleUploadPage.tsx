@@ -4,6 +4,7 @@ import type { ChangeEvent, DragEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { DocumentParseResult } from '../lib/parser';
 import { runModulePipeline } from '../lib/api/modulePipeline';
+import { getAnalysisJob } from '../lib/api/analysisApi';
 
 type Grade = 7 | 8 | 9;
 
@@ -38,6 +39,8 @@ export default function TeacherModuleUploadPage() {
     const [error, setError] = useState('');
     const [pipelineLoading, setPipelineLoading] = useState(false);
     const [pipelineError, setPipelineError] = useState('');
+    const [recoveryJobId, setRecoveryJobId] = useState('');
+    const [recoveryLoading, setRecoveryLoading] = useState(false);
 
     async function processFile(selectedFile?: File) {
         if (!selectedFile) return;
@@ -94,7 +97,7 @@ export default function TeacherModuleUploadPage() {
         event.preventDefault();
         setDragging(false);
 
-        if (pipelineLoading) return;
+        if (pipelineLoading || recoveryLoading) return;
         void processFile(event.dataTransfer.files?.[0]);
     }
 
@@ -108,8 +111,65 @@ export default function TeacherModuleUploadPage() {
         setTitle('');
     }
 
+    async function handleRecoverAnalysis() {
+        const jobId = recoveryJobId.trim();
+
+        if (!result || !jobId || recoveryLoading || pipelineLoading) return;
+
+        setRecoveryLoading(true);
+        setPipelineError('');
+
+        try {
+            // Recovery hanya mengambil analysis job yang sudah ada.
+            // Fungsi ini tidak membuat module, snapshot, atau analysis job baru.
+            const analysisJob = await getAnalysisJob(jobId);
+
+            if (analysisJob.analysis_job_id !== jobId) {
+                throw new Error('ID analysis job pada respons tidak sesuai.');
+            }
+
+            if (analysisJob.status !== 'completed') {
+                const failureMessage = analysisJob.failure?.message;
+                throw new Error(
+                    analysisJob.status === 'failed'
+                        ? `Analysis job gagal: ${failureMessage ?? analysisJob.failure?.code ?? 'Penyebab tidak tersedia.'}`
+                        : `Analysis job belum selesai. Status saat ini: ${analysisJob.status}.`,
+                );
+            }
+
+            if (!analysisJob.module_id || !analysisJob.text_version) {
+                throw new Error(
+                    'Respons analysis job tidak memiliki module_id atau text_version.',
+                );
+            }
+
+            navigate('/teacher/modules/review', {
+                state: {
+                    title: title.trim() || result.filename,
+                    subject,
+                    grade,
+                    parseResult: result,
+                    pipelineResult: {
+                        moduleId: analysisJob.module_id,
+                        textVersion: analysisJob.text_version,
+                        analysisJob,
+                    },
+                    dataMode: 'live',
+                },
+            });
+        } catch (cause) {
+            setPipelineError(
+                cause instanceof Error
+                    ? cause.message
+                    : 'Gagal mengambil hasil Analyzer dari analysis job yang sudah ada.',
+            );
+        } finally {
+            setRecoveryLoading(false);
+        }
+    }
+
     async function handleFinishReview() {
-        if (!result || pipelineLoading) return;
+        if (!result || pipelineLoading || recoveryLoading) return;
 
         const reviewState = {
             title: title.trim() || result.filename,
@@ -264,7 +324,7 @@ export default function TeacherModuleUploadPage() {
 
                         <button
                             type="button"
-                            disabled={loading || pipelineLoading}
+                            disabled={loading || pipelineLoading || recoveryLoading}
                             onClick={() => inputRef.current?.click()}
                             style={styles.secondaryButton}
                         >
@@ -276,7 +336,7 @@ export default function TeacherModuleUploadPage() {
                             type="file"
                             accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             onChange={handleFileChange}
-                            disabled={loading || pipelineLoading}
+                            disabled={loading || pipelineLoading || recoveryLoading}
                             style={{ display: 'none' }}
                         />
 
@@ -301,7 +361,7 @@ export default function TeacherModuleUploadPage() {
                                 type="button"
                                 onClick={removeFile}
                                 style={styles.removeButton}
-                                disabled={loading || pipelineLoading}
+                                disabled={loading || pipelineLoading || recoveryLoading}
                             >
                                 Hapus
                             </button>
@@ -460,14 +520,51 @@ export default function TeacherModuleUploadPage() {
                                 type="button"
                                 style={{
                                     ...styles.primaryButton,
-                                    opacity: pipelineLoading ? 0.65 : 1,
-                                    cursor: pipelineLoading ? 'wait' : 'pointer',
+                                    opacity: pipelineLoading || recoveryLoading ? 0.65 : 1,
+                                    cursor: pipelineLoading || recoveryLoading ? 'wait' : 'pointer',
                                 }}
-                                disabled={pipelineLoading}
+                                disabled={pipelineLoading || recoveryLoading}
                                 onClick={handleFinishReview}
                             >
                                 {pipelineLoading ? 'Memproses Modul...' : 'Selesai Meninjau'}
                             </button>
+
+                            {import.meta.env.DEV && import.meta.env.VITE_DATA_MODE === 'live' && (
+                                <div style={styles.recoveryPanel}>
+                                    <strong>Pulihkan hasil Analyzer yang sudah ada</strong>
+                                    <p style={styles.recoveryDescription}>
+                                        Gunakan ID analysis job yang sudah selesai dari PIC B.
+                                        Fitur ini hanya mengambil hasil melalui GET dan tidak
+                                        membuat modul, snapshot, atau job baru.
+                                    </p>
+                                    <label htmlFor="recovery-analysis-job-id" style={styles.label}>
+                                        Analysis Job ID
+                                    </label>
+                                    <input
+                                        id="recovery-analysis-job-id"
+                                        type="text"
+                                        value={recoveryJobId}
+                                        onChange={(event) => setRecoveryJobId(event.target.value)}
+                                        placeholder="Masukkan ID analysis job"
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        style={styles.recoveryInput}
+                                        disabled={recoveryLoading || pipelineLoading}
+                                    />
+                                    <button
+                                        type="button"
+                                        style={{
+                                            ...styles.secondaryButton,
+                                            opacity: recoveryLoading ? 0.65 : 1,
+                                            cursor: recoveryLoading ? 'wait' : 'pointer',
+                                        }}
+                                        disabled={!recoveryJobId.trim() || recoveryLoading || pipelineLoading}
+                                        onClick={handleRecoverAnalysis}
+                                    >
+                                        {recoveryLoading ? 'Mengambil hasil Analyzer...' : 'Ambil Hasil Analyzer'}
+                                    </button>
+                                </div>
+                            )}
                         </section>
                     </>
                 )}
@@ -753,5 +850,29 @@ const styles = {
         fontSize: '13px',
         fontWeight: 600,
         cursor: 'pointer',
+    },
+    recoveryPanel: {
+        marginTop: '22px',
+        padding: '17px',
+        border: '1px dashed #94a3b8',
+        borderRadius: '9px',
+        background: '#f8fafc',
+    },
+    recoveryDescription: {
+        color: '#64748b',
+        fontSize: '12px',
+        lineHeight: 1.6,
+    },
+    recoveryInput: {
+        display: 'block',
+        width: '100%',
+        boxSizing: 'border-box' as const,
+        marginTop: '8px',
+        padding: '10px 12px',
+        border: '1px solid #cbd5e1',
+        borderRadius: '8px',
+        background: '#ffffff',
+        color: '#172033',
+        fontSize: '12px',
     },
 };

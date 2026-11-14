@@ -1,4 +1,3 @@
-
 import { getSupabaseClient } from '../supabase/client';
 
 export type AnalysisJobStatus =
@@ -29,6 +28,13 @@ export interface AnalyzerObjective {
     review_status: 'pending' | 'approved' | 'rejected';
 }
 
+export interface AnalyzerWarning {
+    code: string;
+    message: string;
+}
+
+export type AnalyzerWarningItem = string | AnalyzerWarning;
+
 export interface AnalysisFailure {
     code: string;
     message: string;
@@ -41,7 +47,7 @@ export interface AnalysisJob {
     text_version: string;
     status: AnalysisJobStatus;
     result_status: AnalysisResultStatus;
-    warnings: string[];
+    warnings: AnalyzerWarningItem[];
     objectives: AnalyzerObjective[];
     failure: AnalysisFailure | null;
 }

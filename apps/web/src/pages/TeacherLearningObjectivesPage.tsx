@@ -8,7 +8,7 @@ type ReviewStatus = 'pending' | 'approved' | 'rejected';
 interface PipelineResult {
     moduleId: string;
     textVersion: string;
-    versionNo: number;
+    versionNo?: number;
     analysisJob: AnalysisJob;
 }
 
@@ -231,7 +231,9 @@ export default function TeacherLearningObjectivesPage() {
                                 Module ID: {reviewData.pipelineResult.moduleId}
                                 <br />
                                 Text version: {reviewData.pipelineResult.textVersion}
-                                {' · '}Versi {reviewData.pipelineResult.versionNo}
+                                {reviewData.pipelineResult.versionNo !== undefined && (
+                                    <> {' · '}Versi {reviewData.pipelineResult.versionNo}</>
+                                )}
                             </p>
                         )}
                     </div>
@@ -289,9 +291,18 @@ export default function TeacherLearningObjectivesPage() {
                     <div style={styles.warningNotice}>
                         <strong>Catatan dari Analyzer</strong>
                         <ul style={styles.warningList}>
-                            {analysisJob.warnings.map((warning, index) => (
-                                <li key={`${index}-${warning}`}>{warning}</li>
-                            ))}
+                            {analysisJob.warnings.map((warning, index) => {
+                                const warningText =
+                                    typeof warning === 'string'
+                                        ? warning
+                                        : `${warning.code}: ${warning.message}`;
+
+                                return (
+                                    <li key={`${index}-${warningText}`}>
+                                        {warningText}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
                 )}
