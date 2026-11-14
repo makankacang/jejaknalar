@@ -17,10 +17,26 @@ describe('P0 world and corridor physical doors',()=>{
   it(`${r.id}: spawn, all NPC/objects/tasks and doors reachable`,()=>{expect(blocked(r,r.spawn)).toBe(false);for(const t of r.targets){const path=approach(r,r.spawn,t);expect(path.length,t.id).toBeGreaterThan(0);expect(canInteract(r,path.at(-1)!,t),t.id).toBe(true);}});
   it(`${r.id}: every solid blocks its center and swept movement from available sides`,()=>{for(const o of r.solids){const center={x:o.x+o.width/2,y:o.y+o.height/2};expect(blocked(r,center),o.id).toBe(true);const cases:[Point,Point][]=[[{x:o.x-FEET-4,y:center.y},{x:500,y:0}],[{x:o.x+o.width+FEET+4,y:center.y},{x:-500,y:0}],[{x:center.x,y:o.y-FEET-4},{x:0,y:500}],[{x:center.x,y:o.y+o.height+FEET+4},{x:0,y:-500}]];for(const [p,d] of cases){if(blocked(r,p))continue;const to=move(r,p,d.x,d.y);expect(blocked(r,to),o.id).toBe(false);expect(Math.hypot(to.x-p.x,to.y-p.y),o.id).toBeLessThan(5);}}});
   for(const t of r.targets.filter(t=>t.portal))it(`${t.id}: valid opening E, wrong side and door sides blocked`,()=>{const d=t.portal!;const path=approach(r,r.spawn,t),good=path.at(-1)!;expect(canUsePortal(r,good,t)).toBe(true);for(const x of [d.opening.x-15,d.opening.x+d.opening.width+15]){const p={x,y:d.normal==='up'?d.opening.y+20:r.height-15};expect(canUsePortal(r,p,t)).toBe(false);if(r.theme!=='outdoor')expect(blocked(r,p)).toBe(true);}const wrong={x:t.x,y:d.normal==='up'?d.backing.y-15:d.backing.y+27};expect(canUsePortal(r,wrong,t)).toBe(false);
-   let s=arrive(initial(ep),r,t);s=reduce(ep,s,{type:'door',targetId:t.id},true);expect(s.room).toBe(t.to);expect(blocked(ROOMS[s.room],s.position)).toBe(false);expect(ROOMS[s.room].targets.some(back=>back.to===r.id)).toBe(true);
+   const worldEpisode=fixture(r.world);let s=arrive(initial(worldEpisode),r,t);s=reduce(worldEpisode,s,{type:'door',targetId:t.id},true);expect(s.room).toBe(t.to);expect(blocked(ROOMS[s.room],s.position)).toBe(false);expect(ROOMS[s.room].targets.some(back=>back.to===r.id)).toBe(true);
    const p=d.approach,delta={x:0,y:d.normal==='up'?-1000:1000},next=move(r,p,delta.x,delta.y);expect(blocked(r,next)).toBe(false);expect(next.y).toBe(d.normal==='up'?Math.max(next.y,d.backing.y+d.backing.height+FEET):Math.min(next.y,d.backing.y-FEET));
   });
  }
+ it('NPCs occupy collision space but can still be approached and spoken to',()=>{
+  for(const r of Object.values(ROOMS))for(const npc of r.targets.filter(t=>t.kind==='npc')){
+    expect(blocked(r,{x:npc.x,y:npc.y}),npc.id).toBe(true);
+    const path=approach(r,r.spawn,npc);
+    expect(path.length,npc.id).toBeGreaterThan(0);
+    expect(blocked(r,path.at(-1)!),npc.id).toBe(false);
+    expect(canInteract(r,path.at(-1)!,npc),npc.id).toBe(true);
+  }
+ });
+ it('lab benches block walking through their painted footprint',()=>{
+  const r=ROOMS['school.laboratory'];
+  for(const obj of r.objects.filter(o=>o.kind==='lab_desk')){
+    const inside={x:(obj.x+obj.w/2)*40,y:(obj.y+obj.h/2)*40};
+    expect(blocked(r,inside),obj.id).toBe(true);
+  }
+ });
  it('manual movement never changes rooms; only explicit door command',()=>{const s=initial(ep),r=ROOMS[s.room],door=r.targets.find(t=>t.portal)!;const near=arrive(s,r,door);expect(reduce(ep,near,{type:'position',position:near.position,heading:'up'}).room).toBe(r.id);expect(()=>reduce(ep,{...s,position:{x:door.x+80,y:door.y}},{type:'door',targetId:door.id})).toThrow();});
  it('sprint diagonal normalization and high-delta clamp',()=>{const walk=movementDelta({x:1,y:0},50,false),run=movementDelta({x:1,y:1},1000,true);expect(Math.hypot(run.x,run.y)/walk.x).toBeCloseTo(1.6);expect(run.x).toBe(run.y);expect(movementDelta({x:0,y:0},1000,true)).toEqual({x:0,y:0});});
  it('BFS segments avoid obstacles/corner cutting; illegal destination rejected',()=>{const r=ROOMS['school.library'],goal={x:900,y:700};const path=findPath(r,r.spawn,goal);expect(path.length).toBeGreaterThan(0);let p=r.spawn;for(const next of path){expect(lineClear(r,p,next,FEET)).toBe(true);p=next;}expect(findPath(r,r.spawn,{x:160,y:300})).toEqual([]);});

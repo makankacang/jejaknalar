@@ -1,6 +1,6 @@
 import { validateSubmission, parseResponse, assessmentItem, type Submission, type AssessmentEnvelope } from './assessment';
 import { DIALOGUE } from './dialogue';
-import { REGISTRY_VERSION, ROOMS, roomId, safeSpawn, blocked, canInteract, type Heading, type Point } from './world';
+import { registryFor, ROOMS, roomId, safeSpawn, blocked, canInteract, type Heading, type Point } from './world';
 import type { Episode, Task } from './content';
 export type LearningPath = 'needs_support' | 'developing' | 'ready_for_extension';
 export type MissionStatus = 'locked' | 'available' | 'active' | 'completed' | 'skipped';
@@ -9,7 +9,7 @@ export type AssessmentReceipt = { request: Submission; response: AssessmentEnvel
 export type State = { feedback: Partial<Record<'decide' | 'transfer', AssessmentReceipt>>; version: 1; registry: string; episode: string; questVersion: string; room: string; position: Point; heading: Heading; statuses: Record<string, MissionStatus>; evidence: string[]; heldItem: string | null; delivered: boolean; drafts: Record<string, TaskDraft>; dialogue: string; route: string | null; visited: string[]; revision: number; decision: { status: 'need_more_evidence' | 'decided'; path: LearningPath | null; simulation: true }; ending: LearningPath | null };
 export type Intent = {type:'npc_open';npcId:string} | { type: 'position'; position: Point; heading: Heading } | { type: 'door'; targetId: string } | { type: 'dialogue'; choice: 'library' | 'office' | 'deliver' } | { type: 'start'; task: string } | { type: 'draft'; task: string; draft: TaskDraft } | { type: 'complete'; task: string; assessment?: AssessmentReceipt } | { type: 'skip'; task: string };
 export const emptyDraft = (): TaskDraft => ({ seen: [], selection: null, power: false, duration: 1, touched: false });
-export function initial(ep: Episode): State { const room = roomId(ep.world, 0); return { feedback: {}, version: 1, registry: REGISTRY_VERSION, episode: ep.id, questVersion: ep.quest_version_id, room, position: { ...ROOMS[room].spawn }, heading: 'down', statuses: Object.fromEntries(Object.values(ep.tasks).map(t => [t.task_id, t.prerequisite.length ? 'locked' : 'available'])), evidence: [], heldItem: null, delivered: false, drafts: {}, dialogue: 'start', route: null, visited: [room], revision: 0, decision: { status: 'need_more_evidence', path: null, simulation: true }, ending: null }; }
+export function initial(ep: Episode): State { const room = roomId(ep.world, 0); return { feedback: {}, version: 1, registry: registryFor(ep.world), episode: ep.id, questVersion: ep.quest_version_id, room, position: { ...ROOMS[room].spawn }, heading: 'down', statuses: Object.fromEntries(Object.values(ep.tasks).map(t => [t.task_id, t.prerequisite.length ? 'locked' : 'available'])), evidence: [], heldItem: null, delivered: false, drafts: {}, dialogue: 'start', route: null, visited: [room], revision: 0, decision: { status: 'need_more_evidence', path: null, simulation: true }, ending: null }; }
 export function validateDAG(tasks: Record<string, Task>): boolean {
   const done = new Set<string>(), stack = new Set<string>();
   function visit(id: string): boolean { if (stack.has(id) || !tasks[id]) return false; if (done.has(id)) return true; stack.add(id); if (!tasks[id].prerequisite.every(visit)) return false; stack.delete(id); done.add(id); return true; }
@@ -73,7 +73,7 @@ export function restore(ep: Episode, raw: string): { state: State; warning?: str
   try {
     const s: State = JSON.parse(raw), base = initial(ep), keys = Object.keys(ep.tasks);
     if (!s || Object.keys(s).length !== Object.keys(base).length || Object.keys(s).some(k => !(k in base))) throw Error('CHECKPOINT_SHAPE');
-    if (s.version !== 1 || s.registry !== REGISTRY_VERSION || s.episode !== ep.id || s.questVersion !== ep.quest_version_id || ROOMS[s.room]?.world !== ep.world) throw Error('VERSION');
+    if (s.version !== 1 || s.registry !== registryFor(ep.world) || s.episode !== ep.id || s.questVersion !== ep.quest_version_id || ROOMS[s.room]?.world !== ep.world) throw Error('VERSION');
     if (!s.position || !Number.isFinite(s.position.x) || !Number.isFinite(s.position.y) || !['up', 'down', 'left', 'right'].includes(s.heading) || !Number.isInteger(s.revision) || s.revision < 0) throw Error('POSITION');
     if (!s.statuses || Object.keys(s.statuses).length !== keys.length || keys.some(k => !['locked', 'available', 'active', 'completed', ...(k === 'side' ? ['skipped'] : [])].includes(s.statuses[k]))) throw Error('STATUSES');
     if (!s.drafts || Object.entries(s.drafts).some(([k, d]) => !ep.tasks[k] || !validDraft(d, ep.tasks[k]))) throw Error('DRAFTS');

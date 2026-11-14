@@ -1,6 +1,6 @@
 /** PIC D draft spatial registry, derived from mock v1.4. Never a QuestV1 alias. */
 import mock from './school-v1.4.json';
-import { ROOMS as legacyRooms } from './legacy-world';
+import { createCityRooms, CITY_LAYOUT_VERSION } from './city/world';
 export type { WorldId, Point, Heading } from './legacy-world';
 import type { WorldId, Point, Heading } from './legacy-world';
 export type Rect = Point & { width: number; height: number };
@@ -10,6 +10,7 @@ export type Portal = { door_id: string; from_room: string; to_room: string; open
 export type Target = Point & { id: string; label: string; kind: 'npc' | 'task' | 'door' | 'inspect' | 'map'; task?: string; to?: string; required?: string; role?: string; message?: string; color?: string; portal?: Portal; objectId?: string; display?: Point; description?: string };
 export type Room = { id: string; title: string; world: WorldId; theme: string; width: number; height: number; spawn: Point; solids: Solid[]; targets: Target[]; objects: ArtObject[]; walls: Rect[] };
 export const REGISTRY_VERSION = 'D-school-1.4-sprint2-1';
+export const registryFor = (world:WorldId) => world === 'city' ? CITY_LAYOUT_VERSION : REGISTRY_VERSION;
 export const TILE = 40, CELL = 16, FEET = 9, RANGE = 62;
 export const WALK_SPEED = 170, RUN_SPEED = 272;
 const SCHOOL = ['school.courtyard', 'school.corridor', 'school.classroom', 'school.library', 'school.staff_room', 'school.laboratory', 'school.knowledge_lab', 'school.discussion_hall'];
@@ -28,7 +29,11 @@ const taskSlots: Record<string, string> = {
 };
 function footprint(o: ArtObject): Solid {
   let x = o.x * TILE, y = o.y * TILE, width = o.w * TILE, height = o.h * TILE;
-  if (o.kind === 'tree') { x += width * .26; y += height * .7; width *= .5; height *= .3; }
+  if (o.kind === 'tree') {
+    // Canopy occupies walkable-looking pixels in top-down view. Keep a generous
+    // physical footprint so the avatar cannot appear to stand in the foliage.
+    x += width * .12; y += height * .18; width *= .76; height *= .79;
+  }
   if (o.kind === 'flagpole') { x += width * .37; y += height * .6; width = 10; height = 16; }
   return { id: o.id, x, y, width, height, heightArt: o.kind.includes('shelf') ? 18 : 0, kind: o.kind };
 }
@@ -43,6 +48,25 @@ for (const raw of Object.values(mock.scenes)) {
     const y = raw.theme === 'outdoor' ? p.y * TILE : north ? 80 : height - 28;
     const opening: Rect = { x: x - 42, y: north ? y - 32 : y - 60, width: 84, height: 100 };
     const portal: Portal = { door_id: `${raw.id}:${p.id}`, from_room: raw.id, to_room: p.target, opening, approach: { x, y: north ? y + 58 : y - 58 }, trigger: { x: x - 24, y: north ? y + 12 : y - 42, width: 48, height: 30 }, target_spawn: { x: p.target_spawn[0] * TILE, y: p.target_spawn[1] * TILE }, normal: north ? 'up' : 'down', backing: { x: x - 42, y: north ? y - 6 : y + 6, width: 84, height: 12 } };
+    // Visual door leaves occupy a taller strip than the wall's logical opening.
+    // Put the hard stop AT the painted threshold and the interaction zone on
+    // the accessible floor, independent of the wall collision and decoration.
+    if (north) {
+      portal.backing = { x: x - 48, y: y - 27, width: 96, height: 91 };
+      portal.approach = { x, y: y + 94 };
+      portal.trigger = { x: x - 62, y: y + 64, width: 124, height: 78 };
+    } else {
+      portal.backing = { x: x - 48, y: y - 76, width: 96, height: 83 };
+      portal.approach = { x, y: y - 112 };
+      portal.trigger = { x: x - 62, y: y - 148, width: 124, height: 78 };
+    }
+    if (room.id === 'school.courtyard' && p.id === 'main_entrance') {
+      // Stand in front of the painted entrance. A player must press E here;
+      // walking north must never put their feet underneath the door sprite.
+      portal.trigger = { x: x - 27, y: y + 54, width: 54, height: 38 };
+      portal.approach = { x, y: y + 87 };
+      portal.backing = { x: x - 46, y: y + 38, width: 92, height: 14 };
+    }
     room.targets.push({ id: portal.door_id, label: p.label, kind: 'door', x, y: north ? y + 27 : y - 27, display: { x, y }, to: p.target, required: p.target === 'school.discussion_hall' ? 'investigate' : undefined, portal });
   }
   for (const o of objects) {
@@ -58,34 +82,66 @@ for (const raw of Object.values(mock.scenes)) {
     if (o.id === 'school.library.reading_clock') point = { x: 25.5 * TILE, y: 3.5 * TILE };
     if (o.id === 'school.staff_room.teacher_note') point = { x: 22.6 * TILE, y: 20.2 * TILE };
     if (o.id === 'school.knowledge_lab.interactive_screen') point = { x: 17 * TILE, y: 3.5 * TILE };
-    room.targets.push({ id: `${o.id}:interaction`, label: o.label || o.id.split('.').at(-1)!, kind: task ? 'task' : o.interaction === 'map' ? 'map' : 'inspect', task, objectId: o.id, display: { x: (o.x + o.w / 2) * TILE, y: (o.y + o.h / 2) * TILE }, description: o.description || 'Objek lingkungan. Konten pembelajaran pada slot ini menunggu modul guru yang disetujui.', ...point });
+    room.targets.push({ id: `${o.id}:interaction`, label: o.label || o.id.split('.').at(-1)!, kind: task ? 'task' : o.interaction === 'map' ? 'map' : 'inspect', task, objectId: o.id, display: { x: (o.x + o.w / 2) * TILE, y: (o.y + o.h / 2) * TILE }, description: o.description || 'Bisa kamu lihat-lihat. Tidak diperlukan untuk tugas saat ini.', ...point });
+  }
+  // Visual identity only: differentiate repeated furniture, preserve IDs/colliders.
+  const counts = new Map<string,number>();
+  for (const t of room.targets) if (t.kind==='inspect' || t.kind==='task') counts.set(t.label,(counts.get(t.label)??0)+1);
+  const index = new Map<string,number>();
+  for (const t of room.targets) if ((counts.get(t.label)??0)>1) {
+    const n=(index.get(t.label)??0)+1;index.set(t.label,n);
+    t.label=`${t.label} ${n}`;
   }
   ROOMS[room.id] = room;
 }
-for (const id of CITY) {
-  const old = legacyRooms[id];
-  ROOMS[id] = { ...structuredClone(old), theme: 'city', objects: [], walls: [{ x: 0, y: 0, width: old.width, height: 64 }, { x: 0, y: 0, width: 32, height: old.height }, { x: old.width - 32, y: 0, width: 32, height: old.height }, { x: 0, y: old.height - 32, width: old.width, height: 32 }] };
-}
-export function blocked(room: Room, p: Point, radius = FEET): boolean {
+// School front door is a portal, not a hole through the painted building.
+// This rear façade collider ends before the approach trigger, so E remains usable.
+// Internal world geometry only: does not change any PIC B/C object or portal IDs.
+const schoolEntrance = ROOMS['school.courtyard']?.targets.find(t => t.portal?.to_room === 'school.corridor')?.portal;
+if (schoolEntrance) ROOMS['school.courtyard'].solids.push({
+  id: 'pic-d:school:entrance-facade', kind: 'entrance-facade',
+  x: schoolEntrance.approach.x - 72, y: 326, width: 144,
+  height: schoolEntrance.backing.y - 326 + 5, heightArt: 0,
+});
+Object.assign(ROOMS, createCityRooms());
+export function blocked(room: Room, p: Point, radius = FEET, ignoreNpc = false): boolean {
   if (!Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x - radius < 0 || p.y - radius < 0 || p.x + radius > room.width || p.y + radius > room.height) return true;
   const portals = room.targets.flatMap(t => t.portal ? [t.portal] : []);
   if (portals.some(d => hits(p, d.backing, radius))) return true;
   if (room.walls.some(w => hits(p, w, radius)) && !portals.some(d => inside(p, d.opening, radius))) return true;
+  // NPCs are people occupying space, not decals the player can walk through.
+  if (!ignoreNpc && room.targets.some(t => t.kind === 'npc' && Math.hypot(p.x - t.x, p.y - t.y) < radius + 13)) return true;
   return room.solids.some(s => hits(p, s, radius));
 }
-export function lineClear(room: Room, a: Point, b: Point, radius = 0): boolean {
+export function lineClear(room: Room, a: Point, b: Point, radius = 0, ignoreNpc = false): boolean {
   const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 4));
-  for (let i = 0; i <= steps; i++) if (blocked(room, { x: a.x + (b.x - a.x) * i / steps, y: a.y + (b.y - a.y) * i / steps }, radius)) return false;
+  for (let i = 0; i <= steps; i++) if (blocked(room, { x: a.x + (b.x - a.x) * i / steps, y: a.y + (b.y - a.y) * i / steps }, radius, ignoreNpc)) return false;
   return true;
 }
 export function canUsePortal(room: Room, p: Point, t: Target) {
   const d = t.portal;
-  return !!d && d.from_room === room.id && !!ROOMS[d.to_room] && ROOMS[d.to_room].world === room.world && inside(p, d.trigger) && lineClear(room, p, d.approach, FEET);
+  if (!d || d.from_room !== room.id || !ROOMS[d.to_room] || ROOMS[d.to_room].world !== room.world || blocked(room, p)) return false;
+  // Wider, floor-side interaction area fixes 'too close to the door = E fails'.
+  // Never grant a transition from inside a wall, behind the leaf, or through
+  // an obstacle. A target's required quest status is still checked by state.ts.
+  const lateral = Math.abs(p.x - d.approach.x);
+  const distance = Math.hypot(p.x - d.approach.x, p.y - d.approach.y);
+  const front = d.normal === 'up'
+    ? p.y >= d.backing.y + d.backing.height + FEET - 1
+    : p.y <= d.backing.y - FEET + 1;
+  return front && lateral <= 83 && distance <= 112 && lineClear(room, p, d.approach, FEET);
 }
 export function canInteract(room: Room, a: Point, b: Point): boolean {
   const t = b as Target;
   if (t.portal) return canUsePortal(room, a, t);
-  return !blocked(room, a) && Math.hypot(a.x - b.x, a.y - b.y) <= RANGE && lineClear(room, a, b);
+  // The NPC endpoint is intentionally occupied; stop the sightline at conversation distance.
+  const distance = Math.hypot(a.x - b.x, a.y - b.y);
+  if (t.kind === 'npc') {
+    if (blocked(room, a) || distance > RANGE || distance < 1) return false;
+    const stop = Math.max(0, distance - (FEET + 15)) / distance;
+    return lineClear(room, a, { x: a.x + (b.x - a.x) * stop, y: a.y + (b.y - a.y) * stop }, FEET);
+  }
+  return !blocked(room, a) && distance <= RANGE && lineClear(room, a, b);
 }
 export function move(room: Room, from: Point, dx: number, dy: number): Point {
   const p = { ...from }, steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 3));
@@ -115,7 +171,11 @@ export function findPath(room: Room, start: Point, goal: Point): Point[] {
   return [];
 }
 export function approach(room: Room, start: Point, target: Target): Point[] {
-  if (target.portal) { const d = target.portal, goal = { x: d.trigger.x + d.trigger.width / 2, y: d.trigger.y + d.trigger.height / 2 }; return findPath(room, start, goal); }
+  if (target.portal) {
+    // Approach a safe point OUTSIDE the painted door instead of the midpoint
+    // of a trigger that might lie within the sprite or wall.
+    return findPath(room, start, target.portal.approach);
+  }
   const points: Point[] = [];
   for (let y = target.y - 32; y <= target.y + 32; y += 16) for (let x = target.x - 32; x <= target.x + 32; x += 16) if (canInteract(room, { x, y }, target)) points.push({ x, y });
   points.sort((a, b) => Math.hypot(a.x - start.x, a.y - start.y) - Math.hypot(b.x - start.x, b.y - start.y));
