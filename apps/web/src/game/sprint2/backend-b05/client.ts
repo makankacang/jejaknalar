@@ -4,7 +4,7 @@
  * The B-05 routes are PROVISIONAL and are not yet aligned with OpenAPI.
  */
 export type BackendErrorCode =
-  | 'UNAUTHORIZED' | 'NOT_FOUND' | 'CONFLICT' | 'VALIDATION_ERROR'
+  | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'VALIDATION_ERROR'
   | 'RATE_LIMITED' | 'INTERNAL_ERROR' | 'NETWORK_ERROR' | 'BAD_RESPONSE';
 
 export class StudentApiError extends Error {
@@ -20,7 +20,7 @@ export class StudentApiError extends Error {
 }
 
 type Method = 'GET' | 'POST' | 'PUT';
-type RequestOptions = { method: Method; expectedStatus: number; auth?: boolean; body?: unknown };
+type RequestOptions = { method: Method; expectedStatus: number; expectedStatuses?: readonly number[]; auth?: boolean; body?: unknown };
 export type StudentApiConfig = {
   /** Full base path, e.g. https://PROJECT.supabase.co/functions/v1/student-api */
   baseUrl: string;
@@ -101,21 +101,23 @@ export class StudentApiClient {
       const body = record(payload) ? payload : null;
       const error = body && record(body.error) ? body.error : null;
       const rawCode = error?.code;
-      const codes: BackendErrorCode[] = ['UNAUTHORIZED', 'NOT_FOUND', 'CONFLICT', 'VALIDATION_ERROR', 'RATE_LIMITED', 'INTERNAL_ERROR'];
+      const codes: BackendErrorCode[] = ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'CONFLICT', 'VALIDATION_ERROR', 'RATE_LIMITED', 'INTERNAL_ERROR'];
       const code = typeof rawCode === 'string' && codes.includes(rawCode as BackendErrorCode)
         ? rawCode as BackendErrorCode : 'BAD_RESPONSE';
       const requestId = typeof body?.request_id === 'string' ? body.request_id : null;
       // Never interpolate upstream errors that might accidentally contain secrets.
       const message = code === 'CONFLICT' ? 'Konflik data. Periksa respons atau muat checkpoint terbaru.'
         : code === 'UNAUTHORIZED' ? 'Sesi siswa tidak valid. Masukkan kembali kode akses.'
+        : code === 'FORBIDDEN' ? 'Akses ke sumber daya ini tidak diizinkan.'
         : code === 'RATE_LIMITED' ? 'Batas permintaan tercapai. Coba lagi nanti.'
         : code === 'VALIDATION_ERROR' ? 'Data tidak memenuhi validasi backend.'
         : 'Permintaan ke layanan siswa gagal.';
       throw new StudentApiError(res.status, code, requestId, message);
     }
-    if (res.status !== opts.expectedStatus) {
+    const acceptedStatuses = opts.expectedStatuses ?? [opts.expectedStatus];
+    if (!acceptedStatuses.includes(res.status)) {
       throw new StudentApiError(502, 'BAD_RESPONSE', null,
-        `Status B-05 tidak sesuai kontrak: HTTP ${res.status}, diharapkan ${opts.expectedStatus}.`);
+        `Status B-05 tidak sesuai kontrak: HTTP ${res.status}, diharapkan ${acceptedStatuses.join(' atau ')}.`);
     }
     return payload;
   }

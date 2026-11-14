@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { StudentApiClient, StudentApiError } from './client';
+import { pollAssessmentResult } from '../assessment/assessment-polling';
 import { InMemoryStudentCredential, StudentSessionApi } from './session';
 import {
   createSubmission, StudentAssessmentApi, StudentSubmitController,
@@ -85,6 +86,14 @@ describe('B-05 HTTP and student session', () => {
     }
   });
 
+  it('preserves HTTP 403 as a forbidden access state', async () => {
+    const api = client(async () => response({
+      ok: false, request_id: 'request-403', error: { code: 'FORBIDDEN', message: 'private detail' },
+    }, 403));
+    await expect(api.request('/student/quests/QV-REAL-01', { method: 'GET', expectedStatus: 200 }))
+      .rejects.toMatchObject({ status: 403, code: 'FORBIDDEN' });
+  });
+
   it('rejects insecure remote base URLs', () => {
     expect(() => new StudentApiClient({ baseUrl: 'http://unit.supabase.co/functions/v1/student-api' }))
       .toThrow('B05_BASE_URL_INVALID');
@@ -112,9 +121,9 @@ describe('B-05 assessment is pending, not scored', () => {
     const controller = new StudentSubmitController(new StudentAssessmentApi(api));
     controller.prepare(catalog, [{ item_id: 'ITEM-REAL-1', value: 'yes' }], uuid);
     const accepted = await controller.submitOrRetry();
-    expect(accepted).toEqual({ attempt_id: attempt, status: 'pending_scoring', replayed: false, request_id: 'r-01' });
+    expect(accepted).toEqual({ attempt_id: attempt, status: 'pending_scoring', replayed: false, request_id: 'r-01', score: null });
     expect(hasOfficialBedaJalur(accepted)).toBe(false);
-    expect('score' in accepted).toBe(false);
+    expect(accepted.score).toBeNull();
     expect('next_path' in accepted).toBe(false);
   });
 
@@ -144,6 +153,73 @@ describe('B-05 assessment is pending, not scored', () => {
       score: 90, feedback: [], next_path: 'ready_for_extension', replayed: false }), 202));
     const req = createSubmission(catalog, [{ item_id: 'ITEM-REAL-1', value: 'x' }], uuid);
     await expect(new StudentAssessmentApi(api).submit(req)).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+  });
+
+  it('accepts HTTP 200 only as an idempotent final replay receipt, without trusting a score', async () => {
+    const api = client(async (_url, init) => {
+      expect(init.method).toBe('POST');
+      return response(ok({ attempt_id: attempt, status: 'scored', replayed: true }), 200);
+    });
+    const receipt = await new StudentAssessmentApi(api).submit(
+      createSubmission(catalog, [{ item_id: 'ITEM-REAL-1', value: 'answer' }], uuid),
+    );
+    expect(receipt).toEqual({
+      attempt_id: attempt, status: 'scored', score: null, replayed: true, request_id: 'r-01',
+    });
+  });
+
+  it('reads official result states and preserves null score for pending/insufficient evidence', async () => {
+    const states = [
+      { status: 'pending_scoring', score: null, scored_at: null },
+      { status: 'insufficient_evidence', score: null, scored_at: '2026-11-14T10:00:00Z' },
+      { status: 'scored', score: 75, scored_at: '2026-11-14T10:01:00Z' },
+    ] as const;
+    for (const state of states) {
+      const api = client(async (url, init) => {
+        expect(url.endsWith(`/assessments/${attempt}/result`)).toBe(true);
+        expect(init.method).toBe('GET');
+        return response(ok({ attempt_id: attempt, quest_version_id: catalog.quest_version_id, ...state }));
+      });
+      const result = await new StudentAssessmentApi(api).getResult(attempt);
+      expect(result.status).toBe(state.status);
+      expect(result.score).toBe(state.score);
+    }
+  });
+
+  it('polls the existing attempt and never repeats POST while pending', async () => {
+    let reads = 0;
+    const api = client(async (url, init) => {
+      expect(init.method).toBe('GET');
+      reads += 1;
+      return response(ok({
+        attempt_id: attempt, quest_version_id: catalog.quest_version_id,
+        status: reads === 1 ? 'pending_scoring' : 'scored',
+        score: reads === 1 ? null : 88,
+        scored_at: reads === 1 ? null : '2026-11-14T10:02:00Z',
+      }));
+    });
+    const service = new StudentAssessmentApi(api);
+    const result = await pollAssessmentResult(service, attempt, {
+      intervalMs: 0, maxAttempts: 3, wait: async () => undefined,
+    });
+    expect(result.status).toBe('scored');
+    expect(result.score).toBe(88);
+    expect(reads).toBe(2);
+  });
+
+  it('rejects an official score with a mismatched attempt or invalid nullability', async () => {
+    const wrongAttempt = client(async () => response(ok({
+      attempt_id: uuid, quest_version_id: catalog.quest_version_id,
+      status: 'scored', score: 100, scored_at: null,
+    })));
+    await expect(new StudentAssessmentApi(wrongAttempt).getResult(attempt))
+      .rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    const badNull = client(async () => response(ok({
+      attempt_id: attempt, quest_version_id: catalog.quest_version_id,
+      status: 'insufficient_evidence', score: 0, scored_at: null,
+    })));
+    await expect(new StudentAssessmentApi(badNull).getResult(attempt))
+      .rejects.toMatchObject({ code: 'BAD_RESPONSE' });
   });
 });
 
