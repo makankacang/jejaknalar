@@ -1,0 +1,2578 @@
+{
+  "project": "JejakNalar",
+  "version": "1.4-mock-complete",
+  "status": "DESIGN_MOCK_NOT_PRODUCTION",
+  "world_preset": "school",
+  "scope": "1 outdoor hub + 1 transit corridor + 6 playable destinations",
+  "reference_pdf": "Refrensi Sekolah.pdf (6 halaman)",
+  "visual_source_policy": "Layout, architectural function, and visual mood inspired by user-provided reference; all illustration assets procedurally original, not copied PDF sprites.",
+  "integration": {
+    "scene_geometry": "PIC D",
+    "npc_object_registry": "PIC D — draft pending C agreement",
+    "story_contents": "PIC C using validated module and official source references",
+    "assessment": "PIC B server",
+    "teacher_preview": "PIC A isolated mock"
+  },
+  "tile_px": 40,
+  "scenes": {
+    "school.courtyard": {
+      "id": "school.courtyard",
+      "name": "Halaman Sekolah",
+      "width": 50,
+      "height": 34,
+      "theme": "outdoor",
+      "subtitle": "Gerbang • lapangan • fasad sekolah",
+      "description": "Titik mulai. Berjalan dari gerbang melalui jalur paving, lapangan upacara, tangga dan masuk ke koridor.",
+      "spawn": [
+        25,
+        29
+      ],
+      "reference_pages": [
+        1,
+        2
+      ],
+      "objects": [
+        {
+          "id": "school.courtyard.building_west",
+          "kind": "school_wing",
+          "x": 5,
+          "y": 1,
+          "w": 18.3,
+          "h": 10,
+          "label": "Sayap kiri gedung",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.courtyard.building_east",
+          "kind": "school_wing",
+          "x": 26.8,
+          "y": 1,
+          "w": 18.2,
+          "h": 10,
+          "label": "Sayap kanan gedung",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.courtyard.building_central_roof",
+          "kind": "school_tower",
+          "x": 23.3,
+          "y": 1,
+          "w": 3.5,
+          "h": 7.4,
+          "label": "Menara jam sekolah",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.courtyard.facade_sign",
+          "kind": "building_sign",
+          "x": 20,
+          "y": 1,
+          "w": 10,
+          "h": 1,
+          "label": "SMA JEJAKNALAR",
+          "solid": false,
+          "interaction": "inspect",
+          "description": "Gedung utama sekolah, dua sayap kelas dan satu pintu tengah."
+        },
+        {
+          "id": "school.courtyard.courtyard_flag",
+          "kind": "flagpole",
+          "x": 16,
+          "y": 20,
+          "w": 1,
+          "h": 1,
+          "label": "Tiang bendera",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Tiang bendera di depan gedung sekolah."
+        },
+        {
+          "id": "school.courtyard.tree_0",
+          "kind": "tree",
+          "x": 3,
+          "y": 14,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.tree_1",
+          "kind": "tree",
+          "x": 7,
+          "y": 19,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.tree_2",
+          "kind": "tree",
+          "x": 4,
+          "y": 27,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.tree_3",
+          "kind": "tree",
+          "x": 46,
+          "y": 16,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.tree_4",
+          "kind": "tree",
+          "x": 44,
+          "y": 26,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.tree_5",
+          "kind": "tree",
+          "x": 41,
+          "y": 22,
+          "w": 2,
+          "h": 2,
+          "label": "Pohon peneduh",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Rindang, memberi bayangan pada jalur halaman."
+        },
+        {
+          "id": "school.courtyard.garden_0",
+          "kind": "garden",
+          "x": 9,
+          "y": 14,
+          "w": 4,
+          "h": 2,
+          "label": "Taman bunga",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Petak tanaman dengan papan nama tumbuhan."
+        },
+        {
+          "id": "school.courtyard.garden_1",
+          "kind": "garden",
+          "x": 38,
+          "y": 13,
+          "w": 4,
+          "h": 2,
+          "label": "Taman bunga",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Petak tanaman dengan papan nama tumbuhan."
+        },
+        {
+          "id": "school.courtyard.garden_2",
+          "kind": "garden",
+          "x": 7,
+          "y": 25,
+          "w": 4,
+          "h": 2,
+          "label": "Taman bunga",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Petak tanaman dengan papan nama tumbuhan."
+        },
+        {
+          "id": "school.courtyard.garden_3",
+          "kind": "garden",
+          "x": 40,
+          "y": 27,
+          "w": 4,
+          "h": 2,
+          "label": "Taman bunga",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Petak tanaman dengan papan nama tumbuhan."
+        },
+        {
+          "id": "school.courtyard.parking",
+          "kind": "bike_rack",
+          "x": 41,
+          "y": 30,
+          "w": 6,
+          "h": 2,
+          "label": "Parkir sepeda",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Sepeda siswa disusun pada rak dekat sisi halaman."
+        },
+        {
+          "id": "school.courtyard.security",
+          "kind": "guard_house",
+          "x": 2,
+          "y": 29,
+          "w": 5,
+          "h": 4,
+          "label": "Pos satpam",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Pos keamanan dekat gerbang sekolah."
+        },
+        {
+          "id": "school.courtyard.notice",
+          "kind": "notice_board",
+          "x": 36,
+          "y": 20,
+          "w": 3,
+          "h": 1,
+          "label": "Mading sekolah",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Papan jadwal kegiatan dan pengumuman sekolah."
+        },
+        {
+          "id": "school.courtyard.school_map",
+          "kind": "map_board",
+          "x": 35,
+          "y": 27,
+          "w": 2,
+          "h": 1,
+          "label": "Peta gedung sekolah",
+          "solid": true,
+          "interaction": "map",
+          "description": "Menunjukkan letak kelas, perpustakaan, guru, dua laboratorium dan aula."
+        },
+        {
+          "id": "school.courtyard.bench_l",
+          "kind": "bench",
+          "x": 9,
+          "y": 22,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku taman",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku di tepi taman."
+        },
+        {
+          "id": "school.courtyard.bench_r",
+          "kind": "bench",
+          "x": 39,
+          "y": 19,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku taman",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku menghadap lapangan."
+        },
+        {
+          "id": "school.courtyard.sport_court",
+          "kind": "court",
+          "x": 32,
+          "y": 14,
+          "w": 12,
+          "h": 6,
+          "label": "Lapangan basket kecil",
+          "solid": false,
+          "interaction": "inspect",
+          "description": "Lapangan samping untuk kegiatan olahraga."
+        },
+        {
+          "id": "school.courtyard.gate",
+          "kind": "gate",
+          "x": 23,
+          "y": 32,
+          "w": 4,
+          "h": 1,
+          "label": "Gerbang utama",
+          "solid": false,
+          "interaction": "inspect",
+          "description": "Gerbang masuk kawasan sekolah."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.guide",
+          "x": 26,
+          "y": 17,
+          "name": "Bu Rani",
+          "role": "Guru pembimbing",
+          "message": "Selamat datang di JejakNalar. Coba jelajahi sekolah, bukan hanya menekan tombol menu.",
+          "follow": "Untuk kasus perpustakaan, periksa buku tamu dahulu lalu bandingkan dengan arsip guru.",
+          "color": "#bf6a5f"
+        }
+      ],
+      "portals": [
+        {
+          "id": "main_entrance",
+          "x": 24.0,
+          "y": 11.3,
+          "target": "school.corridor",
+          "target_spawn": [
+            36,
+            9
+          ],
+          "label": "Masuk gedung sekolah",
+          "side": "north"
+        }
+      ]
+    },
+    "school.corridor": {
+      "id": "school.corridor",
+      "name": "Koridor Gedung Utama",
+      "width": 72,
+      "height": 13,
+      "theme": "corridor",
+      "subtitle": "Lorong dengan enam pintu • loker • mading",
+      "description": "Koridor memanjang: lima ruangan di sisi utara, ruang guru di sisi selatan, serta pintu menuju halaman.",
+      "spawn": [
+        36,
+        9
+      ],
+      "reference_pages": [
+        2
+      ],
+      "objects": [
+        {
+          "id": "school.corridor.window_0",
+          "kind": "window",
+          "x": 3,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_1",
+          "kind": "window",
+          "x": 9,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_2",
+          "kind": "window",
+          "x": 15,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_3",
+          "kind": "window",
+          "x": 23,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_4",
+          "kind": "window",
+          "x": 29,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_5",
+          "kind": "window",
+          "x": 38,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_6",
+          "kind": "window",
+          "x": 46,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_7",
+          "kind": "window",
+          "x": 53,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.window_8",
+          "kind": "window",
+          "x": 64,
+          "y": 0.4,
+          "w": 3.0,
+          "h": 0.5,
+          "label": "Jendela koridor",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.corridor.lockers_0",
+          "kind": "locker",
+          "x": 3,
+          "y": 2.6,
+          "w": 3,
+          "h": 1.0,
+          "label": "Loker siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Loker sekolah menempel dinding; bukan tempat teleportasi."
+        },
+        {
+          "id": "school.corridor.lockers_1",
+          "kind": "locker",
+          "x": 25,
+          "y": 2.6,
+          "w": 3,
+          "h": 1.0,
+          "label": "Loker siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Loker sekolah menempel dinding; bukan tempat teleportasi."
+        },
+        {
+          "id": "school.corridor.lockers_2",
+          "kind": "locker",
+          "x": 40,
+          "y": 2.6,
+          "w": 3,
+          "h": 1.0,
+          "label": "Loker siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Loker sekolah menempel dinding; bukan tempat teleportasi."
+        },
+        {
+          "id": "school.corridor.lockers_3",
+          "kind": "locker",
+          "x": 54,
+          "y": 2.6,
+          "w": 3,
+          "h": 1.0,
+          "label": "Loker siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Loker sekolah menempel dinding; bukan tempat teleportasi."
+        },
+        {
+          "id": "school.corridor.bench_0",
+          "kind": "bench",
+          "x": 7,
+          "y": 10.0,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku lorong",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku di pinggir lorong."
+        },
+        {
+          "id": "school.corridor.bench_1",
+          "kind": "bench",
+          "x": 25,
+          "y": 10.0,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku lorong",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku di pinggir lorong."
+        },
+        {
+          "id": "school.corridor.bench_2",
+          "kind": "bench",
+          "x": 48,
+          "y": 10.0,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku lorong",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku di pinggir lorong."
+        },
+        {
+          "id": "school.corridor.bench_3",
+          "kind": "bench",
+          "x": 63,
+          "y": 10.0,
+          "w": 3,
+          "h": 1,
+          "label": "Bangku lorong",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Bangku di pinggir lorong."
+        },
+        {
+          "id": "school.corridor.schedule",
+          "kind": "notice_board",
+          "x": 13,
+          "y": 2.3,
+          "w": 3,
+          "h": 1,
+          "label": "Jadwal pelajaran",
+          "solid": true,
+          "interaction": "document",
+          "task": "document",
+          "description": "Jadwal belajar dan pemakaian ruangan."
+        },
+        {
+          "id": "school.corridor.student_board",
+          "kind": "notice_board",
+          "x": 51,
+          "y": 2.3,
+          "w": 3,
+          "h": 1,
+          "label": "Papan OSIS",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Pengumuman kegiatan siswa."
+        },
+        {
+          "id": "school.corridor.fire_extinguisher",
+          "kind": "extinguisher",
+          "x": 68,
+          "y": 2.4,
+          "w": 0.7,
+          "h": 0.7,
+          "label": "APAR",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Alat pemadam diletakkan menempel dinding."
+        },
+        {
+          "id": "school.corridor.plant_0",
+          "kind": "plant",
+          "x": 10,
+          "y": 9.7,
+          "w": 1,
+          "h": 1,
+          "label": "Pot tanaman",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.corridor.plant_1",
+          "kind": "plant",
+          "x": 30,
+          "y": 9.7,
+          "w": 1,
+          "h": 1,
+          "label": "Pot tanaman",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.corridor.plant_2",
+          "kind": "plant",
+          "x": 44,
+          "y": 9.7,
+          "w": 1,
+          "h": 1,
+          "label": "Pot tanaman",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.corridor.plant_3",
+          "kind": "plant",
+          "x": 66,
+          "y": 9.7,
+          "w": 1,
+          "h": 1,
+          "label": "Pot tanaman",
+          "solid": true,
+          "interaction": "inspect"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.student_guide",
+          "x": 39,
+          "y": 8,
+          "name": "Adit",
+          "role": "Pengurus OSIS",
+          "message": "Di lorong ini ada enam tujuan. Cek papan nama pintu supaya tidak tersesat.",
+          "follow": "Perpustakaan di sisi kiri, Lab Pengetahuan di sebelah laboratorium IPA.",
+          "color": "#4b94a4"
+        }
+      ],
+      "portals": [
+        {
+          "id": "to_class",
+          "x": 8,
+          "y": 2.0,
+          "target": "school.classroom",
+          "target_spawn": [
+            15,
+            19
+          ],
+          "label": "Ruang Kelas",
+          "side": "north"
+        },
+        {
+          "id": "to_library",
+          "x": 21,
+          "y": 2.0,
+          "target": "school.library",
+          "target_spawn": [
+            16,
+            21
+          ],
+          "label": "Perpustakaan",
+          "side": "north"
+        },
+        {
+          "id": "to_ipa",
+          "x": 33,
+          "y": 2.0,
+          "target": "school.laboratory",
+          "target_spawn": [
+            16,
+            20
+          ],
+          "label": "Lab IPA",
+          "side": "north"
+        },
+        {
+          "id": "to_knowledge",
+          "x": 46,
+          "y": 2.0,
+          "target": "school.knowledge_lab",
+          "target_spawn": [
+            17,
+            21
+          ],
+          "label": "Lab Pengetahuan",
+          "side": "north"
+        },
+        {
+          "id": "to_hall",
+          "x": 61,
+          "y": 2.0,
+          "target": "school.discussion_hall",
+          "target_spawn": [
+            18,
+            23
+          ],
+          "label": "Aula Diskusi",
+          "side": "north"
+        },
+        {
+          "id": "to_staff",
+          "x": 15,
+          "y": 11.6,
+          "target": "school.staff_room",
+          "target_spawn": [
+            17,
+            22
+          ],
+          "label": "Ruang Guru & Admin",
+          "side": "south"
+        },
+        {
+          "id": "to_yard",
+          "x": 36,
+          "y": 11.6,
+          "target": "school.courtyard",
+          "target_spawn": [
+            25,
+            13.8
+          ],
+          "label": "Kembali ke Halaman",
+          "side": "south"
+        }
+      ]
+    },
+    "school.classroom": {
+      "id": "school.classroom",
+      "name": "Ruang Kelas",
+      "width": 30,
+      "height": 23,
+      "theme": "classroom",
+      "subtitle": "Meja siswa • papan tulis • loker kelas",
+      "description": "Ruang kelas hangat dengan meja berkelompok, lorong tengah dan area guru di depan.",
+      "spawn": [
+        15,
+        20
+      ],
+      "reference_pages": [
+        2
+      ],
+      "objects": [
+        {
+          "id": "school.classroom.whiteboard",
+          "kind": "whiteboard",
+          "x": 11,
+          "y": 1.5,
+          "w": 8,
+          "h": 0.6,
+          "label": "Papan tulis",
+          "solid": false,
+          "interaction": "document",
+          "task": "document",
+          "description": "Tulisan dan grafik contoh yang dapat berganti mengikuti modul."
+        },
+        {
+          "id": "school.classroom.teacher_desk",
+          "kind": "teacher_desk",
+          "x": 12,
+          "y": 4.2,
+          "w": 6,
+          "h": 1.8,
+          "label": "Meja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja pengajar menghadap siswa."
+        },
+        {
+          "id": "school.classroom.projector",
+          "kind": "projector",
+          "x": 19,
+          "y": 1.9,
+          "w": 2,
+          "h": 0.5,
+          "label": "Layar proyektor",
+          "solid": false,
+          "interaction": "screen",
+          "task": "screen"
+        },
+        {
+          "id": "school.classroom.student_desk_0_0",
+          "kind": "student_desk",
+          "x": 3.0,
+          "y": 9.0,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_0_0",
+          "kind": "chair",
+          "x": 3.5,
+          "y": 10.35,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_0_1",
+          "kind": "student_desk",
+          "x": 9.4,
+          "y": 9.0,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_0_1",
+          "kind": "chair",
+          "x": 9.9,
+          "y": 10.35,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_0_2",
+          "kind": "student_desk",
+          "x": 15.8,
+          "y": 9.0,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_0_2",
+          "kind": "chair",
+          "x": 16.3,
+          "y": 10.35,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_0_3",
+          "kind": "student_desk",
+          "x": 22.200000000000003,
+          "y": 9.0,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_0_3",
+          "kind": "chair",
+          "x": 22.700000000000003,
+          "y": 10.35,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_1_0",
+          "kind": "student_desk",
+          "x": 3.0,
+          "y": 12.4,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_1_0",
+          "kind": "chair",
+          "x": 3.5,
+          "y": 13.75,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_1_1",
+          "kind": "student_desk",
+          "x": 9.4,
+          "y": 12.4,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_1_1",
+          "kind": "chair",
+          "x": 9.9,
+          "y": 13.75,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_1_2",
+          "kind": "student_desk",
+          "x": 15.8,
+          "y": 12.4,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_1_2",
+          "kind": "chair",
+          "x": 16.3,
+          "y": 13.75,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_1_3",
+          "kind": "student_desk",
+          "x": 22.200000000000003,
+          "y": 12.4,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_1_3",
+          "kind": "chair",
+          "x": 22.700000000000003,
+          "y": 13.75,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_2_0",
+          "kind": "student_desk",
+          "x": 3.0,
+          "y": 15.8,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_2_0",
+          "kind": "chair",
+          "x": 3.5,
+          "y": 17.150000000000002,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_2_1",
+          "kind": "student_desk",
+          "x": 9.4,
+          "y": 15.8,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_2_1",
+          "kind": "chair",
+          "x": 9.9,
+          "y": 17.150000000000002,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_2_2",
+          "kind": "student_desk",
+          "x": 15.8,
+          "y": 15.8,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_2_2",
+          "kind": "chair",
+          "x": 16.3,
+          "y": 17.150000000000002,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.student_desk_2_3",
+          "kind": "student_desk",
+          "x": 22.200000000000003,
+          "y": 15.8,
+          "w": 2.1,
+          "h": 1.2,
+          "label": "Meja siswa",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Meja siswa lengkap dengan buku dan alat tulis."
+        },
+        {
+          "id": "school.classroom.student_chair_2_3",
+          "kind": "chair",
+          "x": 22.700000000000003,
+          "y": 17.150000000000002,
+          "w": 1,
+          "h": 0.8,
+          "label": "Kursi siswa",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.classroom.cabinet",
+          "kind": "cabinet",
+          "x": 26,
+          "y": 5.0,
+          "w": 2,
+          "h": 4,
+          "label": "Lemari kelas",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.classroom.class_library",
+          "kind": "shelf",
+          "x": 2,
+          "y": 3.2,
+          "w": 2,
+          "h": 3,
+          "label": "Rak bacaan kelas",
+          "solid": true,
+          "interaction": "read",
+          "task": "book"
+        },
+        {
+          "id": "school.classroom.attendance",
+          "kind": "attendance",
+          "x": 7,
+          "y": 4.0,
+          "w": 2,
+          "h": 1,
+          "label": "Buku absensi",
+          "solid": true,
+          "interaction": "book",
+          "task": "book",
+          "description": "Data kehadiran untuk latihan numerasi atau literasi."
+        },
+        {
+          "id": "school.classroom.class_poster",
+          "kind": "poster",
+          "x": 4,
+          "y": 1.5,
+          "w": 3,
+          "h": 0.6,
+          "label": "Poster kelas",
+          "solid": false,
+          "interaction": "inspect"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.class_teacher",
+          "x": 20,
+          "y": 6.8,
+          "name": "Bu Dita",
+          "role": "Wali kelas",
+          "message": "Perhatikan posisi papan tulis, meja guru dan kelompok meja siswa.",
+          "follow": "Kita dapat memakai absensi atau proyektor untuk aktivitas sesuai materi.",
+          "color": "#af6379"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 15,
+          "y": 22.0,
+          "target": "school.corridor",
+          "target_spawn": [
+            8,
+            4.3
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    },
+    "school.library": {
+      "id": "school.library",
+      "name": "Perpustakaan Sekolah",
+      "width": 32,
+      "height": 25,
+      "theme": "library",
+      "subtitle": "Rak kayu • meja baca • buku tamu",
+      "description": "Ruang bernuansa kayu. Meja pustakawan dekat pintu, rak koleksi membentuk lorong, area baca di sisi kanan.",
+      "spawn": [
+        16,
+        22
+      ],
+      "reference_pages": [
+        3
+      ],
+      "objects": [
+        {
+          "id": "school.library.bookshelf_island_0",
+          "kind": "shelf",
+          "x": 3,
+          "y": 5,
+          "w": 2,
+          "h": 9,
+          "label": "Rak koleksi 1",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Lorong rak yang bisa dilalui pemain."
+        },
+        {
+          "id": "school.library.bookshelf_island_1",
+          "kind": "shelf",
+          "x": 8,
+          "y": 5,
+          "w": 2,
+          "h": 9,
+          "label": "Rak koleksi 2",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Lorong rak yang bisa dilalui pemain."
+        },
+        {
+          "id": "school.library.bookshelf_island_2",
+          "kind": "shelf",
+          "x": 13,
+          "y": 5,
+          "w": 2,
+          "h": 9,
+          "label": "Rak koleksi 3",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Lorong rak yang bisa dilalui pemain."
+        },
+        {
+          "id": "school.library.bookshelf_wall_0",
+          "kind": "wall_shelf",
+          "x": 2,
+          "y": 2,
+          "w": 8,
+          "h": 1.1,
+          "label": "Rak buku dinding",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.library.bookshelf_wall_1",
+          "kind": "wall_shelf",
+          "x": 18,
+          "y": 2,
+          "w": 11,
+          "h": 1.1,
+          "label": "Rak buku dinding",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.library.bookshelf_wall_2",
+          "kind": "wall_shelf",
+          "x": 27,
+          "y": 5,
+          "w": 2,
+          "h": 1.1,
+          "label": "Rak buku dinding",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.library.librarian_desk",
+          "kind": "service_desk",
+          "x": 3,
+          "y": 17.5,
+          "w": 8,
+          "h": 2,
+          "label": "Meja pustakawan",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Area pelayanan perpustakaan."
+        },
+        {
+          "id": "school.library.guestbook",
+          "kind": "guestbook",
+          "x": 5.3,
+          "y": 17.55,
+          "w": 2,
+          "h": 0.7,
+          "label": "Buku tamu",
+          "solid": false,
+          "interaction": "book",
+          "task": "book",
+          "description": "Catatan kunjungan dengan halaman interaktif.",
+          "anchor": [
+            8,
+            20.2
+          ]
+        },
+        {
+          "id": "school.library.return_rack",
+          "kind": "shelf",
+          "x": 11.2,
+          "y": 19.1,
+          "w": 2,
+          "h": 2,
+          "label": "Rak pengembalian",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.library.reading_table_0",
+          "kind": "reading_table",
+          "x": 19,
+          "y": 7,
+          "w": 4,
+          "h": 2,
+          "label": "Meja baca",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Meja baca untuk membandingkan teks atau data."
+        },
+        {
+          "id": "school.library.reading_table_1",
+          "kind": "reading_table",
+          "x": 25,
+          "y": 7,
+          "w": 4,
+          "h": 2,
+          "label": "Meja baca",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Meja baca untuk membandingkan teks atau data."
+        },
+        {
+          "id": "school.library.reading_table_2",
+          "kind": "reading_table",
+          "x": 19,
+          "y": 13,
+          "w": 4,
+          "h": 2,
+          "label": "Meja baca",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Meja baca untuk membandingkan teks atau data."
+        },
+        {
+          "id": "school.library.reading_table_3",
+          "kind": "reading_table",
+          "x": 25,
+          "y": 13,
+          "w": 4,
+          "h": 2,
+          "label": "Meja baca",
+          "solid": true,
+          "interaction": "read",
+          "task": "document",
+          "description": "Meja baca untuk membandingkan teks atau data."
+        },
+        {
+          "id": "school.library.book_reference",
+          "kind": "book_pile",
+          "x": 22,
+          "y": 9.0,
+          "w": 1,
+          "h": 0.8,
+          "label": "Buku referensi",
+          "solid": false,
+          "interaction": "book",
+          "task": "book",
+          "anchor": [
+            24,
+            10.5
+          ]
+        },
+        {
+          "id": "school.library.catalog_pc",
+          "kind": "pc_station",
+          "x": 4,
+          "y": 3.5,
+          "w": 3,
+          "h": 2,
+          "label": "Komputer katalog",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen"
+        },
+        {
+          "id": "school.library.archive",
+          "kind": "archive",
+          "x": 27,
+          "y": 17,
+          "w": 2,
+          "h": 3,
+          "label": "Arsip staf",
+          "solid": true,
+          "interaction": "document",
+          "task": "document",
+          "description": "Area arsip perlu izin pustakawan dalam alur cerita."
+        },
+        {
+          "id": "school.library.reading_clock",
+          "kind": "clock",
+          "x": 25,
+          "y": 1.4,
+          "w": 1,
+          "h": 0.5,
+          "label": "Jam dinding",
+          "solid": false,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.library.plant_0",
+          "kind": "plant",
+          "x": 3,
+          "y": 22,
+          "w": 1,
+          "h": 1,
+          "label": "Tanaman sudut",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.library.plant_1",
+          "kind": "plant",
+          "x": 12,
+          "y": 22,
+          "w": 1,
+          "h": 1,
+          "label": "Tanaman sudut",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.library.plant_2",
+          "kind": "plant",
+          "x": 29,
+          "y": 22,
+          "w": 1,
+          "h": 1,
+          "label": "Tanaman sudut",
+          "solid": true,
+          "interaction": "none"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.librarian",
+          "x": 10,
+          "y": 16.2,
+          "name": "Bu Maya",
+          "role": "Pustakawan",
+          "message": "Buku tamu ada di meja layanan. Silakan baca bukti, lalu cek sumber pendukung.",
+          "follow": "Jangan menyimpulkan sesuatu hanya karena kabar yang beredar.",
+          "color": "#9879b3"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 16,
+          "y": 24,
+          "target": "school.corridor",
+          "target_spawn": [
+            21,
+            4.3
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    },
+    "school.staff_room": {
+      "id": "school.staff_room",
+      "name": "Ruang Guru & Administrasi",
+      "width": 34,
+      "height": 25,
+      "theme": "staff",
+      "subtitle": "Klaster meja • arsip • administrasi",
+      "description": "Ruang kerja dengan area meja guru, berkas administrasi, lemari arsip dan meja pelayanan.",
+      "spawn": [
+        17,
+        22
+      ],
+      "reference_pages": [
+        5
+      ],
+      "objects": [
+        {
+          "id": "school.staff_room.cubicle_0_0",
+          "kind": "cubicle",
+          "x": 3.0,
+          "y": 6.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.cubicle_0_1",
+          "kind": "cubicle",
+          "x": 11.5,
+          "y": 6.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.cubicle_0_2",
+          "kind": "cubicle",
+          "x": 20.0,
+          "y": 6.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.cubicle_1_0",
+          "kind": "cubicle",
+          "x": 3.0,
+          "y": 12.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.cubicle_1_1",
+          "kind": "cubicle",
+          "x": 11.5,
+          "y": 12.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.cubicle_1_2",
+          "kind": "cubicle",
+          "x": 20.0,
+          "y": 12.0,
+          "w": 5.5,
+          "h": 3.1,
+          "label": "Meja kerja guru",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Cubicle berisi meja, kursi, komputer, dan dokumen."
+        },
+        {
+          "id": "school.staff_room.archive_wall",
+          "kind": "cabinet",
+          "x": 25,
+          "y": 2.3,
+          "w": 6,
+          "h": 1,
+          "label": "Lemari arsip",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.staff_room.book_schedule",
+          "kind": "document",
+          "x": 5,
+          "y": 3.4,
+          "w": 3,
+          "h": 1,
+          "label": "Jadwal mengajar",
+          "solid": true,
+          "interaction": "document",
+          "task": "document"
+        },
+        {
+          "id": "school.staff_room.teacher_note",
+          "kind": "document",
+          "x": 22.5,
+          "y": 18.0,
+          "w": 3.1,
+          "h": 1.2,
+          "label": "Map laporan kegiatan",
+          "solid": true,
+          "interaction": "document",
+          "task": "document",
+          "description": "Catatan resmi kegiatan sekolah."
+        },
+        {
+          "id": "school.staff_room.admin_desk",
+          "kind": "service_desk",
+          "x": 24,
+          "y": 18.5,
+          "w": 6,
+          "h": 2,
+          "label": "Meja administrasi",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.staff_room.printer",
+          "kind": "printer",
+          "x": 28,
+          "y": 10.4,
+          "w": 2,
+          "h": 1.5,
+          "label": "Printer kantor",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.staff_room.water_dispenser",
+          "kind": "dispenser",
+          "x": 30,
+          "y": 14.5,
+          "w": 1.1,
+          "h": 1.1,
+          "label": "Dispenser",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.staff_room.work_notice",
+          "kind": "notice_board",
+          "x": 12,
+          "y": 1.5,
+          "w": 5,
+          "h": 0.7,
+          "label": "Papan jadwal staf",
+          "solid": false,
+          "interaction": "document",
+          "task": "document"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.staff",
+          "x": 20,
+          "y": 18,
+          "name": "Pak Arif",
+          "role": "Staf administrasi",
+          "message": "Dokumen harus ditelaah dengan teliti. Catatan resmi belum tentu sama dengan rumor.",
+          "follow": "Periksa jadwal dan map di meja administrasi untuk membandingkan waktu kejadian.",
+          "color": "#5e9181"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 17,
+          "y": 24,
+          "target": "school.corridor",
+          "target_spawn": [
+            15,
+            9.5
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    },
+    "school.laboratory": {
+      "id": "school.laboratory",
+      "name": "Laboratorium IPA",
+      "width": 32,
+      "height": 24,
+      "theme": "science",
+      "subtitle": "Meja praktikum • mikroskop • wastafel",
+      "description": "Area eksperimen aman dengan meja kelompok, meja demonstrasi depan, kabinet dan wastafel.",
+      "spawn": [
+        16,
+        21
+      ],
+      "reference_pages": [
+        1,
+        4
+      ],
+      "objects": [
+        {
+          "id": "school.laboratory.demo_table",
+          "kind": "lab_desk",
+          "x": 11,
+          "y": 3.7,
+          "w": 9,
+          "h": 2.3,
+          "label": "Meja demonstrasi",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Simulasi perubahan variabel dan pengamatan."
+        },
+        {
+          "id": "school.laboratory.demonstration_screen",
+          "kind": "whiteboard",
+          "x": 12,
+          "y": 1.4,
+          "w": 7,
+          "h": 0.6,
+          "label": "Papan pengamatan",
+          "solid": false,
+          "interaction": "document",
+          "task": "document"
+        },
+        {
+          "id": "school.laboratory.lab_bench_0_0",
+          "kind": "lab_desk",
+          "x": 3.0,
+          "y": 9.0,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.lab_bench_0_1",
+          "kind": "lab_desk",
+          "x": 12.3,
+          "y": 9.0,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.lab_bench_0_2",
+          "kind": "lab_desk",
+          "x": 21.6,
+          "y": 9.0,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.lab_bench_1_0",
+          "kind": "lab_desk",
+          "x": 3.0,
+          "y": 14.4,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.lab_bench_1_1",
+          "kind": "lab_desk",
+          "x": 12.3,
+          "y": 14.4,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.lab_bench_1_2",
+          "kind": "lab_desk",
+          "x": 21.6,
+          "y": 14.4,
+          "w": 5.3,
+          "h": 2.2,
+          "label": "Meja praktikum",
+          "solid": true,
+          "interaction": "device",
+          "task": "device",
+          "description": "Meja percobaan virtual beserta alat ukur."
+        },
+        {
+          "id": "school.laboratory.microscope",
+          "kind": "microscope",
+          "x": 8,
+          "y": 9.0,
+          "w": 1,
+          "h": 1,
+          "label": "Mikroskop virtual",
+          "solid": false,
+          "interaction": "device",
+          "task": "device",
+          "anchor": [
+            8.5,
+            12.3
+          ]
+        },
+        {
+          "id": "school.laboratory.sink_one",
+          "kind": "sink",
+          "x": 1.1,
+          "y": 7,
+          "w": 1.2,
+          "h": 2.0,
+          "label": "Wastafel",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.laboratory.sink_two",
+          "kind": "sink",
+          "x": 1.1,
+          "y": 15,
+          "w": 1.2,
+          "h": 2.0,
+          "label": "Wastafel",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.laboratory.tool_cabinet",
+          "kind": "cabinet",
+          "x": 29,
+          "y": 5,
+          "w": 2,
+          "h": 6,
+          "label": "Lemari alat IPA",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.laboratory.sample_cabinet",
+          "kind": "cabinet",
+          "x": 29,
+          "y": 13,
+          "w": 2,
+          "h": 4,
+          "label": "Lemari sampel",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.laboratory.safety",
+          "kind": "poster",
+          "x": 23,
+          "y": 1.6,
+          "w": 4,
+          "h": 0.6,
+          "label": "Keselamatan laboratorium",
+          "solid": false,
+          "interaction": "read"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.ipa_mentor",
+          "x": 23,
+          "y": 6.8,
+          "name": "Bu Sinta",
+          "role": "Pembimbing IPA",
+          "message": "Seluruh percobaan dalam game ini berupa simulasi aman.",
+          "follow": "Dekati meja demonstrasi atau mikroskop untuk membuka aktivitas.",
+          "color": "#d58f4a"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 16,
+          "y": 23,
+          "target": "school.corridor",
+          "target_spawn": [
+            33,
+            4.3
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    },
+    "school.knowledge_lab": {
+      "id": "school.knowledge_lab",
+      "name": "Lab Pengetahuan",
+      "width": 34,
+      "height": 25,
+      "theme": "knowledge",
+      "subtitle": "Komputer riset • referensi • layar interaktif",
+      "description": "Satu ruang koheren dengan komputer penelitian di kiri, referensi di kanan, kolaborasi di tengah dan layar di depan.",
+      "spawn": [
+        17,
+        22
+      ],
+      "reference_pages": [
+        4
+      ],
+      "objects": [
+        {
+          "id": "school.knowledge_lab.interactive_screen",
+          "kind": "screen_board",
+          "x": 12,
+          "y": 1.5,
+          "w": 10,
+          "h": 0.6,
+          "label": "Layar belajar interaktif",
+          "solid": false,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Tampilkan tabel, grafik, peta, dan materi interaktif."
+        },
+        {
+          "id": "school.knowledge_lab.computer_0_0",
+          "kind": "computer_desk",
+          "x": 3.0,
+          "y": 6.0,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.computer_0_1",
+          "kind": "computer_desk",
+          "x": 8.4,
+          "y": 6.0,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.computer_1_0",
+          "kind": "computer_desk",
+          "x": 3.0,
+          "y": 10.3,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.computer_1_1",
+          "kind": "computer_desk",
+          "x": 8.4,
+          "y": 10.3,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.computer_2_0",
+          "kind": "computer_desk",
+          "x": 3.0,
+          "y": 14.6,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.computer_2_1",
+          "kind": "computer_desk",
+          "x": 8.4,
+          "y": 14.6,
+          "w": 4,
+          "h": 2,
+          "label": "Komputer riset",
+          "solid": true,
+          "interaction": "screen",
+          "task": "screen",
+          "description": "Akses informasi, grafik, dan simulasi sesuai modul."
+        },
+        {
+          "id": "school.knowledge_lab.reference_shelves",
+          "kind": "shelf",
+          "x": 26,
+          "y": 4,
+          "w": 3,
+          "h": 8,
+          "label": "Rak ensiklopedia",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.knowledge_lab.atlas",
+          "kind": "book_pile",
+          "x": 27,
+          "y": 13.5,
+          "w": 1.6,
+          "h": 1,
+          "label": "Atlas dan referensi",
+          "solid": true,
+          "interaction": "book",
+          "task": "book"
+        },
+        {
+          "id": "school.knowledge_lab.globe",
+          "kind": "globe",
+          "x": 29.6,
+          "y": 6,
+          "w": 1,
+          "h": 1,
+          "label": "Globe",
+          "solid": true,
+          "interaction": "inspect",
+          "description": "Globe untuk menunjukkan lokasi geografis."
+        },
+        {
+          "id": "school.knowledge_lab.central_table",
+          "kind": "collab_table",
+          "x": 14,
+          "y": 11,
+          "w": 9,
+          "h": 3,
+          "label": "Meja diskusi dan analisis",
+          "solid": true,
+          "interaction": "case",
+          "task": "case",
+          "description": "Membandingkan temuan untuk membangun argumen."
+        },
+        {
+          "id": "school.knowledge_lab.research_board",
+          "kind": "board",
+          "x": 25,
+          "y": 18,
+          "w": 6,
+          "h": 1,
+          "label": "Papan riset",
+          "solid": true,
+          "interaction": "case",
+          "task": "case",
+          "description": "Papan yang dapat diisi dengan bukti."
+        },
+        {
+          "id": "school.knowledge_lab.data_archive",
+          "kind": "cabinet",
+          "x": 2,
+          "y": 19,
+          "w": 3,
+          "h": 2,
+          "label": "Laci arsip digital",
+          "solid": true,
+          "interaction": "document",
+          "task": "document"
+        },
+        {
+          "id": "school.knowledge_lab.scanner",
+          "kind": "scanner",
+          "x": 28.2,
+          "y": 16.0,
+          "w": 2,
+          "h": 1,
+          "label": "Pemindai dokumen",
+          "solid": true,
+          "interaction": "inspect"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.researcher",
+          "x": 23.7,
+          "y": 16.7,
+          "name": "Kak Nara",
+          "role": "Fasilitator riset",
+          "message": "Di sini kamu boleh memakai komputer, peta, dan papan analisis untuk belajar.",
+          "follow": "Konten risetnya nantinya berasal dari modul yang disetujui guru.",
+          "color": "#648db6"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 17,
+          "y": 24,
+          "target": "school.corridor",
+          "target_spawn": [
+            46,
+            4.3
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    },
+    "school.discussion_hall": {
+      "id": "school.discussion_hall",
+      "name": "Aula Diskusi",
+      "width": 36,
+      "height": 27,
+      "theme": "hall",
+      "subtitle": "Panggung • kursi hadirin • papan kasus",
+      "description": "Panggung dan dua blok kursi dengan lorong tengah serta akses menuju papan diskusi.",
+      "spawn": [
+        18,
+        24
+      ],
+      "reference_pages": [
+        1
+      ],
+      "objects": [
+        {
+          "id": "school.discussion_hall.stage",
+          "kind": "stage",
+          "x": 4,
+          "y": 2.3,
+          "w": 28,
+          "h": 5,
+          "label": "Panggung aula",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.curtain",
+          "kind": "stage_curtain",
+          "x": 3,
+          "y": 1,
+          "w": 30,
+          "h": 1,
+          "label": "Tirai panggung",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.projection",
+          "kind": "screen_board",
+          "x": 14,
+          "y": 1.5,
+          "w": 8,
+          "h": 0.7,
+          "label": "Layar presentasi",
+          "solid": false,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.podium",
+          "kind": "podium",
+          "x": 25,
+          "y": 8,
+          "w": 3,
+          "h": 2,
+          "label": "Podium",
+          "solid": true,
+          "interaction": "inspect"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_0_0",
+          "kind": "hall_chair",
+          "x": 4.0,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_0_0",
+          "kind": "hall_chair",
+          "x": 21.0,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_0_1",
+          "kind": "hall_chair",
+          "x": 6.3,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_0_1",
+          "kind": "hall_chair",
+          "x": 23.3,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_0_2",
+          "kind": "hall_chair",
+          "x": 8.6,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_0_2",
+          "kind": "hall_chair",
+          "x": 25.6,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_0_3",
+          "kind": "hall_chair",
+          "x": 10.899999999999999,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_0_3",
+          "kind": "hall_chair",
+          "x": 27.9,
+          "y": 11.0,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_1_0",
+          "kind": "hall_chair",
+          "x": 4.0,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_1_0",
+          "kind": "hall_chair",
+          "x": 21.0,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_1_1",
+          "kind": "hall_chair",
+          "x": 6.3,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_1_1",
+          "kind": "hall_chair",
+          "x": 23.3,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_1_2",
+          "kind": "hall_chair",
+          "x": 8.6,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_1_2",
+          "kind": "hall_chair",
+          "x": 25.6,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_1_3",
+          "kind": "hall_chair",
+          "x": 10.899999999999999,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_1_3",
+          "kind": "hall_chair",
+          "x": 27.9,
+          "y": 13.8,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_2_0",
+          "kind": "hall_chair",
+          "x": 4.0,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_2_0",
+          "kind": "hall_chair",
+          "x": 21.0,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_2_1",
+          "kind": "hall_chair",
+          "x": 6.3,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_2_1",
+          "kind": "hall_chair",
+          "x": 23.3,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_2_2",
+          "kind": "hall_chair",
+          "x": 8.6,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_2_2",
+          "kind": "hall_chair",
+          "x": 25.6,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_2_3",
+          "kind": "hall_chair",
+          "x": 10.899999999999999,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_2_3",
+          "kind": "hall_chair",
+          "x": 27.9,
+          "y": 16.6,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_3_0",
+          "kind": "hall_chair",
+          "x": 4.0,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_3_0",
+          "kind": "hall_chair",
+          "x": 21.0,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_3_1",
+          "kind": "hall_chair",
+          "x": 6.3,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_3_1",
+          "kind": "hall_chair",
+          "x": 23.3,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_3_2",
+          "kind": "hall_chair",
+          "x": 8.6,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_3_2",
+          "kind": "hall_chair",
+          "x": 25.6,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_0_3_3",
+          "kind": "hall_chair",
+          "x": 10.899999999999999,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.chair_1_3_3",
+          "kind": "hall_chair",
+          "x": 27.9,
+          "y": 19.4,
+          "w": 1.3,
+          "h": 1.3,
+          "label": "Kursi penonton",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.case_board",
+          "kind": "case_board",
+          "x": 29,
+          "y": 20,
+          "w": 4.5,
+          "h": 2,
+          "label": "Papan kasus",
+          "solid": true,
+          "interaction": "case",
+          "task": "case",
+          "description": "Siswa meninjau evidence lalu memilih kesimpulan."
+        },
+        {
+          "id": "school.discussion_hall.evidence_desk",
+          "kind": "reading_table",
+          "x": 2,
+          "y": 20,
+          "w": 3,
+          "h": 2,
+          "label": "Meja bukti",
+          "solid": true,
+          "interaction": "document",
+          "task": "document"
+        },
+        {
+          "id": "school.discussion_hall.speaker_l",
+          "kind": "speaker",
+          "x": 2,
+          "y": 8,
+          "w": 2,
+          "h": 2,
+          "label": "Speaker kiri",
+          "solid": true,
+          "interaction": "none"
+        },
+        {
+          "id": "school.discussion_hall.speaker_r",
+          "kind": "speaker",
+          "x": 32,
+          "y": 8,
+          "w": 2,
+          "h": 2,
+          "label": "Speaker kanan",
+          "solid": true,
+          "interaction": "none"
+        }
+      ],
+      "npcs": [
+        {
+          "id": "school.npc.moderator",
+          "x": 18,
+          "y": 9.4,
+          "name": "Bu Nisa",
+          "role": "Moderator",
+          "message": "Seluruh temuan dari sekolah bisa kamu bahas di depan panggung.",
+          "follow": "Mendekatlah ke papan kasus di pojok kanan untuk menguji kesimpulan.",
+          "color": "#bf7e6b"
+        }
+      ],
+      "portals": [
+        {
+          "id": "exit",
+          "x": 18,
+          "y": 26,
+          "target": "school.corridor",
+          "target_spawn": [
+            61,
+            4.3
+          ],
+          "label": "Kembali ke Koridor",
+          "side": "bottom"
+        }
+      ]
+    }
+  },
+  "quest_demo": {
+    "id": "DEMO-INVESTIGASI",
+    "name": "Misteri Catatan Perpustakaan",
+    "steps": [
+      {
+        "id": "intro",
+        "object": "school.npc.guide",
+        "label": "Temui Bu Rani di halaman"
+      },
+      {
+        "id": "book",
+        "object": "school.library.guestbook",
+        "label": "Periksa buku tamu perpustakaan"
+      },
+      {
+        "id": "document",
+        "object": "school.staff_room.teacher_note",
+        "label": "Bandingkan catatan petugas"
+      },
+      {
+        "id": "research",
+        "object": "school.knowledge_lab.interactive_screen",
+        "label": "Analisis data di Lab Pengetahuan"
+      },
+      {
+        "id": "conclusion",
+        "object": "school.discussion_hall.case_board",
+        "label": "Simpulkan bukti di Aula"
+      }
+    ]
+  }
+}
