@@ -60,7 +60,7 @@ export class StudentApiClient {
       throw new Error('B05_BASE_URL_INVALID');
     }
     this.url = url.href.replace(/\/$/, '');
-    this.fetchFn = config.fetchImpl ?? fetch;
+    this.fetchFn = config.fetchImpl ?? fetch.bind(globalThis);
     this.accessCode = config.accessCode;
     this.publicApiKey = config.publicApiKey;
   }
