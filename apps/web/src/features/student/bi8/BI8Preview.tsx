@@ -388,6 +388,9 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
               : selectedTask.template === 'investigate' ? (index === 0 ? 'Paragraf A · Sepeda Mira' : 'Paragraf B · Sepeda motor')
               : index === 0 ? 'Panduan redaksi' : index === 1 ? 'Paragraf A · Sepeda Mira' : 'Paragraf B · Sepeda motor',
             text: ref.excerpt,
+          locator: ref.locator.kind === 'pdf_page'
+            ? `Halaman ${ref.locator.page}`
+            : `Paragraf ${ref.locator.paragraph_index}${ref.locator.section ? ` — ${ref.locator.section}` : ''}`,
           }))}
           viewed={answer.viewedSourceIndices}
           onView={index => updateAnswer({

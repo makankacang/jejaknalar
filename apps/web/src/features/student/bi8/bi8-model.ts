@@ -71,7 +71,17 @@ export function splitEvidenceSentences(text: string): string[] {
 /** Paragraph A/B are source_refs 1/2; source_refs[0] is the concept guide. */
 export function evidenceOptionsForParagraph(task: StoryTask, paragraphIndex: 0 | 1): string[] {
   const source = task.source_refs[paragraphIndex + 1];
-  return source ? splitEvidenceSentences(source.excerpt) : [];
+  if (!source) return [];
+
+  // Prefer the complete paragraph from the comparison activity.
+  // Preserve the original source-map identity.
+  const canonical = story.tasks
+    .filter(candidate => candidate.template === 'investigate')
+    .flatMap(candidate => candidate.source_refs)
+    .filter(ref => ref.source_map_id === source.source_map_id)
+    .sort((a, b) => b.excerpt.length - a.excerpt.length)[0];
+
+  return splitEvidenceSentences(canonical?.excerpt ?? source.excerpt);
 }
 
 /**

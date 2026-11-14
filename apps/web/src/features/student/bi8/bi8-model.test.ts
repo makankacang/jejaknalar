@@ -100,10 +100,9 @@ describe('PIC D BI8 candidate — isolated local preview', () => {
     const a=evidenceOptionsForParagraph(decide,0);
     const b=evidenceOptionsForParagraph(decide,1);
     expect(a.length).toBe(3);
-    expect(b.length).toBe(3);
+    expect(b.length).toBe(2);
     expect(a[0]).toContain('Sepeda baru Mira');
     expect(b[1]).toContain('Rp7.800,00');
-    expect(b[2]).toContain('rute-rute sulit');
     expect(a.join(' ')).not.toContain('DOC-P-');
   });
   it('serializes all six completed fields into one string for the official item', () => {
