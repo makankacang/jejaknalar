@@ -64,7 +64,7 @@ export default function TeacherDashboardPage(): React.JSX.Element {
                 dijadikan dasar pengembangan quest.
               </p>
               <Link to="/teacher/modules" style={styles.cardLink}>
-                Buka katalog →
+                Buka katalog â†’
               </Link>
             </article>
 
@@ -79,7 +79,7 @@ export default function TeacherDashboardPage(): React.JSX.Element {
                 to="/teacher/modules/upload"
                 style={styles.cardLink}
               >
-                Mulai upload →
+                Mulai upload â†’
               </Link>
             </article>
           </div>
@@ -150,7 +150,7 @@ const styles = {
   page: {
     minHeight: 'calc(100vh - 64px)',
     padding: '12px 0 48px',
-    color: '#172033',
+    color: 'var(--jn-color-primary-deep)',
   },
   container: {
     maxWidth: '1000px',
@@ -165,7 +165,7 @@ const styles = {
     marginBottom: '28px',
   },
   eyebrow: {
-    color: '#64748b',
+    color: 'var(--jn-text-secondary)',
     fontSize: '11px',
     fontWeight: 700,
     letterSpacing: '1.5px',
@@ -176,34 +176,34 @@ const styles = {
   },
   subtitle: {
     maxWidth: '650px',
-    color: '#64748b',
+    color: 'var(--jn-text-secondary)',
     fontSize: '14px',
     lineHeight: 1.7,
   },
   liveBadge: {
     padding: '8px 12px',
     borderRadius: '7px',
-    background: '#dcfce7',
-    color: '#166534',
+    background: 'var(--jn-status-success-bg)',
+    color: 'var(--jn-status-success-text)',
     fontSize: '11px',
     fontWeight: 700,
   },
   demoBadge: {
     padding: '8px 12px',
     borderRadius: '7px',
-    background: '#fef3c7',
-    color: '#92400e',
+    background: 'var(--jn-status-warning-bg)',
+    color: 'var(--jn-status-warning-text)',
     fontSize: '11px',
     fontWeight: 700,
   },
   welcomeCard: {
     padding: '30px',
     borderRadius: '15px',
-    background: '#172033',
-    color: '#ffffff',
+    background: 'var(--jn-color-primary-deep)',
+    color: 'var(--jn-surface-card)',
   },
   welcomeLabel: {
-    color: '#cbd5e1',
+    color: 'var(--jn-border-default)',
     fontSize: '10px',
     fontWeight: 700,
     letterSpacing: '1.5px',
@@ -218,8 +218,8 @@ const styles = {
     display: 'inline-block',
     padding: '11px 16px',
     borderRadius: '8px',
-    background: '#ffffff',
-    color: '#172033',
+    background: 'var(--jn-surface-card)',
+    color: 'var(--jn-color-primary-deep)',
     textDecoration: 'none',
     fontSize: '13px',
     fontWeight: 700,
@@ -227,9 +227,9 @@ const styles = {
   secondaryButton: {
     display: 'inline-block',
     padding: '11px 16px',
-    border: '1px solid #64748b',
+    border: '1px solid var(--jn-text-secondary)',
     borderRadius: '8px',
-    color: '#ffffff',
+    color: 'var(--jn-surface-card)',
     textDecoration: 'none',
     fontSize: '13px',
     fontWeight: 600,
@@ -247,19 +247,19 @@ const styles = {
   },
   menuCard: {
     padding: '22px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid var(--jn-border-default)',
     borderRadius: '12px',
-    background: '#ffffff',
+    background: 'var(--jn-surface-card)',
   },
   cardNumber: {
-    color: '#94a3b8',
+    color: 'var(--jn-color-muted)',
     fontSize: '11px',
     fontWeight: 700,
   },
   cardLink: {
     display: 'inline-block',
     marginTop: '8px',
-    color: '#1e293b',
+    color: 'var(--jn-color-primary-dark)',
     fontSize: '13px',
     fontWeight: 700,
     textDecoration: 'none',
@@ -273,9 +273,9 @@ const styles = {
     alignItems: 'flex-start',
     gap: '15px',
     padding: '18px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid var(--jn-border-default)',
     borderRadius: '11px',
-    background: '#ffffff',
+    background: 'var(--jn-surface-card)',
   },
   stepNumber: {
     display: 'grid',
@@ -284,18 +284,18 @@ const styles = {
     width: '30px',
     height: '30px',
     borderRadius: '8px',
-    background: '#e2e8f0',
-    color: '#334155',
+    background: 'var(--jn-border-default)',
+    color: 'var(--jn-color-primary-medium)',
     fontSize: '12px',
     fontWeight: 700,
   },
   integrationNotice: {
     padding: '17px',
     marginTop: '28px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid var(--jn-border-default)',
     borderRadius: '10px',
-    background: '#f8fafc',
-    color: '#475569',
+    background: 'var(--jn-color-cream)',
+    color: 'var(--jn-text-secondary)',
     fontSize: '12px',
     lineHeight: 1.7,
   },

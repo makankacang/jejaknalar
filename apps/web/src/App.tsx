@@ -1,3 +1,4 @@
+﻿import './shared-ui/styles/design-tokens.css';
 import './shared-ui/styles/teacher.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
