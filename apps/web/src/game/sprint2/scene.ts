@@ -1,14 +1,17 @@
+import { cityObjectDepth } from './city/art';
 import Phaser from 'phaser';
-import { ROOMS, blocked, canInteract, move, findPath, approach, type Heading, type Point, type Target } from './world';
+import { ROOMS, blocked, canInteract, move, findPath, approach, safeSpawn, type Heading, type Point, type Target } from './world';
 import { paintObject, paintFloor } from './art';
 import { animate, idleMotion, type Motion } from './animation';
 import { movementDelta, FEET } from './world';
 import type { State } from './state';
-export type SceneHooks = { snapshot: () => State; active: () => boolean; direction: () => Point; position: (p: Point, h: Heading) => void; interact: (t: Target) => void; nearby: (t: Target | null) => void; message: (s: string) => void; reduced: () => boolean; running: () => boolean; debug: () => boolean };
-type Person = { container: Phaser.GameObjects.Container; left: Phaser.GameObjects.Rectangle; right: Phaser.GameObjects.Rectangle; eyes: Phaser.GameObjects.Rectangle; head: Phaser.GameObjects.Rectangle };
+import { routeWaypoint, type Guide, type MarkerStatus } from './mission-guidance';
+import { paintPerson, facePerson, type Person } from './character-renderer';
+import { missionMarkerY } from './marker-layout';
+export type SceneHooks = { snapshot: () => State; active: () => boolean; direction: () => Point; position: (p: Point, h: Heading) => void; interact: (t: Target) => void; nearby: (t: Target | null) => void; message: (s: string) => void; reduced: () => boolean; running: () => boolean; debug: () => boolean; guidance?: () => Guide | null; markerStatus?: (target:Target) => MarkerStatus; directionHint?: (hint:{x:number;y:number;glyph:string;label:string}|null)=>void };
 export class AdventureScene extends Phaser.Scene {
   private person!: Person;
-  private npc!: Person;
+  private npc?: Person;
   private roomId = '';
   private keys?: Record<string, Phaser.Input.Keyboard.Key>;
   private path: Point[] = [];
@@ -23,6 +26,11 @@ export class AdventureScene extends Phaser.Scene {
   private doorReadyAt = 0;
   private prompt!: Phaser.GameObjects.Text;
   private labels: { target: Target; text: Phaser.GameObjects.Text }[] = [];
+  private missionMarkers: { target:Target; text:Phaser.GameObjects.Text; ring:Phaser.GameObjects.Arc }[] = [];
+  private offscreenArrow!: Phaser.GameObjects.Text;
+  private nextGuidanceAt = 0;
+  private doorFronts: {graphic:Phaser.GameObjects.Graphics;x:number;y:number}[] = [];
+  private doorSigns: {target:Target;text:Phaser.GameObjects.Text}[] = [];
   constructor(private hooks: SceneHooks) { super('D-sprint2'); }
   create() {
     this.keys = this.input.keyboard?.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,SHIFT') as Record<string, Phaser.Input.Keyboard.Key>;
@@ -37,19 +45,26 @@ export class AdventureScene extends Phaser.Scene {
     this.scale.on('resize', this.camera, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.camera, this));
   }
-  private camera() { if (!this.person) return; const room = ROOMS[this.roomId]; this.cameras.main.setBounds(0, 0, room.width, room.height).setZoom(this.scale.width < 600 ? 1.1 : 1.25).startFollow(this.person.container, true, 0.15, 0.15); this.cameras.main.roundPixels = true; }
+  private camera() {
+    if (!this.person) return;
+    const room = ROOMS[this.roomId];
+    // In portrait the camera must show a useful radius around the student,
+    // rather than zooming in to fill a short corridor vertically.
+    const mobile = this.scale.width <= 600;
+    const mobileZoom = Math.max(.82, Math.min(1.12, this.scale.width / 390 * 1.06));
+    const desktopZoom = Math.min(2.1, Math.max(1.25, this.scale.height / room.height + .025));
+    this.cameras.main.setBounds(0, 0, room.width, room.height)
+      .setZoom(mobile ? mobileZoom : desktopZoom)
+      .startFollow(this.person.container, true, .15, .15);
+    this.cameras.main.roundPixels = true;
+  }
   /** Safe to call when the browser changes from desktop to 390×844 without reload. */
   reframe() { if (!this.person || !this.cameras?.main) return; this.cameras.main.setSize(this.scale.width, this.scale.height); this.camera(); }
-  private paintPerson(x: number, y: number, color: number): Person {
-    const shadow = this.add.ellipse(0, 0, 23, 9, 0x101d29, .3);
-    const left = this.add.rectangle(-5, -5, 6, 10, 0x283344), right = this.add.rectangle(5, -5, 6, 10, 0x283344);
-    const torso = this.add.rectangle(0, -18, 20, 20, color), head = this.add.rectangle(0, -35, 18, 17, 0xf1bd8b), hair = this.add.rectangle(0, -45, 20, 7, 0x392c32), eyes = this.add.rectangle(5, -35, 3, 3, 0x273040);
-    return { container: this.add.container(x, y, [shadow, left, right, torso, head, hair, eyes]).setDepth(y), left, right, eyes, head };
-  }
-  private face(person: Person, heading: Heading) { person.eyes.setVisible(heading !== 'up'); person.eyes.setPosition(heading === 'left' ? -6 : heading === 'right' ? 6 : 3, -35); }
+  /** Avatar depth always follows FEET position; props sort against the same world Y. */
+  private actorDepth(y: number) { return y + 4; }
   private loadRoom() {
     this.children.removeAll(true); for (const key of this.textureKeys) this.textures.remove(key); this.textureKeys = [];
-    this.labels = []; this.path = []; this.pending = null; this.nearId = ''; this.hooks.nearby(null); this.motion = idleMotion();
+    this.npc = undefined; this.doorFronts = []; this.doorSigns = []; this.hooks.directionHint?.(null); this.labels = []; this.missionMarkers = []; this.path = []; this.pending = null; this.nearId = ''; this.hooks.nearby(null); this.motion = idleMotion();
     const s = this.hooks.snapshot(), room = ROOMS[s.room]; this.roomId = s.room; this.heading = s.heading;
     const floorKey = `s2:${room.id}:floor`, floor = this.textures.createCanvas(floorKey, room.width, room.height)!; this.textureKeys.push(floorKey);
     paintFloor(floor.context, room); floor.refresh(); this.add.image(0, 0, floorKey).setOrigin(0).setDepth(-20);
@@ -57,13 +72,20 @@ export class AdventureScene extends Phaser.Scene {
       const margin = 140, key = `s2:${obj.id}`, texture = this.textures.createCanvas(key, Math.ceil(obj.w * 40 + margin * 2), Math.ceil(obj.h * 40 + margin * 2))!; this.textureKeys.push(key);
       texture.context.translate(margin - obj.x * 40, margin - obj.y * 40); paintObject(texture.context, obj); texture.refresh();
       // Each prop is independent: real y-sort/occlusion, never a flat map screenshot.
-      const depth = ['court', 'gate', 'building_sign', 'window', 'poster', 'clock', 'stage_curtain', 'whiteboard', 'screen_board'].includes(obj.kind) ? 1 : (obj.y + obj.h) * 40;
+      const depth = room.world === 'city' ? cityObjectDepth(obj) : ['court', 'gate', 'building_sign', 'window', 'poster', 'clock', 'stage_curtain', 'whiteboard', 'screen_board'].includes(obj.kind) ? 1 : (obj.y + obj.h) * 40 + (obj.kind==='lab_desk' ? 35 : 0);
       this.add.image(obj.x * 40 - margin, obj.y * 40 - margin, key).setOrigin(0).setDepth(depth);
     }
-    if (room.world === 'city') for (const o of room.solids) { this.add.rectangle(o.x, o.y - o.heightArt, o.width, o.height + o.heightArt, o.kind === 'plant' ? 0x497b4d : 0xad8657).setOrigin(0).setStrokeStyle(2, 0x4c493b).setDepth(o.y + o.height); }
     for (const t of room.targets) {
-      if (t.kind === 'npc') this.npc = this.paintPerson(t.x, t.y, Number(t.color?.replace('#', '0x')) || 0xb78275);
-      if (t.kind === 'door') {
+      if (t.kind === 'npc') this.npc = paintPerson(this, t.x, t.y, Number(t.color?.replace('#', '0x')) || 0xb78275, t.id, t.label, t.role);
+      // The park exit is an open pathway; label the trail, never paint an indoor door.
+      if (t.kind === 'door' && room.id === 'city_park' && t.to === 'city_hub') {
+        const text = this.add.text(t.x, t.y - 56, 'Jalur ke Alun-Alun', {
+          fontFamily:'Arial, sans-serif', fontSize:'12px', fontStyle:'bold',
+          color:'#fff1c5', backgroundColor:'#31583d', padding:{x:5,y:3},
+        }).setResolution(2).setOrigin(.5).setDepth(5400).setVisible(false);
+        this.doorSigns.push({target:t,text});
+      }
+      if (t.kind === 'door' && !(room.id === 'city_hub' && t.to === 'city_park') && !(room.id === 'city_park' && t.to === 'city_hub')) {
         const pos = t.display ?? t, top = pos.y - 56, x = pos.x - 34;
         // Door has visible frame, shadowed recess, inset glass, two wood panels, hinges and knob.
         // Visual is anchored to the SAME portal opening/trigger as world.ts; never grants transit on its own.
@@ -85,15 +107,76 @@ export class AdventureScene extends Phaser.Scene {
         g.fillStyle(0xecc889).fillCircle(x+53,top+41,3.7);
         g.fillStyle(0x3a4647).fillCircle(x+53,top+41,1.5);
         g.fillStyle(0xddcfa8).fillRect(x-8,top+73,84,7); // raised threshold
-        const label = this.add.text(pos.x, top-19, t.label, { fontFamily:'monospace', fontSize:'12px', color:'#fff2d6', backgroundColor:'#203942', padding:{x:7,y:4}}).setOrigin(.5).setDepth(Math.max(5,pos.y-45));
-        label.setAlpha(.94);
+        // Keep door text in the crisp HTML proximity HUD; only world art belongs on the canvas.
+        this.doorFronts.push({graphic:g,x:pos.x,y:pos.y});
+        // Tiny proximity-only door sign. Inverse zoom keeps DOM-like readable size;
+        // never render a giant screen-covering world-space location banner.
+        const destination = t.to ? ROOMS[t.to]?.title : undefined;
+        if (destination) {
+          const text = this.add.text(pos.x, top - 12, destination.length > 23 ? `${destination.slice(0,21)}…` : destination, {
+            fontFamily: 'Arial, sans-serif', fontSize: '12px', fontStyle: 'bold',
+            color: '#fff1c5', backgroundColor: '#19343b', padding: { x: 5, y: 3 },
+          }).setResolution(2).setOrigin(.5).setDepth(5400).setVisible(false);
+          this.doorSigns.push({target:t,text});
+        }
+
       }
-      if (t.kind === 'task') { this.add.text(t.x, t.y - 10, '◆', { fontSize: '20px', color: '#f4d588', stroke: '#253b3c', strokeThickness: 4 }).setOrigin(.5).setDepth(5000); }
+      // World markers are state-controlled below. No static ◆ on an already-completed object.
       if (t.kind === 'npc' || t.kind === 'task') { const text = this.add.text(t.x, t.y - (t.kind === 'npc' ? 61 : 35), t.label, { fontFamily: 'monospace', fontSize: '12px', color: '#fff0cb', backgroundColor: '#243a42', padding: { x: 6, y: 4 } }).setOrigin(.5).setDepth(5100); text.setVisible(false); this.labels.push({ target: t, text }); }
     }
-    this.person = this.paintPerson(s.position.x, s.position.y, 0xd6a75b); this.face(this.person, s.heading);
+    // Every quest object receives a live status; labels and IDs come from the registry.
+    for (const t of room.targets) {
+      if (t.kind === 'door' || t.kind === 'map') continue;
+      const ring = this.add.circle(t.x,t.y,23,0xf2c96c,0).setStrokeStyle(3,0xf2c96c,0.95).setDepth(4900).setVisible(false);
+      const marker = this.add.text(t.x,missionMarkerY(t),'◆',{fontFamily:'monospace',fontSize:'16px',fontStyle:'bold',color:'#f2cb72',padding:{x:0,y:0}}).setOrigin(.5).setDepth(5205).setVisible(false);
+      this.missionMarkers.push({target:t,text:marker,ring});
+    }
+    this.offscreenArrow = this.add.text(0,0,'',{fontFamily:'monospace',fontSize:'13px',fontStyle:'bold',color:'#1c302f',backgroundColor:'#ffe09a',padding:{x:9,y:7},wordWrap:{width:170}}).setScrollFactor(0).setDepth(9000).setVisible(false);
+    const safePosition = safeSpawn(room, s.position);
+    this.person = paintPerson(this, safePosition.x, safePosition.y, 0xd6a75b);
+    this.person.container.setDepth(this.actorDepth(safePosition.y)); facePerson(this.person, s.heading);
+    if (safePosition.x !== s.position.x || safePosition.y !== s.position.y)
+      this.hooks.position(safePosition, s.heading); // old checkpoint inside a new collider: recover visibly
     this.prompt = this.add.text(0, 0, 'E · Interaksi', { fontSize: '12px', backgroundColor: '#f4dc98', color: '#253644', padding: { x: 6, y: 4 } }).setOrigin(.5).setDepth(5200).setVisible(false);
-    this.debugLayer = this.add.graphics().setDepth(5300); this.camera();
+    this.debugLayer = this.add.graphics().setDepth(5300);
+    this.camera();
+    // A newly entered room has different coordinates/bounds. Snap once to its
+    // safe spawn so the player cannot vanish offscreen while camera follow lerps.
+    this.cameras.main.centerOn(this.person.container.x, this.person.container.y);
+    this.person.container.setVisible(true).setAlpha(1);
+
+  }
+  private updateGuidance(time:number) {
+    if (time < this.nextGuidanceAt) return;
+    this.nextGuidanceAt = time + 320;
+    const guide = this.hooks.guidance?.() ?? null;
+    for (const {target,text,ring} of this.missionMarkers) {
+      const status=this.hooks.markerStatus?.(target) ?? 'explore';
+      const active=status==='active';
+      // Once a task is completed, remove its floating checkmark and ring entirely.
+      // A single active target is indicated by the guidance arrow and modest gold dot.
+      const show=active && guide?.target.id===target.id;
+      text.setVisible(show);
+      ring.setStrokeStyle(2,0xf2cb72,0.48).setVisible(show);
+      if (show) text.setPosition(target.x,missionMarkerY(target));
+    }
+    this.offscreenArrow.setVisible(false); this.hooks.directionHint?.(null);
+    if (!guide || guide.room !== this.roomId || !this.person) return;
+    const room=ROOMS[this.roomId], waypoint=routeWaypoint(room,this.person.container,guide);
+    if (!waypoint) return; // No legal collision-safe path: don't show a misleading arrow.
+    const camera=this.cameras.main, world=camera.worldView;
+    if(!world.width||!world.height)return;
+    const visible=world.contains(guide.target.x,guide.target.y);
+    const longDistance=Math.hypot(guide.target.x-this.person.container.x,guide.target.y-this.person.container.y)>105;
+    if (visible && !longDistance) return;
+    const dx=waypoint.x-this.person.container.x,dy=waypoint.y-this.person.container.y;
+    const glyph=Math.abs(dx)>Math.abs(dy)?(dx>0?'→':'←'):(dy>0?'↓':'↑');
+    const tx=(guide.target.x-world.x)*camera.width/world.width, ty=(guide.target.y-world.y)*camera.height/world.height;
+    const cx=camera.width/2,cy=camera.height/2;
+    const ex=tx-cx,ey=ty-cy, factor=Math.min(1,(camera.width/2-95)/Math.max(1,Math.abs(ex)),(camera.height/2-135)/Math.max(1,Math.abs(ey)));
+    const px=Math.max(45,Math.min(camera.width-45,cx+ex*factor)),py=Math.max(Math.min(260,camera.height*.35),Math.min(camera.height-170,cy+ey*factor));
+    if(this.hooks.directionHint) this.hooks.directionHint({x:px,y:py,glyph,label:guide.label});
+    else this.offscreenArrow.setText(glyph).setPosition(px,py).setOrigin(.5).setVisible(true);
   }
   private debug() {
     const g = this.debugLayer; g.clear(); if (!this.hooks.debug()) return;
@@ -106,8 +189,18 @@ export class AdventureScene extends Phaser.Scene {
     if (t.kind === 'door') { if (this.time.now < this.doorReadyAt) return; this.doorReadyAt = this.time.now + 500; }
     this.path = []; this.pending = null;
     this.hooks.position({ x: this.person.container.x, y: this.person.container.y }, this.heading);
-    if (t.kind === 'npc') { const dx = this.person.container.x-t.x, dy = this.person.container.y-t.y; this.face(this.npc, Math.abs(dx)>Math.abs(dy) ? dx<0?'left':'right' : dy<0?'up':'down'); }
+    if (t.kind === 'npc') { const dx = this.person.container.x-t.x, dy = this.person.container.y-t.y; if(this.npc)facePerson(this.npc, Math.abs(dx)>Math.abs(dy) ? dx<0?'left':'right' : dy<0?'up':'down'); }
     this.hooks.interact(t);
+  }
+  /** Explicit checkpoint restore; movement never implicitly trusts external coordinates. */
+  restorePosition(position:Point, heading:Heading) {
+    const room=ROOMS[this.roomId]; if(!this.person)return;
+    const valid=safeSpawn(room,position);
+    this.path=[];this.pending=null;
+    this.person.container.setPosition(valid.x,valid.y).setDepth(this.actorDepth(valid.y));
+    this.heading=heading;this.motion=idleMotion();facePerson(this.person,heading);
+    if(valid.x!==position.x||valid.y!==position.y)this.hooks.position(valid,heading);
+    this.reframe();
   }
   readPose() { return this.person ? { x:this.person.container.x,y:this.person.container.y,heading:this.heading,motion:{...this.motion},room:this.roomId } : null; }
   interactNearest() { const t = ROOMS[this.roomId]?.targets.filter(t => canInteract(ROOMS[this.roomId], this.person.container, t)).sort((a, b) => Phaser.Math.Distance.BetweenPoints(a, this.person.container) - Phaser.Math.Distance.BetweenPoints(b, this.person.container))[0]; if (t && this.hooks.active()) this.activate(t); }
@@ -116,7 +209,7 @@ export class AdventureScene extends Phaser.Scene {
     if (this.hooks.snapshot().room !== this.roomId) this.loadRoom();
     const editing = document.activeElement instanceof HTMLElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName), active = this.hooks.active();
     if (this.input.keyboard) { if (!active && this.input.keyboard.enabled) this.input.keyboard.resetKeys(); this.input.keyboard.enabled = active && !editing; }
-    if (!active) { this.path = []; this.pending = null; this.prompt.setVisible(false); this.motion = animate(this.motion,0,0,false,true); this.person.left.y=-5; this.person.right.y=-5; this.debug(); return; }
+    if (!active) { this.hooks.directionHint?.(null); this.offscreenArrow?.setVisible(false); this.path = []; this.pending = null; this.prompt.setVisible(false); this.motion = animate(this.motion,0,0,false,true); this.person.left.y=-5; this.person.right.y=-5; this.debug(); return; }
     const down = (k: string) => active && !editing && !!this.keys?.[k]?.isDown, joy = this.hooks.direction();
     let dx = Number(down('D') || down('RIGHT')) - Number(down('A') || down('LEFT')) + joy.x, dy = Number(down('S') || down('DOWN')) - Number(down('W') || down('UP')) + joy.y;
     if (dx || dy) { this.path = []; this.pending = null; }
@@ -127,24 +220,37 @@ export class AdventureScene extends Phaser.Scene {
     const before = { x: p.x, y: p.y };
     if (length) {
       const delta = movementDelta({ x: dx, y: dy }, dt, running), scale = this.path.length ? Math.min(1, length / Math.max(.001, Math.hypot(delta.x, delta.y))) : 1;
-      const next = move(room, before, delta.x * scale, delta.y * scale); p.setPosition(next.x, next.y).setDepth(next.y);
+      const next = move(room, before, delta.x * scale, delta.y * scale); p.setPosition(next.x, next.y).setDepth(this.actorDepth(next.y));
     }
     this.motion = animate(this.motion, p.x-before.x, p.y-before.y, running);
     if (this.motion.mode !== 'idle') { this.heading=this.motion.heading; this.walking=true; }
-    this.face(this.person,this.heading);
+    facePerson(this.person,this.heading);
+    // The threshold is scenery, never a foreground layer that hides the avatar.
+    for (const door of this.doorFronts) door.graphic.setDepth(Math.max(4, door.y - 47));
+    const zoom = Math.max(.1, this.cameras.main.zoom);
+    for (const sign of this.doorSigns) {
+      const close = Math.hypot(p.x-sign.target.x, p.y-sign.target.y) < 120;
+      sign.text.setScale(Math.min(1, 1 / zoom)).setVisible(close);
+    }
     // Readable alternating feet. Reduce motion preserves gait (essential movement feedback).
     this.person.left.y=-5+this.motion.left; this.person.right.y=-5+this.motion.right;
     this.person.left.rotation=this.motion.left/30;this.person.right.rotation=this.motion.right/30;
-    if (!this.hooks.reduced()) this.npc.head.y = -35 + Math.sin(time / 500) * .6;
-    this.debug();
+    if (!this.hooks.reduced() && this.npc) this.npc.head.y = -35 + Math.sin(time / 500) * .6;
+    this.debug(); this.updateGuidance(time);
     if (this.walking && (time > this.saveAt || !length)) { this.hooks.position({ x: p.x, y: p.y }, this.heading); this.saveAt = time + 400; this.walking = !!length; }
     if (this.pending && !this.path.length) { const t = this.pending; this.pending = null; if (canInteract(room, p, t)) { this.activate(t); return; } }
     const nearest = room.targets.filter(t => canInteract(room, p, t)).sort((a, b) => Phaser.Math.Distance.BetweenPoints(a, p) - Phaser.Math.Distance.BetweenPoints(b, p))[0];
     if ((nearest?.id ?? '') !== this.nearId) { this.nearId = nearest?.id ?? ''; this.hooks.nearby(nearest ?? null); }
     // Single nearby hint above the target, not overlapping NPC head or feet.
-    this.prompt.setText(nearest ? `E · ${nearest.label}` : 'E · Interaksi').setPosition(nearest?.x ?? p.x, (nearest?.y ?? p.y) - (nearest?.kind === 'npc' ? 87 : 48)).setVisible(!!nearest);
+    // Crisp labels are drawn in the DOM HUD, never in the pixel-art canvas.
+    this.prompt.setVisible(false);
     for (const { text } of this.labels) text.setVisible(this.hooks.debug());
     if (down('E') && this.keys?.E && Phaser.Input.Keyboard.JustDown(this.keys.E)) this.interactNearest();
-    if (blocked(room, p)) { const spawn = room.spawn; p.setPosition(spawn.x, spawn.y); }
+    if (blocked(room, p)) {
+      // A stale checkpoint or a repaired scene must never leave a player hidden
+      // in scenery or save an invalid location across reloads.
+      const spawn=room.spawn; p.setPosition(spawn.x,spawn.y).setDepth(this.actorDepth(spawn.y));
+      this.path=[];this.pending=null;this.hooks.position({...spawn},this.heading);
+    }
   }
 }

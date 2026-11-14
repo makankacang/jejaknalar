@@ -1,8 +1,10 @@
+import { paintCityObject, paintCityFloor } from './city/art';
 import type { ArtObject, Room } from './world';
 import { TILE as T } from './world';
 import { paintReferenceObject } from './reference-art';
 /** Original procedural mock v1.4 artwork; each prop is rendered separately for y-depth. */
 export function paintObject(c: CanvasRenderingContext2D, object: ArtObject) {
+if (object.kind.startsWith('city_') && paintCityObject(c, object)) return;
 const hash=(i:number,j:number)=>{let x=Math.imul(i+2437,19797)^Math.imul(j+887,15485863);x=Math.imul(x^(x>>>16),2246822519);return(x>>>0)%1000/1000;};
 function box(x:number,y:number,w:number,h:number,color:string){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function rect(x:number,y:number,w:number,h:number,fill:string,stroke?:string){box(x,y,w,h,fill);if(stroke){c.lineWidth=2;c.strokeStyle=stroke;c.strokeRect(Math.round(x)+1,Math.round(y)+1,Math.round(w)-2,Math.round(h)-2);}}
@@ -36,7 +38,24 @@ function shapeObj(o: ArtObject){const x=o.x*T,y=o.y*T,w=o.w*T,h=o.h*T,k=o.kind;
  if(k==='pc_station'||k==='computer_desk'||k==='teacher_desk'||k==='service_desk'||k==='cubicle'||k==='student_desk'||k==='lab_desk'||k==='reading_table'||k==='collab_table'||k==='desk'){
   const wood=k==='lab_desk'?'#a6bfba':k==='computer_desk'?'#879eac':k==='cubicle'?'#b7a18e':'#b88d63';rect(x,y,w,h,wood,'#635043');box(x+5,y+7,w-10,6,'#e3c79f');if(k==='cubicle'){box(x+4,y-18,w-8,21,'#b6bfc2');box(x+w*.48,y+2,6,h-8,'#b4c3c5');box(x+w*.5-20,y+9,34,22,'#3b6470');box(x+w*.5-13,y+12,19,12,'#6bb4bd')}
   else if(k==='pc_station'||k==='computer_desk'){box(x+w*.35,y-12,w*.34,27,'#233d48');box(x+w*.35+5,y-9,w*.34-10,18,'#5fb5b8');box(x+w*.46,y+14,10,9,'#435963');box(x+w*.35,y+24,w*.34,4,'#dcd2b1')}
-  else if(k==='lab_desk'){for(let i=0;i<3;i++){box(x+20+i*42,y+5,16,25,['#6c9bac','#d2ab78','#8ab98c'][i]);ellipse(x+28+i*42,y+30,9,4,'#48626c')}}
+  else if(k==='lab_desk'){
+   // Laboratory bench with recognizable science equipment; playable footprint unchanged.
+   box(x+5,y+8,w-10,9,'#d3c7a1');
+   box(x+9,y+h-16,w-18,7,'#54736e');
+   for(let i=0;i<3;i++){
+    const fx=x+32+i*Math.min(58,(w-63)/3);
+    box(fx-4,y+17,8,17,'#dce9df');
+    ellipse(fx,y+39,14,10,['#dd7196','#649ed0','#e6a85a'][i]);
+    ellipse(fx,y+31,11,5,'#f1e5d0');
+    box(fx-6,y+11,12,6,'#5a7782');
+   }
+   const bx=x+w-57;
+   box(bx+17,y+9,11,25,'#314c54');
+   box(bx+2,y+29,21,7,'#d8ded0');
+   box(bx+5,y+38,32,6,'#a9b8aa');
+   box(bx-2,y+42,47,6,'#35525b');
+   ellipse(bx+26,y+18,8,10,'#c9dbe0');
+  }
   else if(k==='service_desk'){box(x+12,y+12,w*.3,18,'#ece1ba');box(x+w*.6,y+12,w*.19,16,'#607f87')}
   else if(k==='student_desk'){box(x+w*.4,y+7,14,20,'#d8e3cc');box(x+8,y+8,12,16,'#567c8c')}
   else if(k==='reading_table'){box(x+w*.35,y+10,18,22,'#e5d2a3');box(x+w*.6,y+15,26,16,'#a4baaa')}
@@ -66,10 +85,30 @@ function shapeObj(o: ArtObject){const x=o.x*T,y=o.y*T,w=o.w*T,h=o.h*T,k=o.kind;
 if (!paintReferenceObject(c, object)) shapeObj(object);
 }
 export function paintFloor(c: CanvasRenderingContext2D, room: Room) {
+ if(room.world==='city'){paintCityFloor(c,room);return;}
  const colors:Record<string,[string,string]>={outdoor:['#729968','#7da36e'],corridor:['#bcb7a7','#c8c1ae'],classroom:['#bbad88','#c1b495'],library:['#ab8058','#bc9067'],staff:['#abaeb0','#b5b8b8'],science:['#bed0c7','#a9c4bd'],knowledge:['#9db5c5','#aec7d4'],hall:['#b69273','#c39c7a'],city:['#819780','#879d85']};
  const palette=colors[room.theme]??colors.classroom;
  for(let y=0;y<room.height;y+=T)for(let x=0;x<room.width;x+=T){c.fillStyle=palette[(x/T+y/T)%2];c.fillRect(x,y,T,T);c.fillStyle='#334b3b15';c.fillRect(x,y,T,1);c.fillRect(x,y,1,T);}
- if(room.theme==='outdoor') {c.fillStyle='#c4bba4';c.fillRect(22.5*T,11*T,5*T,23*T);c.fillStyle='#8c9390';c.fillRect(11*T,14*T,23*T,15*T);for(let y=14;y<29;y++)for(let x=11;x<34;x++)if((x+y)%2===0){c.fillStyle='#9ea6a1';c.fillRect(x*T+3,y*T+3,34,34);}}
+ if(room.theme==='outdoor') {
+   // A continuous stone forecourt visually joins both wings instead of exposing grass under the entrance.
+   c.fillStyle='#b6b0a0';c.fillRect(4.6*T,10.6*T,40.8*T,3.3*T);
+   c.fillStyle='#d7c6a9';c.fillRect(4.6*T,10.6*T,40.8*T,5);c.fillStyle='#778c86';c.fillRect(4.6*T,13.8*T,40.8*T,6);
+   for(let x=5;x<45;x++){c.fillStyle=x%2?'#c5bdab':'#a6ada3';c.fillRect(x*T+2,11*T+5,T-3,26);}
+   c.fillStyle='#c4bba4';c.fillRect(22.5*T,11*T,5*T,23*T);
+   c.fillStyle='#8c9390';c.fillRect(11*T,14*T,23*T,15*T);
+   for(let y=14;y<29;y++)for(let x=11;x<34;x++)if((x+y)%2===0){c.fillStyle='#9ea6a1';c.fillRect(x*T+3,y*T+3,34,34);}
+   if(room.id==='school.courtyard'){
+     // The central door sits between two school-wing sprites; draw a proper masonry vestibule there.
+     // Background-only pixels; portal coordinates, obstacles and triggers remain untouched.
+     const px=22.6*T,py=7.4*T,pw=5.1*T,ph=4.2*T;
+     c.fillStyle='#51414a';c.fillRect(px-7,py-9,pw+14,ph+13);
+     c.fillStyle='#b87972';c.fillRect(px,py,pw,ph);
+     for(let yy=0;yy<4;yy++){c.fillStyle=yy%2?'#d28c80':'#cf8578';c.fillRect(px+5,py+yy*36+6,pw-10,29);c.fillStyle='#e1a596';c.fillRect(px+5,py+yy*36+5,pw-10,3);}
+     c.fillStyle='#e2c49a';c.fillRect(px-12,py-13,pw+24,15);
+     c.fillStyle='#8a6256';c.fillRect(px-9,py+ph-11,pw+18,13);
+     c.fillStyle='#e2c9a6';c.fillRect(22.5*T,11.6*T,5.5*T,12);
+   }
+ }
  for(const wall of room.walls){c.fillStyle=room.theme==='library'?'#a47a56':room.theme==='knowledge'?'#7a98a8':'#b3aa8a';c.fillRect(wall.x,wall.y,wall.width,wall.height);c.fillStyle='#ead1a3';c.fillRect(wall.x,wall.y+wall.height-5,wall.width,5);}
  for(const t of room.targets)if(t.portal){const o=t.portal.opening;c.fillStyle=palette[0];c.fillRect(o.x,o.y,o.width,o.height);}
 }

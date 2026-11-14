@@ -51,7 +51,26 @@ export function paintReferenceObject(c: CanvasRenderingContext2D, o: ArtObject):
   }
   if(k==='guestbook'||k==='attendance'||k==='book_pile'||k==='atlas'){shadow();if(k==='book_pile'||k==='atlas'){for(let n=2;n>=0;n--)book(x+3+n*6,y+n*7,Math.max(26,w-14),Math.max(24,h-16),['#816ab1','#64947b','#b27952'][n]);}else book(x,y,w,h,k==='attendance'?'#755b56':'#926247');return true;}
   if(k==='document'){frame(x,y,w,h,'#bb9869','#5e4338');page(x+5,y+3,w-10,h-7);r(x+w*.4,y+2,w*.2,8,'#e7c95c');return true;}
-  if(k==='lab_desk'){plank(x,y,w,h,'#a9bbbd');for(let n=0;n<3;n++){const xx=x+22+n*Math.max(32,(w-35)/3);disk(xx,y+h*.54,12,10,'#627d88');disk(xx,y+h*.54,8,6,['#7eb4bf','#d1a77d','#9abd9c'][n]);r(xx-8,y+10,17,18,'#cad8cf');}return true;}
+  if(k==='lab_desk') {
+    // Top-down science bench with recognizable microscope, glassware and safety mat.
+    // Artwork stays within the existing task/collider footprint.
+    shadow();frame(x,y,w,h,'#b6c9c3','#455a59');
+    r(x+5,y+6,w-10,7,'#f0e7cb');r(x+7,y+h-16,w-14,8,'#506d69');
+    const cell=Math.min(62,(w-95)/3);
+    for(let n=0;n<3;n++) {
+      const fx=x+22+n*cell;
+      r(fx-9,y+19,18,23,'#d5e9e7');r(fx-5,y+14,10,6,'#56787f');
+      disk(fx,y+46,14,12,['#e2779d','#5aaad0','#e6aa5b'][n]);
+      disk(fx,y+39,11,5,'#f3efdf');disk(fx+3,y+45,4,3,'#ffffff7d');
+    }
+    const mx=x+w-54,my=y+22;
+    r(mx+15,my-13,9,35,'#2b4652');r(mx+13,my-15,26,8,'#3b5265');
+    r(mx+7,my+6,13,11,'#a8bbc1');disk(mx+11,my+16,8,7,'#233b4b');
+    r(mx+1,my+24,48,8,'#395766');r(mx-6,my+34,58,9,'#72898c');
+    disk(mx+15,my+9,6,6,'#d8ae65');
+    r(x+w*.51,y+h-24,26,16,'#f4e5c6');r(x+w*.53,y+h-20,14,3,'#abac9a');
+    return true;
+  }
   if(k==='microscope'){shadow();disk(x+w*.55,y+h*.82,w*.44,8,'#596f73');r(x+w*.32,y+h*.66,w*.48,h*.15,'#9eb2b8');r(x+w*.36,y+h*.2,12,h*.48,'#485d67');r(x+w*.25,y+h*.1,w*.36,12,'#3a4b59');r(x+w*.6,y+6,8,h*.3,'#303c47');disk(x+w*.6,y+h*.6,8,8,'#d1aa5d');return true;}
   if(k==='sink'){frame(x,y,w,h,'#e6e7e3','#7c9292');frame(x+9,y+8,w-18,h-17,'#a8c1c5','#67818d');disk(x+w*.5,y+h*.57,4,4,'#4e6975');r(x+w*.46,y+1,6,19,'#899ea5');r(x+w*.46,y+1,19,5,'#899ea5');return true;}
   if(k==='globe'){shadow();disk(x+w*.5,y+h*.43,Math.min(w*.38,24),Math.min(h*.35,24),'#357ea4');disk(x+w*.43,y+h*.42,10,15,'#77a56c');disk(x+w*.61,y+h*.44,7,11,'#9bbb77');ln(x+w*.5,y+h*.09,x+w*.5,y+h*.86,'#d3bb82',3);r(x+w*.28,y+h*.89,w*.44,6,'#926a47');return true;}
