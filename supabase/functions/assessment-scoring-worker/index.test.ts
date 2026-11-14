@@ -14,6 +14,10 @@ Deno.test("scoring worker rejects unsafe requests before database access", async
     "SUPABASE_URL",
     "SUPABASE_SERVICE_ROLE_KEY",
     "ASSESSMENT_SCORING_ENGINE_READY",
+    "ASSESSMENT_SCORING_SOURCE_IMMUTABLE_READY",
+    "AI_PROVIDER",
+    "GEMINI_API_KEY",
+    "GEMINI_MODEL",
   ];
   const original = keys.map((key) => Deno.env.get(key));
   try {
@@ -32,46 +36,36 @@ Deno.test("scoring worker rejects unsafe requests before database access", async
     );
     const secret = "S".repeat(40);
     Deno.env.set(keys[0], secret);
-    await check(
-      await handleAssessmentScoringRequest(
-        new Request(url, { method: "POST" }),
-      ),
-      401,
-      "UNAUTHORIZED",
-    );
-    await check(
-      await handleAssessmentScoringRequest(
-        new Request(url, {
-          method: "POST",
-          headers: { "x-worker-secret": "wrong" },
-        }),
-      ),
-      401,
-      "UNAUTHORIZED",
-    );
-    await check(
-      await handleAssessmentScoringRequest(
-        new Request(url, {
-          method: "POST",
-          headers: { "x-worker-secret": "X".repeat(513) },
-        }),
-      ),
-      401,
-      "UNAUTHORIZED",
-    );
-    Deno.env.set(keys[1], "https://example.invalid");
-    Deno.env.set(keys[2], "test-service-key");
-    Deno.env.set(keys[3], "true");
-    await check(
-      await handleAssessmentScoringRequest(
+    for (const wrong of ["", "wrong", "X".repeat(513)]) {
+      await check(
+        await handleAssessmentScoringRequest(
+          new Request(url, {
+            method: "POST",
+            headers: wrong ? { "x-worker-secret": wrong } : {},
+          }),
+        ),
+        401,
+        "UNAUTHORIZED",
+      );
+    }
+    const authorized = () =>
+      handleAssessmentScoringRequest(
         new Request(url, {
           method: "POST",
           headers: { "x-worker-secret": secret },
         }),
-      ),
-      503,
-      "SCORING_ENGINE_NOT_IMPLEMENTED",
-    );
+      );
+    await check(await authorized(), 503, "DATABASE_NOT_CONFIGURED");
+    Deno.env.set(keys[1], "https://example.invalid");
+    Deno.env.set(keys[2], "test-service-key");
+    await check(await authorized(), 503, "SCORING_ENGINE_NOT_READY");
+    Deno.env.set(keys[3], "true");
+    await check(await authorized(), 503, "SCORING_SOURCE_NOT_READY");
+    Deno.env.set(keys[4], "true");
+    Deno.env.set(keys[5], "gemini");
+    Deno.env.delete(keys[6]);
+    Deno.env.delete(keys[7]);
+    await check(await authorized(), 503, "SCORING_MODEL_NOT_CONFIGURED");
   } finally {
     keys.forEach((key, i) => {
       if (original[i] === undefined) Deno.env.delete(key);
