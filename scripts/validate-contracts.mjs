@@ -45,6 +45,141 @@ for (const [index, candidate] of invalidStoryBundleCases.entries()) {
     throw new Error(`Story Bundle negative probe ${index + 1} unexpectedly passed`);
   }
 }
+const candidateStoryBundlePath = 'docs/C03_STORY_BINDING_CANDIDATE_BI8_v0.1.json';
+const candidateStoryBundle = read(candidateStoryBundlePath);
+
+if (!validateStoryBundle(candidateStoryBundle)) {
+  console.error(JSON.stringify(validateStoryBundle.errors, null, 2));
+  throw new Error('C-03 Story Binding candidate tidak sesuai Story Bundle Draft v0.1 schema');
+}
+
+// Validate the approved LO binding supplied by PIC B.
+const approvedObjectiveId = 'LO-8A857C13-422A-4C5B-AD8A-8403955C067E';
+const rejectedObjectiveId = 'LO-8923F9B3-C10B-4744-A4E0-40A944530B70';
+const candidateObjectiveIds = [
+  ...candidateStoryBundle.missions.flatMap((item) => item.objective_ids),
+  ...candidateStoryBundle.tasks.flatMap((item) => item.objective_ids),
+  ...candidateStoryBundle.evidence.flatMap((item) => item.objective_ids),
+  ...candidateStoryBundle.dialogues.flatMap((dialogue) =>
+    dialogue.nodes.flatMap((node) => node.objective_ids || []),
+  ),
+];
+
+if (
+  !candidateObjectiveIds.length ||
+  candidateObjectiveIds.some((id) => id !== approvedObjectiveId || id === rejectedObjectiveId)
+) {
+  throw new Error('C-03 candidate memakai LO yang tidak approved atau tidak memiliki LO');
+}
+
+// Every source reference must point to a document version declared by the bundle.
+const declaredSourceVersions = new Set(
+  candidateStoryBundle.source_document_versions.map(
+    (item) => `${item.document_id}:${item.text_version}`,
+  ),
+);
+const candidateSourceRefs = [
+  ...candidateStoryBundle.tasks.flatMap((item) => item.source_refs || []),
+  ...candidateStoryBundle.evidence.flatMap((item) => item.source_refs || []),
+  ...candidateStoryBundle.dialogues.flatMap((dialogue) =>
+    dialogue.nodes.flatMap((node) => node.source_refs || []),
+  ),
+  ...(candidateStoryBundle.hints || []).flatMap((item) => item.source_refs || []),
+  ...(candidateStoryBundle.feedback || []).flatMap((item) => item.source_refs || []),
+];
+
+if (!candidateSourceRefs.length) {
+  throw new Error('C-03 candidate tidak memiliki source reference');
+}
+
+for (const sourceRef of candidateSourceRefs) {
+  const key = `${sourceRef.document_id}:${sourceRef.text_version}`;
+  if (!declaredSourceVersions.has(key)) {
+    throw new Error(`Source reference tidak terdaftar pada source_document_versions: ${key}`);
+  }
+}
+
+// Validate mission, activity, and evidence references.
+const assertUniqueIds = (ids, label) => {
+  if (new Set(ids).size !== ids.length) {
+    throw new Error(`${label} mengandung ID duplikat`);
+  }
+};
+
+const missionIds = candidateStoryBundle.missions.map((item) => item.mission_id);
+const activityIds = candidateStoryBundle.tasks.map((item) => item.activity_id);
+const evidenceIds = candidateStoryBundle.evidence.map((item) => item.evidence_id);
+
+assertUniqueIds(missionIds, 'mission_id');
+assertUniqueIds(activityIds, 'activity_id');
+assertUniqueIds(evidenceIds, 'evidence_id');
+
+const missionById = new Map(
+  candidateStoryBundle.missions.map((item) => [item.mission_id, item]),
+);
+const activityIdSet = new Set(activityIds);
+const evidenceIdSet = new Set(evidenceIds);
+
+for (const mission of candidateStoryBundle.missions) {
+  for (const prerequisite of mission.prerequisites) {
+    if (!missionById.has(prerequisite)) {
+      throw new Error(`Mission prerequisite tidak ditemukan: ${prerequisite}`);
+    }
+  }
+  for (const activityId of mission.activity_ids) {
+    if (!activityIdSet.has(activityId)) {
+      throw new Error(`Mission menunjuk activity yang tidak ditemukan: ${activityId}`);
+    }
+  }
+}
+
+for (const task of candidateStoryBundle.tasks) {
+  for (const evidenceId of task.evidence_ids || []) {
+    if (!evidenceIdSet.has(evidenceId)) {
+      throw new Error(`Task menunjuk evidence yang tidak ditemukan: ${evidenceId}`);
+    }
+  }
+  if ((task.public_item_ids || []).length > 0) {
+    throw new Error('public_item_ids belum boleh digunakan sebelum otorisasi PIC B');
+  }
+}
+
+for (const evidence of candidateStoryBundle.evidence) {
+  if (!missionById.has(evidence.mission_id)) {
+    throw new Error(`Evidence menunjuk mission yang tidak ditemukan: ${evidence.mission_id}`);
+  }
+}
+
+// Reject cycles in the mission prerequisite graph.
+const visitingMissions = new Set();
+const visitedMissions = new Set();
+
+const visitMission = (missionId) => {
+  if (visitingMissions.has(missionId)) {
+    throw new Error(`Mission prerequisite cycle ditemukan pada ${missionId}`);
+  }
+  if (visitedMissions.has(missionId)) return;
+
+  visitingMissions.add(missionId);
+  const mission = missionById.get(missionId);
+
+  for (const prerequisite of mission.prerequisites) {
+    visitMission(prerequisite);
+  }
+
+  visitingMissions.delete(missionId);
+  visitedMissions.add(missionId);
+};
+
+for (const missionId of missionIds) visitMission(missionId);
+
+// Public content must not expose private assessment material.
+const candidateSerialized = JSON.stringify(candidateStoryBundle);
+if (/"(?:answer_key|correct_answer|private_rubric|scoring_policy|service_role_key|gemini_api_key)"\s*:/i.test(candidateSerialized)) {
+  throw new Error('Field privat ditemukan di C-03 Story Binding candidate');
+}
+
+console.log('PASS: C-03 candidate schema, approved LO, source versions, mission graph, activity/evidence references, and public-field checks.');
 const dir = 'fixtures/public';
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
 if (!files.length) throw new Error('Tidak ada public fixture JSON');
@@ -69,4 +204,4 @@ for (const file of files) {
     throw new Error(`${file}: field privat ditemukan dalam public fixture`);
   }
 }
-console.log(`OK: ${files.length} public fixture JSON terbaca; quest-public dan Story Bundle Draft v0.1 tervalidasi.`);
+console.log(`OK: ${files.length} public fixture JSON terbaca; QuestV1 fixture, Story Bundle fixture, dan C-03 candidate tervalidasi.`);
