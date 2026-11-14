@@ -8,8 +8,9 @@ export default function PublicDemoPage(): React.JSX.Element {
         Halaman ini menggunakan data sintetis. Tidak diperlukan login untuk mengakses demo.
       </p>
       <p style={styles.body}>
-        Fitur demo akan tersedia setelah integrasi backend dan quest publik selesai.
+        Kamu bisa mencoba petualangan perpustakaan dengan data sintetis. Ini adalah preview gameplay, bukan Quest BI8 yang dipublikasikan, dan skor maupun BedaJalur hanyalah simulasi.
       </p>
+      <p><Link to="/demo/play" style={styles.back}>Mulai demo permainan (simulasi) →</Link></p>
       <Link to="/" style={styles.back}>
         ← Kembali ke Landing
       </Link>

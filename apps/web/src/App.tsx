@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import LandingPage from './pages/LandingPage';
 import PublicDemoPage from './pages/PublicDemoPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
@@ -13,6 +14,9 @@ import { AuthProvider } from './lib/auth/AuthProvider';
 import ProtectedRoute from './lib/auth/ProtectedRoute';
 import TeacherLearningObjectivesPage from './pages/TeacherLearningObjectivesPage';
 
+// Lazy loaded so the Phaser preview does not enter the initial landing/teacher bundle.
+const StudentDemoPage = lazy(() => import('./pages/StudentDemoPage'));
+
 export default function App(): React.JSX.Element {
   return (
     <AuthProvider>
@@ -21,6 +25,7 @@ export default function App(): React.JSX.Element {
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/demo" element={<PublicDemoPage />} />
+          <Route path="/demo/play" element={<Suspense fallback={<p role="status">Memuat demo game...</p>}><StudentDemoPage /></Suspense>} />
           <Route path="/login" element={<TeacherLoginPage />} />
 
           {/* Protected teacher routes */}
