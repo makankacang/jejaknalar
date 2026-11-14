@@ -21,7 +21,9 @@ async function sameSecret(a: string, b: string) {
   for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i];
   return diff === 0;
 }
-Deno.serve(async (req) => {
+export async function handleAssessmentScoringRequest(
+  req: Request,
+): Promise<Response> {
   if (req.method !== "POST") {
     return json(405, { ok: false, error: "METHOD_NOT_ALLOWED" });
   }
@@ -107,4 +109,6 @@ Deno.serve(async (req) => {
     validated_item_count: prepared.items.length,
     missing_item_count: prepared.missing_item_ids.length,
   });
-});
+}
+
+if (import.meta.main) Deno.serve(handleAssessmentScoringRequest);
