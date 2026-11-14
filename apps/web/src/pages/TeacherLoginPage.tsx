@@ -153,6 +153,7 @@ export default function TeacherLoginPage(): React.JSX.Element {
           </button>
         </form>
 
+        <Link to="/forgot-password" style={styles.backLink}>Lupa password?</Link>
         <p style={styles.footer}>
           Dengan masuk, Anda dapat mengakses ruang pengelolaan
           pembelajaran JejakNalar.
