@@ -2,8 +2,20 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { DocumentParseResult, DocumentSourceReference } from '../lib/parser';
 import type { AnalysisJob, AnalyzerObjective } from '../lib/api/analysisApi';
+import { useAuth } from '../lib/auth/AuthProvider';
+import { getSupabaseClient } from '../lib/supabase/client';
 
 type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
+type ReviewApiResponse = {
+    ok?: boolean;
+    data?: { objective_id?: string; review_status?: string };
+    error?: { message?: string };
+};
+
+const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 
 interface PipelineResult {
     moduleId: string;
@@ -113,6 +125,7 @@ function createDemoObjectives(parseResult: DocumentParseResult): ReviewObjective
 
 export default function TeacherLearningObjectivesPage() {
     const location = useLocation();
+    const { mode } = useAuth();
     const reviewData = location.state as ReviewState | null;
     const parseResult = reviewData?.parseResult;
     const analysisJob = reviewData?.pipelineResult?.analysisJob;
@@ -136,6 +149,9 @@ export default function TeacherLearningObjectivesPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [draftText, setDraftText] = useState('');
     const [notice, setNotice] = useState('');
+    const [requestError, setRequestError] = useState('');
+    const [savingId, setSavingId] = useState<string | null>(null);
+    const [reviewFinished, setReviewFinished] = useState(false);
 
     const approvedCount = objectives.filter((item) => item.status === 'approved').length;
     const pendingCount = objectives.filter((item) => item.status === 'pending').length;
@@ -148,6 +164,10 @@ export default function TeacherLearningObjectivesPage() {
     }
 
     function saveObjective(id: string) {
+        if (isLiveResult) {
+            setNotice('Edit pernyataan belum didukung API LIVE. Tidak ada perubahan yang disimpan.');
+            return;
+        }
         if (!draftText.trim()) {
             setNotice('Pernyataan tujuan pembelajaran tidak boleh kosong.');
             return;
@@ -166,6 +186,11 @@ export default function TeacherLearningObjectivesPage() {
     }
 
     function updateStatus(id: string, status: ReviewStatus) {
+        if (isLiveResult) {
+            setRequestError('Perubahan LIVE harus melalui API, bukan mode DEMO.');
+            return;
+        }
+        setReviewFinished(false);
         setObjectives((current) =>
             current.map((item) => (item.id === id ? { ...item, status } : item)),
         );
@@ -177,6 +202,91 @@ export default function TeacherLearningObjectivesPage() {
                     ? 'Tujuan pembelajaran ditolak pada sesi review ini.'
                     : 'Tujuan pembelajaran dikembalikan ke Pending.',
         );
+    }
+
+
+    async function submitLiveReview(id: string, status: 'approved' | 'rejected') {
+        if (savingId !== null) return;
+        setRequestError('');
+        setNotice('');
+        setReviewFinished(false);
+
+        if (!isLiveResult || mode !== 'live' || analysisJob?.status !== 'completed') {
+            setRequestError('Untuk menyimpan keputusan, login sebagai guru pada mode LIVE dan selesaikan analisis terlebih dahulu.');
+            return;
+        }
+        if (!uuidPattern.test(id) || !objectives.some((objective) => objective.id === id)) {
+            setRequestError('ID Learning Objective bukan UUID database yang valid. Tidak ada data yang diubah.');
+            return;
+        }
+        setSavingId(id);
+        try {
+            const client = getSupabaseClient();
+            const { data: sessionData, error: sessionError } = await client.auth.getSession();
+            if (sessionError || !sessionData.session?.access_token) {
+                throw new Error('Sesi login guru tidak tersedia. Silakan login ulang pada mode LIVE.');
+            }
+
+            const { data, error } = await client.functions.invoke<ReviewApiResponse>(
+                `api/learning-objectives/${id}/review`,
+                {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+                    body: { review_status: status },
+                },
+            );
+
+            if (error) {
+                let message = error.message;
+                if (error.context instanceof Response) {
+                    const detail: ReviewApiResponse | null = await error.context.json().catch(() => null);
+                    message = detail?.error?.message || message;
+                }
+                throw new Error(`Gagal menyimpan review LIVE: ${message}`);
+            }
+            if (
+                data?.ok !== true ||
+                data.data?.objective_id?.toLowerCase() !== id.toLowerCase() ||
+                data.data?.review_status !== status
+            ) {
+                throw new Error('Respons API tidak mengonfirmasi objective dan status yang disimpan.');
+            }
+
+            setObjectives((current) =>
+                current.map((objective) => objective.id === id
+                    ? { ...objective, status }
+                    : objective),
+            );
+            setNotice(`Keputusan ${status === 'approved' ? 'Approve' : 'Reject'} berhasil disimpan ke backend untuk objective ${id}.`);
+        } catch (cause) {
+            setRequestError(cause instanceof Error
+                ? cause.message
+                : 'Gagal menghubungi backend. Status objective tidak diubah.');
+        } finally {
+            setSavingId(null);
+        }
+    }
+
+    function finishReview() {
+        setRequestError('');
+        setReviewFinished(false);
+        if (savingId !== null) return;
+        if (pendingCount > 0) {
+            setNotice('Masih ada objective Pending. Putuskan Approve atau Reject terlebih dahulu.');
+            return;
+        }
+        if (approvedCount === 0) {
+            setNotice('Minimal satu objective harus disetujui untuk melanjutkan.');
+            return;
+        }
+        if (isLiveResult && (mode !== 'live' || analysisJob?.status !== 'completed')) {
+            setRequestError('Review LIVE tidak dapat diselesaikan tanpa sesi guru dan analisis yang berhasil.');
+            return;
+        }
+        setReviewFinished(true);
+        setNotice(isLiveResult
+            ? 'Review LIVE selesai. Keputusan Approve/Reject telah disimpan satu per satu melalui backend.'
+            : 'Review DEMO selesai. Keputusan hanya berlaku pada sesi browser ini.');
     }
 
     if (!parseResult || !reviewData) {
@@ -247,7 +357,7 @@ export default function TeacherLearningObjectivesPage() {
                     <strong>{isLiveResult ? 'Hasil analisis live' : 'Mode demonstrasi'}</strong>
                     <p>
                         {isLiveResult
-                            ? 'Objective di bawah berasal dari respons Learning Analyzer untuk snapshot dokumen ini. Perubahan review pada halaman ini masih bersifat lokal dan belum disimpan ke backend.'
+                            ? 'Objective berasal dari Analyzer. Approve/Reject pada mode LIVE disimpan langsung melalui API guru; fitur edit pernyataan masih khusus DEMO.'
                             : 'Pernyataan Learning Objective berikut merupakan data contoh untuk menguji antarmuka. Ini bukan hasil AI Analyzer. Referensi sumber diambil dari dokumen yang benar-benar diunggah.'}
                     </p>
                     {analysisJob && (
@@ -331,14 +441,19 @@ export default function TeacherLearningObjectivesPage() {
                         {notice}
                     </div>
                 )}
+                {requestError && (
+                    <div role="alert" style={styles.errorNotice}>
+                        {requestError}
+                    </div>
+                )}
 
                 <div role="note" style={styles.reviewSimulationNotice}>
-                    <strong>DEMO / SIMULASI — REVIEW BELUM TERSIMPAN</strong>
-                    <p>
-                        Edit, Approve, Reject, dan perubahan status di halaman ini hanya
-                        mengubah tampilan pada sesi browser. Keputusan review belum dikirim
-                        atau disimpan ke backend Supabase dan belum menjadi persetujuan resmi.
-                    </p>
+                    <strong>{isLiveResult
+                        ? 'REVIEW LIVE — PERSETUJUAN DISIMPAN MELALUI API'
+                        : 'DEMO / SIMULASI — REVIEW BELUM TERSIMPAN'}</strong>
+                    <p>{isLiveResult
+                        ? 'Setiap klik Approve/Reject akan mengirim keputusan ke Supabase. Jika API gagal, status tidak berubah. Edit pernyataan belum didukung endpoint yang tersedia.'
+                        : 'Edit, Approve, dan Reject pada halaman DEMO hanya mengubah tampilan browser. Tidak ada perubahan dikirim ke Supabase.'}</p>
                 </div>
 
                 {objectives.length > 0 ? (
@@ -424,44 +539,57 @@ export default function TeacherLearningObjectivesPage() {
                                 )}
 
                                 <div style={styles.actionRow}>
-                                    <button
-                                        type="button"
-                                        style={styles.secondaryButton}
-                                        onClick={() => editObjective(objective)}
-                                        disabled={editingId === objective.id}
-                                    >
-                                        Edit (DEMO)
-                                    </button>
-                                    {objective.status === 'rejected' ? (
-                                        <button
-                                            type="button"
-                                            style={styles.secondaryButton}
-                                            onClick={() => updateStatus(objective.id, 'pending')}
-                                        >
-                                            Kembalikan ke Pending (DEMO)
-                                        </button>
+                                    {isLiveResult ? (
+                                        <>
+                                            {objective.status === 'approved' ? (
+                                                <strong style={styles.approved}>Approved — tersimpan</strong>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        style={styles.rejectButton}
+                                                        disabled={savingId !== null || mode !== 'live' || objective.status === 'rejected'}
+                                                        onClick={() => void submitLiveReview(objective.id, 'rejected')}
+                                                    >
+                                                        {savingId === objective.id ? 'Menyimpan...' : objective.status === 'rejected' ? 'Rejected — tersimpan' : 'Reject (LIVE)'}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        style={styles.approveButton}
+                                                        disabled={savingId !== null || mode !== 'live'}
+                                                        onClick={() => void submitLiveReview(objective.id, 'approved')}
+                                                    >
+                                                        {savingId === objective.id ? 'Menyimpan...' : 'Approve (LIVE)'}
+                                                    </button>
+                                                </>
+                                            )}
+                                        </>
                                     ) : (
                                         <>
-                                            <button
-                                                type="button"
-                                                style={styles.rejectButton}
-                                                onClick={() =>
-                                                    updateStatus(objective.id, 'rejected')
-                                                }
-                                                disabled={editingId === objective.id}
-                                            >
-                                                Reject (DEMO)
+                                            <button type="button" style={styles.secondaryButton}
+                                                onClick={() => editObjective(objective)}
+                                                disabled={editingId === objective.id}>
+                                                Edit (DEMO)
                                             </button>
-                                            <button
-                                                type="button"
-                                                style={styles.approveButton}
-                                                onClick={() =>
-                                                    updateStatus(objective.id, 'approved')
-                                                }
-                                                disabled={editingId === objective.id}
-                                            >
-                                                Approve (DEMO)
-                                            </button>
+                                            {objective.status === 'rejected' ? (
+                                                <button type="button" style={styles.secondaryButton}
+                                                    onClick={() => updateStatus(objective.id, 'pending')}>
+                                                    Kembalikan ke Pending (DEMO)
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button type="button" style={styles.rejectButton}
+                                                        onClick={() => updateStatus(objective.id, 'rejected')}
+                                                        disabled={editingId === objective.id}>
+                                                        Reject (DEMO)
+                                                    </button>
+                                                    <button type="button" style={styles.approveButton}
+                                                        onClick={() => updateStatus(objective.id, 'approved')}
+                                                        disabled={editingId === objective.id}>
+                                                        Approve (DEMO)
+                                                    </button>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -495,17 +623,22 @@ export default function TeacherLearningObjectivesPage() {
                     <button
                         type="button"
                         style={styles.primaryButton}
-                        disabled={approvedCount === 0}
-                        onClick={() =>
-                            setNotice(
-                                isLiveResult
-                                    ? 'Review selesai untuk sesi ini. Status approval belum dikirim atau disimpan ke backend.'
-                                    : 'Review demonstrasi selesai. Approval belum disimpan ke backend.',
-                            )
-                        }
+                        disabled={approvedCount === 0 || savingId !== null}
+                        onClick={finishReview}
                     >
-                        Selesai Review
+                        {reviewFinished ? 'Review Selesai ✓' : 'Selesai Review'}
                     </button>
+                    {reviewFinished && (
+                        <div role="status" style={styles.notice}>
+                            <strong>{isLiveResult ? 'Review tersimpan' : 'Review demonstrasi selesai'}</strong>
+                            <p>{isLiveResult
+                                ? 'Keputusan objective sudah disimpan melalui API PIC B. Generator quest PIC C belum memiliki halaman lanjutan pada paket ini; review selesai bukan berarti quest sudah dihasilkan.'
+                                : 'Mode DEMO selesai tanpa menyimpan perubahan ke backend.'}</p>
+                            <Link to="/teacher/modules" style={styles.primaryLink}>
+                                Kembali ke Daftar Modul
+                            </Link>
+                        </div>
+                    )}
                 </section>
             </div>
         </main>
