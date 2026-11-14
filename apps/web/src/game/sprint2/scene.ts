@@ -8,6 +8,7 @@ import type { State } from './state';
 import { routeWaypoint, type Guide, type MarkerStatus } from './mission-guidance';
 import { paintPerson, facePerson, type Person } from './character-renderer';
 import { missionMarkerY } from './marker-layout';
+import { paintLearningObjectProp } from './learning-object-prop';
 export type SceneHooks = { snapshot: () => State; active: () => boolean; direction: () => Point; position: (p: Point, h: Heading) => void; interact: (t: Target) => void; nearby: (t: Target | null) => void; message: (s: string) => void; reduced: () => boolean; running: () => boolean; debug: () => boolean; guidance?: () => Guide | null; markerStatus?: (target:Target) => MarkerStatus; directionHint?: (hint:{x:number;y:number;glyph:string;label:string}|null)=>void };
 export class AdventureScene extends Phaser.Scene {
   private person!: Person;
@@ -75,6 +76,13 @@ export class AdventureScene extends Phaser.Scene {
       const depth = room.world === 'city' ? cityObjectDepth(obj) : ['court', 'gate', 'building_sign', 'window', 'poster', 'clock', 'stage_curtain', 'whiteboard', 'screen_board'].includes(obj.kind) ? 1 : (obj.y + obj.h) * 40 + (obj.kind==='lab_desk' ? 35 : 0);
       this.add.image(obj.x * 40 - margin, obj.y * 40 - margin, key).setOrigin(0).setDepth(depth);
     }
+    // Show physical module props at the SAME positions as world object IDs.
+    // No new collision or interaction anchor is created.
+    for (const t of room.targets) {
+      if (t.kind !== 'task' || !t.objectId) continue;
+      const object = room.objects.find(o => o.id === t.objectId);
+      if (object) paintLearningObjectProp(this, object, t);
+    }
     for (const t of room.targets) {
       if (t.kind === 'npc') this.npc = paintPerson(this, t.x, t.y, Number(t.color?.replace('#', '0x')) || 0xb78275, t.id, t.label, t.role);
       // The park exit is an open pathway; label the trail, never paint an indoor door.
@@ -128,7 +136,8 @@ export class AdventureScene extends Phaser.Scene {
     for (const t of room.targets) {
       if (t.kind === 'door' || t.kind === 'map') continue;
       const ring = this.add.circle(t.x,t.y,23,0xf2c96c,0).setStrokeStyle(3,0xf2c96c,0.95).setDepth(4900).setVisible(false);
-      const marker = this.add.text(t.x,missionMarkerY(t),'◆',{fontFamily:'monospace',fontSize:'16px',fontStyle:'bold',color:'#f2cb72',padding:{x:0,y:0}}).setOrigin(.5).setDepth(5205).setVisible(false);
+      const visual = t.kind === 'task' && t.display ? {x:t.display.x,y:t.display.y-43} : {x:t.x,y:missionMarkerY(t)};
+      const marker = this.add.text(visual.x,visual.y,'!',{fontFamily:'monospace',fontSize:'16px',fontStyle:'bold',color:'#f2cb72',padding:{x:0,y:0}}).setOrigin(.5).setDepth(5205).setVisible(false);
       this.missionMarkers.push({target:t,text:marker,ring});
     }
     this.offscreenArrow = this.add.text(0,0,'',{fontFamily:'monospace',fontSize:'13px',fontStyle:'bold',color:'#1c302f',backgroundColor:'#ffe09a',padding:{x:9,y:7},wordWrap:{width:170}}).setScrollFactor(0).setDepth(9000).setVisible(false);
@@ -158,7 +167,7 @@ export class AdventureScene extends Phaser.Scene {
       const show=active && guide?.target.id===target.id;
       text.setVisible(show);
       ring.setStrokeStyle(2,0xf2cb72,0.48).setVisible(show);
-      if (show) text.setPosition(target.x,missionMarkerY(target));
+      if (show) text.setPosition(target.kind === 'task' && target.display ? target.display.x : target.x, target.kind === 'task' && target.display ? target.display.y - 43 : missionMarkerY(target));
     }
     this.offscreenArrow.setVisible(false); this.hooks.directionHint?.(null);
     if (!guide || guide.room !== this.roomId || !this.person) return;
