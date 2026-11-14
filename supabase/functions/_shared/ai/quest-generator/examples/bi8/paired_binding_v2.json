@@ -1,0 +1,99 @@
+{
+  "artifact_type": "BI8_PAIRED_BINDING_V2_MANIFEST",
+  "status": "CONTRACT_COHERENT_ADAPTER_REQUIRED_RUNTIME_NOT_E2E_VERIFIED",
+  "quest": {
+    "quest_id": "QUEST-BI8-B1S5-REDAKSI-001",
+    "approved_draft_id": "b0b973e1-ea14-423d-9b9c-c935b8f895ff",
+    "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+    "version_status": "PROVISIONAL_NOT_PUBLISHED",
+    "scene_id": "school_library"
+  },
+  "story_bundle": {
+    "bundle_schema_version": "0.1-draft",
+    "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+    "world_preset": "school",
+    "start_room_id": "school.library",
+    "registry_version": "D-school-1.4-sprint2-1"
+  },
+  "identity_bindings": {
+    "objective_id": "LO-8A857C13-422A-4C5B-AD8A-8403955C067E",
+    "assessment_item_id": "ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001",
+    "staging_document_id": "doc_a305829d3917b4ca",
+    "staging_text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2"
+  },
+  "mapping": [
+    {
+      "quest_step_id": "read-bi8-subbab5",
+      "quest_step_type": "read_document",
+      "quest_ref": "doc_a305829d3917b4ca",
+      "story_activity_id": "ACT-BI8-REDAKSI-OBSERVE-01",
+      "story_template": "observe",
+      "room_id": "school.library",
+      "object_id": "school.library.guestbook",
+      "source_refs": [
+        "DOC-P-559"
+      ],
+      "assessment_item_id": null,
+      "status": "CONTENT_BINDING_READY_SOURCE_RESOLUTION_PENDING"
+    },
+    {
+      "quest_step_id": "submit-bi8-classification",
+      "quest_step_type": "select_evidence",
+      "quest_item_id": "ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001",
+      "story_activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "story_template": "investigate",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "source_refs": [
+        "DOC-P-559",
+        "DOC-P-599",
+        "DOC-P-596"
+      ],
+      "response_presentation": "constructed_response / long_text + two classification selectors + multi-select evidence",
+      "payload": "answers: [{ item_id, value: one labeled string }]",
+      "status": "CONTRACT_ACCEPTED_ADAPTER_AND_STAGING_VERIFICATION_REQUIRED"
+    }
+  ],
+  "activity_sequence": [
+    {
+      "activity_id": "ACT-BI8-REDAKSI-OBSERVE-01",
+      "mission_id": "MIS-BI8-REDAKSI-01",
+      "task_template": "observe"
+    },
+    {
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "mission_id": "MIS-BI8-REDAKSI-02",
+      "task_template": "investigate",
+      "paired_quest_step": "submit-bi8-classification"
+    }
+  ],
+  "serialization": {
+    "item_id": "ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001",
+    "value_type": "string",
+    "labels": [
+      "Paragraf A",
+      "Klasifikasi",
+      "Bukti",
+      "Alasan",
+      "Paragraf B",
+      "Klasifikasi",
+      "Bukti",
+      "Alasan"
+    ],
+    "allow_partial": true,
+    "frontend_scoring": false
+  },
+  "scene_room_separation": {
+    "questv1_scene_id": "school_library",
+    "story_bundle_start_room_id": "school.library",
+    "rule": "These are separate identifiers in separate contracts. Do not assume an alias or equality. The D adapter must explicitly resolve the QuestV1 scene to Story Bundle/world rooms."
+  },
+  "runtime_gates": [
+    "Legacy Sprint 1 school_library preview content points to fixture DOC-001 and ITEM-001; a BI8 presentation adapter must resolve the BI8 document and official item.",
+    "The QuestV1 scene_id school_library and world room school.library are distinct identifiers; no alias is assumed.",
+    "DOC-P-* local source locators must be resolved by PIC B against staging snapshot/text_version.",
+    "Supplied world JSON is DESIGN_MOCK_NOT_PRODUCTION; D audit previously observed the code-side pin D-school-1.4-sprint2-1. Runtime capability still needs confirmation.",
+    "Student Runtime must remain demo/fail-closed until published Quest and live adapter are proven."
+  ],
+  "registry_pin": "D-school-1.4-sprint2-1"
+}

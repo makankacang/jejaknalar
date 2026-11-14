@@ -1,0 +1,363 @@
+{
+  "bundle_schema_version": "0.1-draft",
+  "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+  "source_document_versions": [
+    {
+      "document_id": "doc_a305829d3917b4ca",
+      "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2"
+    }
+  ],
+  "registry_version": "D-school-1.4-sprint2-1",
+  "world_preset": "school",
+  "start_room_id": "school.library",
+  "title": "Misi Redaksi: Audit Dua Paragraf",
+  "opening": "Majalah sekolah sedang menyiapkan rubrik laporan hasil observasi. Dua paragraf masuk ke meja redaksi. Sebelum diterbitkan, tim redaksi perlu memeriksa bagaimana setiap paragraf menyajikan objek dan informasi, kemudian menyusun kesimpulan yang didukung bukti tekstual.",
+  "learning_context": {
+    "grade": 8,
+    "subject": "Bahasa Indonesia",
+    "topic": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi",
+    "curriculum": "Materi bersumber dari modul ajar Bahasa Indonesia kelas VIII yang terlampir; status persetujuan konten dicatat terpisah."
+  },
+  "missions": [
+    {
+      "mission_id": "MIS-BI8-REDAKSI-01",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "required": true,
+      "room_id": "school.library",
+      "prerequisites": [],
+      "activity_ids": [
+        "ACT-BI8-REDAKSI-OBSERVE-01"
+      ]
+    },
+    {
+      "mission_id": "MIS-BI8-REDAKSI-02",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "required": true,
+      "room_id": "school.staff_room",
+      "prerequisites": [
+        "MIS-BI8-REDAKSI-01"
+      ],
+      "activity_ids": [
+        "ACT-BI8-REDAKSI-INVESTIGATE-01"
+      ]
+    }
+  ],
+  "dialogues": [
+    {
+      "npc_id": "school.npc.librarian",
+      "room_id": "school.library",
+      "start_node_id": "NODE-REDAKSI-INTRO",
+      "nodes": [
+        {
+          "node_id": "NODE-REDAKSI-INTRO",
+          "text": "Bu Maya: Tim redaksi menerima dua paragraf untuk rubrik laporan hasil observasi. Sebelum naskah diterbitkan, periksa cara paragraf menyajikan objek dan informasi.",
+          "choices": [
+            {
+              "choice_id": "CHOICE-REDAKSI-READ-CRITERIA",
+              "label": "Pelajari kriteria redaksi",
+              "next_node_id": "NODE-REDAKSI-CRITERIA"
+            }
+          ]
+        },
+        {
+          "node_id": "NODE-REDAKSI-CRITERIA",
+          "text": "Materi menjelaskan bahwa paragraf deskripsi menonjolkan cara menggambarkan keadaan, sedangkan paragraf eksposisi menonjolkan informasi yang dikandungnya.",
+          "source_refs": [
+            {
+              "document_id": "doc_a305829d3917b4ca",
+              "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+              "source_map_id": "DOC-P-559",
+              "locator": {
+                "kind": "docx_paragraph",
+                "paragraph_index": 559
+              },
+              "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+            }
+          ],
+          "choices": [
+            {
+              "choice_id": "CHOICE-REDAKSI-START",
+              "label": "Mulai memeriksa naskah",
+              "unlock_mission_id": "MIS-BI8-REDAKSI-01"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "activity_id": "ACT-BI8-REDAKSI-OBSERVE-01",
+      "room_id": "school.library",
+      "object_id": "school.library.guestbook",
+      "template": "observe",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "instruction": "Baca kartu kriteria redaksi. Catat perbedaan fokus paragraf deskripsi dan eksposisi sebelum memeriksa contoh.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ],
+      "evidence_ids": [
+        "EVD-BI8-REDAKSI-KRITERIA"
+      ]
+    },
+    {
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "template": "investigate",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "instruction": "Audit kedua paragraf. Untuk Paragraf A dan Paragraf B, tentukan klasifikasi, pilih satu atau lebih bukti tekstual, lalu tuliskan alasanmu dengan kalimat sendiri. Keenam bagian respons akan dikirim sebagai satu jawaban untuk assessment BI8 resmi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596
+          },
+          "excerpt": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan."
+        }
+      ],
+      "evidence_ids": [
+        "EVD-BI8-REDAKSI-MIRA",
+        "EVD-BI8-REDAKSI-MOTOR"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EVD-BI8-REDAKSI-KRITERIA",
+      "mission_id": "MIS-BI8-REDAKSI-01",
+      "room_id": "school.library",
+      "object_id": "school.library.guestbook",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Kartu Kriteria Redaksi",
+      "summary": "Kriteria untuk membedakan paragraf yang menggambarkan keadaan dan paragraf yang menyampaikan informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    },
+    {
+      "evidence_id": "EVD-BI8-REDAKSI-MIRA",
+      "mission_id": "MIS-BI8-REDAKSI-02",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Detail Sepeda Mira",
+      "summary": "Rangkaian detail yang menggambarkan tampilan dan bagian-bagian sepeda Mira.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+        }
+      ]
+    },
+    {
+      "evidence_id": "EVD-BI8-REDAKSI-MOTOR",
+      "mission_id": "MIS-BI8-REDAKSI-02",
+      "room_id": "school.staff_room",
+      "object_id": "school.staff_room.teacher_note",
+      "objective_ids": [
+        "LO-8A857C13-422A-4C5B-AD8A-8403955C067E"
+      ],
+      "title": "Informasi Sepeda Motor",
+      "summary": "Informasi tentang penggunaan, bahan bakar, jarak tempuh, dan manfaat sepeda motor.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596
+          },
+          "excerpt": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan."
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "hint_id": "HINT-BI8-REDAKSI-01",
+      "activity_id": "ACT-BI8-REDAKSI-OBSERVE-01",
+      "level": 1,
+      "text": "Perhatikan perbedaan antara paragraf yang menggambarkan keadaan dan paragraf yang menyampaikan informasi.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    },
+    {
+      "hint_id": "HINT-BI8-REDAKSI-02",
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "level": 2,
+      "text": "Baca setiap kalimat. Tandai detail objek, informasi, atau data yang dapat kamu gunakan sebagai bukti.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596
+          },
+          "excerpt": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan."
+        }
+      ]
+    },
+    {
+      "hint_id": "HINT-BI8-REDAKSI-03",
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "level": 3,
+      "text": "Setelah memilih bukti, jelaskan mengapa bagian teks tersebut mendukung klasifikasimu.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    }
+  ],
+  "feedback": [
+    {
+      "feedback_id": "FB-BI8-REDAKSI-SUPPORT",
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "path": "needs_support",
+      "text": "Tinjau kembali kartu kriteria dan baca kedua paragraf sekali lagi. Pilih bukti yang jelas, lalu jelaskan alasan klasifikasimu.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    },
+    {
+      "feedback_id": "FB-BI8-REDAKSI-DEVELOPING",
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "path": "developing",
+      "text": "Klasifikasi awalmu sudah terbentuk. Perkuat alasan dengan petikan yang lebih spesifik dari setiap paragraf.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-599",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 599
+          },
+          "excerpt": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang."
+        },
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-596",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 596
+          },
+          "excerpt": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan."
+        }
+      ]
+    },
+    {
+      "feedback_id": "FB-BI8-REDAKSI-EXTENSION",
+      "activity_id": "ACT-BI8-REDAKSI-INVESTIGATE-01",
+      "path": "ready_for_extension",
+      "text": "Audit redaksimu sudah tersusun. Tantangan berikutnya adalah mencari contoh paragraf lain dan menerapkan kriteria yang sama.",
+      "source_refs": [
+        {
+          "document_id": "doc_a305829d3917b4ca",
+          "text_version": "1c8e29fe-698d-4d6c-ad2b-ff178de1ace2",
+          "source_map_id": "DOC-P-559",
+          "locator": {
+            "kind": "docx_paragraph",
+            "paragraph_index": 559
+          },
+          "excerpt": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya."
+        }
+      ]
+    }
+  ],
+  "endings": {
+    "needs_support": "Redaksi menunda penerbitan. Baca kembali kartu kriteria dan telusuri bukti dari kedua paragraf sebelum menyusun kesimpulan.",
+    "developing": "Redaksi menerima klasifikasi awal. Perkuat alasan dengan memilih petikan yang lebih spesifik dari masing-masing paragraf.",
+    "ready_for_extension": "Rapat redaksi selesai. Tim dapat mencari contoh paragraf lain dan menguji kriteria yang sama."
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "artifact_type": "BI8_STUDENT_PRESENTATION_CONTENT",
+  "artifact_version": "1.0.0",
+  "status": "CONTENT_READY_FOR_STUDENT_UI_ADAPTER; DEMO_UNTIL_SOURCE_AND_PUBLICATION_GATES_PASS",
+  "title": "Misi Redaksi: Audit Dua Paragraf",
+  "grade": 8,
+  "subject": "Bahasa Indonesia",
+  "topic": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi",
+  "intro": "Kamu adalah bagian dari tim redaksi majalah sekolah. Sebelum naskah diterbitkan, periksa dua paragraf berikut. Tentukan jenis masing-masing paragraf, pilih bagian teks yang menjadi bukti, lalu jelaskan alasanmu menggunakan kalimat sendiri.",
+  "concept_card": {
+    "title": "Bekal Tim Redaksi",
+    "body": "Mengidentifikasi paragraf deskripsi dan eksposisi dalam Laporan Hasil Observasi. Guru dapat menjelaskan kepada peserta didik bahwa kunci paragraf deskripsi terletak pada cara menggambarkan sebuah keadaan, sedangkan kunci paragraf eksposisi terletak pada informasi yang dikandungnya.",
+    "definitions": [
+      {
+        "term": "Paragraf deskripsi",
+        "explanation": "Paragraf yang menonjolkan cara menggambarkan suatu keadaan atau objek secara terperinci."
+      },
+      {
+        "term": "Paragraf eksposisi",
+        "explanation": "Paragraf yang menonjolkan informasi yang disampaikan tentang suatu hal."
+      }
+    ]
+  },
+  "paragraphs": [
+    {
+      "id": "paragraph_a",
+      "label": "Paragraf A — Sepeda Mira",
+      "text": "Sepeda baru Mira berwarna merah, punya keranjang, dan memiliki bangku boncengan di bagian belakang. Bel sepedanya terletak di setang sebelah kanan. Ada kaca spion kecil di setang kiri dan kanan yang berfungsi untuk melihat jika ada kendaraan dari belakang.",
+      "evidence_options": [
+        {
+          "id": "A-EV-01",
+          "text": "Sepeda baru Mira berwarna merah"
+        },
+        {
+          "id": "A-EV-02",
+          "text": "punya keranjang"
+        },
+        {
+          "id": "A-EV-03",
+          "text": "memiliki bangku boncengan di bagian belakang"
+        },
+        {
+          "id": "A-EV-04",
+          "text": "Bel sepedanya terletak di setang sebelah kanan"
+        },
+        {
+          "id": "A-EV-05",
+          "text": "Ada kaca spion kecil di setang kiri dan kanan"
+        }
+      ],
+      "classification_options": [
+        "Deskripsi",
+        "Eksposisi"
+      ],
+      "reason_prompt": "Mengapa pilihan klasifikasimu sesuai dengan isi Paragraf A? Jelaskan dengan bahasamu sendiri."
+    },
+    {
+      "id": "paragraph_b",
+      "label": "Paragraf B — Sepeda Motor",
+      "text": "Sepeda motor banyak digunakan untuk pergi bekerja karena termasuk salah satu alat transportasi yang hemat. Dengan bahan bakar seharga Rp7.800,00 per liter, pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer. Selain itu, sepeda motor juga bermanfaat untuk memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet untuk mencapai tujuan.",
+      "evidence_options": [
+        {
+          "id": "B-EV-01",
+          "text": "Sepeda motor banyak digunakan untuk pergi bekerja"
+        },
+        {
+          "id": "B-EV-02",
+          "text": "termasuk salah satu alat transportasi yang hemat"
+        },
+        {
+          "id": "B-EV-03",
+          "text": "Dengan bahan bakar seharga Rp7.800,00 per liter"
+        },
+        {
+          "id": "B-EV-04",
+          "text": "pengendara sepeda motor bisa menempuh jarak sejauh 47 kilometer"
+        },
+        {
+          "id": "B-EV-05",
+          "text": "memudahkan pengendara dalam mengakses rute-rute sulit, gang-gang sempit, dan jalan-jalan yang macet"
+        }
+      ],
+      "classification_options": [
+        "Deskripsi",
+        "Eksposisi"
+      ],
+      "reason_prompt": "Mengapa pilihan klasifikasimu sesuai dengan isi Paragraf B? Jelaskan dengan bahasamu sendiri."
+    }
+  ],
+  "assessment_instruction": "Untuk setiap paragraf: (1) pilih jenis paragraf, (2) pilih satu atau lebih bagian teks yang mendukung pilihanmu, dan (3) jelaskan alasanmu dengan kalimat sendiri. Kamu boleh menggunakan kata-katamu sendiri. Jawaban tidak harus sama dengan contoh atau definisi di materi.",
+  "response_fields": [
+    {
+      "id": "paragraph_a_classification",
+      "label": "Paragraf A — Klasifikasi",
+      "type": "single_choice",
+      "options": [
+        "Deskripsi",
+        "Eksposisi"
+      ]
+    },
+    {
+      "id": "paragraph_a_evidence",
+      "label": "Paragraf A — Bukti tekstual",
+      "type": "multi_select",
+      "options_ref": "paragraph_a.evidence_options"
+    },
+    {
+      "id": "paragraph_a_reasoning",
+      "label": "Paragraf A — Alasan",
+      "type": "long_text",
+      "placeholder": "Jelaskan alasanmu menggunakan kalimat sendiri."
+    },
+    {
+      "id": "paragraph_b_classification",
+      "label": "Paragraf B — Klasifikasi",
+      "type": "single_choice",
+      "options": [
+        "Deskripsi",
+        "Eksposisi"
+      ]
+    },
+    {
+      "id": "paragraph_b_evidence",
+      "label": "Paragraf B — Bukti tekstual",
+      "type": "multi_select",
+      "options_ref": "paragraph_b.evidence_options"
+    },
+    {
+      "id": "paragraph_b_reasoning",
+      "label": "Paragraf B — Alasan",
+      "type": "long_text",
+      "placeholder": "Jelaskan alasanmu menggunakan kalimat sendiri."
+    }
+  ],
+  "submission": {
+    "quest_version_id": "QV-BI8-B1S5-REDAKSI-001",
+    "item_id": "ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001",
+    "payload_shape": "answers: [{ item_id, value }]",
+    "value_type": "string",
+    "serialization_template": "Paragraf A:\\nKlasifikasi: {classification_a}\\nBukti: {evidence_a}\\nAlasan: {reasoning_a}\\n\\nParagraf B:\\nKlasifikasi: {classification_b}\\nBukti: {evidence_b}\\nAlasan: {reasoning_b}",
+    "allow_partial_submission": true,
+    "frontend_validation": "Only validate payload/string serialization and optionally show completeness reminders. Do not block partial answers and do not score academic correctness."
+  },
+  "display_safety": {
+    "show_internal_document_ids": false,
+    "show_source_map_ids": false,
+    "show_answer_key": false,
+    "show_private_rubric": false,
+    "show_score_before_backend_result": false,
+    "demo_label_required_until_published": true
+  }
+}
