@@ -2,7 +2,7 @@
 
 Platform website pembelajaran interaktif untuk siswa SMP: guru menyiapkan materi dan menyetujui quest; siswa menyelesaikan petualangan dan menerima feedback serta latihan adaptif **BedaJalur**.
 
-> **Status:** Sprint 0 / Hari 1 — fondasi repository dan kontrak. Backend, database, AI Generator, dan gameplay produksi **belum** dinyatakan selesai.
+> **Status (14 Nov 2026):** backend guru dan siswa ada di `supabase/functions/`. Scoring server, publish quest lewat UI, dan koneksi game ke API **belum selesai di `develop`**. Lihat `docs/B-13-RELEASE-RUNBOOK.md` (staging, gerbang keamanan, gap) dan `docs/CCR-09-SUBMIT-JOIN-CONTRACT.md`.
 
 ## Anggota dan kepemilikan
 
@@ -80,8 +80,8 @@ supabase/                 Migrasi, autentikasi, API Edge Functions (hari berikut
 - Frontend tidak boleh menerima kunci jawaban privat; score dan otorisasi diverifikasi server.
 - Kontrak, error, dan session recovery belum final sampai CCR terkait disetujui.
 
-## Status dan blocker Hari 1
+## Status dan blocker
 
-Scaffold frontend, CI, contoh env, README dan pemeriksaan kontrak disiapkan dalam patch Hari 1. `contracts/api.openapi.yaml` dan `contracts/quest.schema.json` **tidak diubah sepihak**. Sebelum Sprint 1 dimulai, selesaikan CCR pada `docs/CCR_DAY1_PENDING.md`, khususnya `student/join` dan standar JSON.
+Kontrak yang masih menunggu persetujuan lintas PIC: `docs/CCR_DAY1_PENDING.md` dan `docs/CCR-09-SUBMIT-JOIN-CONTRACT.md`. `contracts/api.openapi.yaml` dan `contracts/quest.schema.json` tidak diubah sepihak. Daftar gap terbuka ada di bagian 5 runbook B-13.
 
-> Dokumen ini menjelaskan arah dan status repo pada Sprint 0; tidak mengklaim semua fitur sudah terimplementasi.
+> Dokumen ini tidak mengklaim semua fitur sudah terimplementasi; lihat runbook untuk status per fitur.
