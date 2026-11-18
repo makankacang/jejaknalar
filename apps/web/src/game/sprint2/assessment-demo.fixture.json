@@ -1,0 +1,263 @@
+{
+  "draftVersion": "pic-d-0.2",
+  "id": "QUEST-LAMPU",
+  "versionId": "QV-LAMPU-DRAFT-02",
+  "objectiveId": "LO-BUKTI-01",
+  "title": "Misteri Lampu Perpustakaan",
+  "opening": "Lampu perpustakaan masih menyala setelah bel pulang. Sebuah pesan menuduh klub baca memboroskan listrik. Bu Rani meminta bantuanmu sebelum tuduhan itu tersebar.",
+  "ending": "Papan pengumuman diperbaiki: lampu menyala untuk pendataan buku, dan kenaikan kunjungan tidak membuktikan pemborosan. Bu Rani tersenyum. Kamu menutup kasus dengan bukti, bukan prasangka.",
+  "scene": "library_evening",
+  "sources": [
+    {
+      "documentId": "doc_demo_library",
+      "textVersion": "text-v1",
+      "refId": "DOC-P-001",
+      "kind": "paragraph",
+      "index": 1,
+      "text": "Buku tamu: Juli 80 kunjungan, Agustus 125 kunjungan. Program klub baca dimulai pada Agustus."
+    },
+    {
+      "documentId": "doc_demo_library",
+      "textVersion": "text-v1",
+      "refId": "DOC-P-002",
+      "kind": "paragraph",
+      "index": 2,
+      "text": "Catatan petugas, Jumat 16.00–17.00: lampu ruang baca menyala untuk pendataan buku. Kegiatan klub baca selesai pukul 15.30."
+    },
+    {
+      "documentId": "doc_demo_energy",
+      "textVersion": "text-v1",
+      "refId": "PDF-P-001",
+      "kind": "page",
+      "index": 1,
+      "text": "Meter perpustakaan: Juli 40 kWh, Agustus 38 kWh. Angka ini total bulanan, bukan pengukuran per kegiatan."
+    }
+  ],
+  "clues": [
+    {
+      "id": "guest",
+      "title": "Buku tamu",
+      "sourceRef": "doc_demo_library::text-v1::DOC-P-001"
+    },
+    {
+      "id": "shift",
+      "title": "Catatan petugas",
+      "sourceRef": "doc_demo_library::text-v1::DOC-P-002"
+    },
+    {
+      "id": "meter",
+      "title": "Meter energi",
+      "sourceRef": "doc_demo_energy::text-v1::PDF-P-001"
+    }
+  ],
+  "actors": [
+    {
+      "id": "rani",
+      "kind": "npc",
+      "label": "Bu Rani",
+      "x": 145,
+      "y": 230,
+      "dialog": [
+        "Jangan biarkan pesan itu menjadi tuduhan tanpa bukti.",
+        "Periksa buku tamu, catatan petugas, dan meter energi. Bawa temuanmu ke papan kasus."
+      ]
+    },
+    {
+      "id": "guest-obj",
+      "kind": "clue",
+      "label": "Buku tamu",
+      "x": 360,
+      "y": 175,
+      "clueId": "guest",
+      "dialog": [
+        "Halaman buku tamu terbuka. Ada dua angka yang perlu dibandingkan."
+      ]
+    },
+    {
+      "id": "shift-obj",
+      "kind": "clue",
+      "label": "Catatan petugas",
+      "x": 735,
+      "y": 175,
+      "clueId": "shift",
+      "dialog": [
+        "Sebuah catatan kecil terselip di bawah lampu meja."
+      ]
+    },
+    {
+      "id": "meter-obj",
+      "kind": "clue",
+      "label": "Meter energi",
+      "x": 845,
+      "y": 365,
+      "clueId": "meter",
+      "dialog": [
+        "Rekap meter bisa menguji pesan yang beredar."
+      ]
+    },
+    {
+      "id": "board",
+      "kind": "board",
+      "label": "Papan kasus",
+      "x": 435,
+      "y": 395,
+      "dialog": [
+        "Susun kesimpulanmu dari temuan, lalu bantu Bu Rani memperbaiki pengumuman."
+      ]
+    }
+  ],
+  "rounds": [
+    [
+      {
+        "id": "E1",
+        "activityId": "ACT-E1",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Pesan menyebut klub baca memakai lampu setelah pukul 16.00. Temuan mana paling langsung menguji tuduhan itu?",
+        "options": [
+          {
+            "id": "E1-1",
+            "text": "Jumlah kunjungan naik."
+          },
+          {
+            "id": "E1-2",
+            "text": "Catatan petugas: pendataan buku pukul 16.00–17.00; klub selesai 15.30."
+          },
+          {
+            "id": "E1-3",
+            "text": "Ada buku tamu di perpustakaan."
+          }
+        ],
+        "transfer": false
+      },
+      {
+        "id": "I1",
+        "activityId": "ACT-I1",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Apa yang layak ditulis pada papan kasus?",
+        "options": [
+          {
+            "id": "I1-1",
+            "text": "Klub baca pasti menyebabkan semua kenaikan kunjungan."
+          },
+          {
+            "id": "I1-2",
+            "text": "Kenaikan kunjungan membuktikan energi naik."
+          },
+          {
+            "id": "I1-3",
+            "text": "Kunjungan naik 45; penyebab tunggal belum dapat dipastikan."
+          }
+        ],
+        "transfer": false
+      },
+      {
+        "id": "T1",
+        "activityId": "ACT-T1",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Kasus pembanding: klub sains naik dari 20 menjadi 30 peserta. Poster berkata “semua siswa suka sains”. Apa keputusanmu?",
+        "options": [
+          {
+            "id": "T1-1",
+            "text": "Peserta naik 10, tetapi data ini tidak mewakili semua siswa."
+          },
+          {
+            "id": "T1-2",
+            "text": "Setuju, semua siswa pasti suka sains."
+          },
+          {
+            "id": "T1-3",
+            "text": "Peserta berkurang 10."
+          }
+        ],
+        "transfer": true
+      }
+    ],
+    [
+      {
+        "id": "E2",
+        "activityId": "ACT-E2",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Kasus baru: aula menyala pukul 18.00. Klub drama selesai 17.00, sedangkan petugas membersihkan aula 17.30–18.30. Bukti paling relevan?",
+        "options": [
+          {
+            "id": "E2-1",
+            "text": "Poster klub drama."
+          },
+          {
+            "id": "E2-2",
+            "text": "Jadwal kebersihan dan waktu klub selesai."
+          },
+          {
+            "id": "E2-3",
+            "text": "Jumlah kursi aula."
+          }
+        ],
+        "transfer": false
+      },
+      {
+        "id": "I2",
+        "activityId": "ACT-I2",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Peserta lokakarya naik dari 24 menjadi 36 setelah poster baru dipasang. Apa simpulan yang cukup hati-hati?",
+        "options": [
+          {
+            "id": "I2-1",
+            "text": "Poster pasti satu-satunya penyebab kenaikan."
+          },
+          {
+            "id": "I2-2",
+            "text": "Semua warga menghadiri lokakarya."
+          },
+          {
+            "id": "I2-3",
+            "text": "Peserta naik 12; penyebab kenaikan perlu bukti tambahan."
+          }
+        ],
+        "transfer": false
+      },
+      {
+        "id": "T2",
+        "activityId": "ACT-T2",
+        "objectiveId": "LO-BUKTI-01",
+        "prompt": "Kantin mencatat sampah turun dari 50 menjadi 35 kg. Pengumuman mengklaim “setiap siswa selalu memilah sampah”. Apa tanggapanmu?",
+        "options": [
+          {
+            "id": "T2-1",
+            "text": "Total turun 15 kg; perilaku setiap siswa belum terbukti."
+          },
+          {
+            "id": "T2-2",
+            "text": "Semua siswa selalu memilah sampah."
+          },
+          {
+            "id": "T2-3",
+            "text": "Sampah naik 15 kg."
+          }
+        ],
+        "transfer": true
+      }
+    ]
+  ],
+  "variants": {
+    "needs_support": {
+      "title": "Susun jejak bersama Bu Rani",
+      "dialog": "Pisahkan apa yang tercatat dari apa yang hanya diduga. Kamu boleh melangkah pelan.",
+      "task": "Cocokkan waktu pada pesan dan catatan petugas. Angka kunjungan menjelaskan jumlah, bukan siapa yang menyalakan lampu."
+    },
+    "developing": {
+      "title": "Periksa batas kesimpulan",
+      "dialog": "Temuanmu sudah membantu. Sekarang cari bagian klaim yang melampaui bukti.",
+      "task": "Tandai kata “semua”, “pasti”, dan “satu-satunya”. Apakah sumber benar-benar membuktikannya?"
+    },
+    "ready_for_extension": {
+      "title": "Satu jejak lagi",
+      "dialog": "Kamu siap menguji pola yang sama di tempat lain.",
+      "task": "Uji kasus aula dan kantin. Cari bukti yang relevan, lalu jelaskan batas klaimnya."
+    }
+  },
+  "hints": [
+    "Cari tiga objek bercahaya. Ketuk lantai untuk mendekat.",
+    "Cocokkan waktu lampu menyala dengan catatan petugas.",
+    "Kenaikan jumlah tidak otomatis membuktikan sebab atau keadaan semua orang."
+  ]
+}
