@@ -1,0 +1,70 @@
+:root {
+  /* JejakNalar Warm Adventure palette */
+  --jn-color-primary-dark: #193640;
+  --jn-color-primary-deep: #102A33;
+  --jn-color-primary-medium: #31535A;
+  --jn-color-primary-soft: #6F9290;
+
+  --jn-color-cream: #F3E6C8;
+  --jn-color-cream-light: #FFF4D9;
+
+  --jn-color-gold: #E9C46A;
+  --jn-color-gold-dark: #B88B3D;
+
+  --jn-color-wood: #A97850;
+  --jn-color-wood-dark: #684A38;
+  --jn-color-earth: #C29A72;
+
+  --jn-color-green: #719B72;
+  --jn-color-red: #B9685D;
+  --jn-color-muted: #B8C2BA;
+
+  /* Semantic tokens */
+  --jn-surface-page: var(--jn-color-cream);
+  --jn-surface-card: var(--jn-color-cream-light);
+  --jn-surface-dark: var(--jn-color-primary-dark);
+
+  --jn-text-primary: var(--jn-color-primary-deep);
+  --jn-text-secondary: var(--jn-color-primary-medium);
+  --jn-text-on-dark: var(--jn-color-cream-light);
+
+  --jn-border-default: var(--jn-color-earth);
+  --jn-border-accent: var(--jn-color-gold-dark);
+
+  --jn-action-primary-bg: var(--jn-color-gold);
+  --jn-action-primary-text: var(--jn-color-primary-deep);
+
+  --jn-status-success-bg: #E8EFDF;
+  --jn-status-success-text: #31535A;
+
+  --jn-status-error-bg: #F3DFD4;
+  --jn-status-error-text: #8F443C;
+
+  --jn-status-warning-bg: #F9EBCB;
+  --jn-status-warning-text: #684A38;
+
+  --jn-focus-ring: var(--jn-color-gold-dark);
+}
+
+/* A-03: Global viewport reset */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--jn-surface-page);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.teacher-ui {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+}

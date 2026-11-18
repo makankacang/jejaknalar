@@ -1,9 +1,13 @@
+﻿import './shared-ui/styles/design-tokens.css';
+import './shared-ui/styles/teacher.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import LandingPage from './pages/LandingPage';
 import PublicDemoPage from './pages/PublicDemoPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherLoginPage from './pages/TeacherLoginPage';
+import TeacherForgotPasswordPage from './pages/TeacherForgotPasswordPage';
+import TeacherResetPasswordPage from './pages/TeacherResetPasswordPage';
 import TeacherModulesPage from './pages/TeacherModulesPage';
 import TeacherModulePreviewPage from './pages/TeacherModulePreviewPage';
 import StudentPlaceholderPage from './pages/StudentPlaceholderPage';
@@ -27,6 +31,8 @@ export default function App(): React.JSX.Element {
           <Route path="/demo" element={<PublicDemoPage />} />
           <Route path="/demo/play" element={<Suspense fallback={<p role="status">Memuat demo game...</p>}><StudentDemoPage /></Suspense>} />
           <Route path="/login" element={<TeacherLoginPage />} />
+          <Route path="/forgot-password" element={<TeacherForgotPasswordPage />} />
+          <Route path="/reset-password" element={<TeacherResetPasswordPage />} />
 
           {/* Protected teacher routes */}
           <Route
