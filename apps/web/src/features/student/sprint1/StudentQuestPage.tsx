@@ -3,7 +3,7 @@ import { TARGET_LABELS, type InteractionTarget, type ProximityState } from '../.
 import { PhaserStage } from './PhaserStage';
 import { prepareEvidenceHunt, reasoningQuestions, practiceByPath } from '../../../game/sprint1/content';
 import { QuestFlow, type QuestSnapshot } from '../../../game/sprint1/flow';
-import { MockQuestRepositoryV1 } from '../../../game/sprint0/repositories-v1';
+import { MockAssessmentRepositoryV1, MockQuestRepositoryV1 } from '../../../game/sprint0/repositories-v1';
 import { DemoAssessmentRepository } from '../../../game/sprint1/demo-repository';
 import type { LearningPath } from '../../../game/sprint0/types';
 
@@ -24,7 +24,7 @@ function useQuestSnapshot(flow: QuestFlow | null): QuestSnapshot | null {
 }
 
 /** Halaman mandiri PIC D; tidak mengedit routing milik PIC A. */
-export function StudentQuestPage() {
+export function StudentQuestPage({ demoPath }: { demoPath?: LearningPath } = {}) {
   const [flow, setFlow] = useState<QuestFlow | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [repository, setRepository] = useState<DemoAssessmentRepository | null>(null);
@@ -51,14 +51,15 @@ export function StudentQuestPage() {
         if (!mounted) return;
         const { quest, content } = prepareEvidenceHunt(payload);
         const repo = new DemoAssessmentRepository(() => ({ hintsUsed: game.getSnapshot().hintsUsed, attemptCount: game.getSnapshot().attemptCount }));
-        const game: QuestFlow = new QuestFlow(quest, content, repo);
-        setRepository(repo);
+        const assessment = demoPath === undefined ? repo : new MockAssessmentRepositoryV1(demoPath);
+        const game: QuestFlow = new QuestFlow(quest, content, assessment);
+        setRepository(demoPath === undefined ? repo : null);
         setFlow(game);
         game.start();
       })
       .catch(() => { if (mounted) setLoadingError('Quest tidak tersedia. Periksa mock data dan referensi scene.'); });
     return () => { mounted = false; };
-  }, [reload]);
+  }, [demoPath, reload]);
 
   const content = flow?.content;
   return <main className="jn-main">
@@ -156,19 +157,19 @@ export function StudentQuestPage() {
         {snapshot.submitError && <div className="jn-error" role="alert">{snapshot.submitError}<button onClick={() => void flow.submit()} disabled={snapshot.busy}>Coba lagi</button></div>}
       </section>}
       {snapshot.state === 'FEEDBACK' && snapshot.result && <section ref={activePanel} tabIndex={-1} className="jn-panel" aria-live="polite">
-        <h2>Feedback Assessment</h2><p><strong>SIMULASI.</strong> Skor latihan lokal: {snapshot.result.score}/100. Dihitung oleh aturan deterministik pada server demo lokal, bukan nilai resmi Supabase.</p>
+        <h2>Feedback Assessment</h2><p><strong>SIMULASI.</strong> {demoPath === undefined ? `Skor latihan sintetis: ${snapshot.result.score}/100.` : 'Jalur latihan contoh. Jawaban demo tidak dinilai.'}</p>
         {snapshot.result.feedback.map((item, index) => <p key={item.item_id ?? index}>{item.message}</p>)}
         <div className="jn-actions"><button className="jn-primary" onClick={() => flow.nextPath()}>Lihat BedaJalur</button><button onClick={() => flow.retry()}>Perbaiki jawaban</button></div>
       </section>}
       {snapshot.state === 'ADAPTIVE_TRANSITION' && snapshot.result && <section ref={activePanel} tabIndex={-1} className="jn-panel">
         <h2>BedaJalur: {adaptiveText[snapshot.result.next_path].title}</h2>
         <p>{adaptiveText[snapshot.result.next_path].description}</p>
-        <p className="jn-tip">Rekomendasi latihan berasal dari tiga aktivitas, petunjuk, dan percobaan. Ini bukan label kemampuan tetap. Konten latihan masih draf untuk ditinjau guru/PIC C.</p>
+        <p className="jn-tip">{demoPath === undefined ? 'Simulasi lokal menggunakan tiga aktivitas latihan, petunjuk, dan percobaan.' : 'Jalur contoh ini ditampilkan untuk memperkenalkan bentuk latihan BedaJalur.'}</p>
         <div className="jn-practice"><h3>{practiceByPath[snapshot.result.next_path].title}</h3><p>{practiceByPath[snapshot.result.next_path].passage}</p><p>{practiceByPath[snapshot.result.next_path].guidance}</p></div>
         <div className="jn-actions"><button className="jn-primary" onClick={() => { setPractice(snapshot.result!.next_path); flow.retry(); }}>Latihan ulang dengan bantuan jalur ini</button><button onClick={() => flow.finish()}>Selesaikan misi</button></div>
       </section>}
       {snapshot.state === 'COMPLETED' && <section ref={activePanel} tabIndex={-1} className="jn-panel"><h2>Petualangan selesai!</h2><p>Kamu berhasil menelusuri misi hingga tahap BedaJalur. Progres ini hanya ada di memori browser.</p><button onClick={() => { setPractice(null); flow.retry(); }}>Latihan lagi</button></section>}
-      <details className="jn-panel"><summary>Pengujian pengiriman demo</summary><p>Aktifkan sebelum mengirim untuk menguji kegagalan jaringan satu kali. Klik Coba lagi setelah pesan gagal muncul.</p><label><input type="checkbox" checked={failNext} disabled={snapshot.state === 'SUBMITTING'} onChange={e => { setFailNext(e.target.checked); if (repository) repository.failNext = e.target.checked; }}/> Gagalkan pengiriman berikutnya sekali</label><p>Flag habis setelah satu kegagalan. Matikan lalu aktifkan lagi untuk mengulang simulasi.</p></details>
+      {repository && <details className="jn-panel"><summary>Pengujian pengiriman demo</summary><p>Aktifkan sebelum mengirim untuk menguji kegagalan jaringan satu kali. Klik Coba lagi setelah pesan gagal muncul.</p><label><input type="checkbox" checked={failNext} disabled={snapshot.state === 'SUBMITTING'} onChange={e => { setFailNext(e.target.checked); if (repository) repository.failNext = e.target.checked; }}/> Gagalkan pengiriman berikutnya sekali</label><p>Flag habis setelah satu kegagalan. Matikan lalu aktifkan lagi untuk mengulang simulasi.</p></details>}
     </>}
   </main>;
 }
