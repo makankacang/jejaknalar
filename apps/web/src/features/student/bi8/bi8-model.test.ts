@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { restorePreviewProgress } from './bi8-model';
 import { initialStoryProgress } from '../../../game/sprint2/story-c03/runtime';
 import {
   previewPlan, story, activeMission, isActivityAllowed, emptyAnswer, canComplete,
@@ -67,7 +68,7 @@ describe('PIC D BI8 candidate — isolated local preview', () => {
     a.comparison='jawaban siswa yang berbeda dari contoh';
     expect(canComplete(investigate,a)).toBe(true);
   });
-  it('requires all six BI8 response fields but never checks whether the answers are correct', () => {
+  it('permits partial BI8 responses and never grades correctness', () => {
     const decide=story.tasks[2], a=emptyAnswer();
     expect(canComplete(decide,a)).toBe(false);
     expect(missingAssessmentFields(decide,a)).toEqual([
@@ -75,17 +76,17 @@ describe('PIC D BI8 candidate — isolated local preview', () => {
       'Paragraf B — Klasifikasi', 'Paragraf B — Bukti', 'Paragraf B — Alasan',
     ]);
 
-    // Five filled fields are not enough: both paragraphs must be complete.
+    // A partial response is evaluable by the official server once publication is available.
     a.categories=['eksposisi','deskripsi'];
     a.evidenceIndices=[0,1];
     a.reasons=['Alasan bebas untuk A.',''];
-    expect(canComplete(decide,a)).toBe(false);
+    expect(canComplete(decide,a)).toBe(true);
     expect(missingAssessmentFields(decide,a)).toEqual(['Paragraf B — Alasan']);
 
     // Whitespace-only text and an invalid evidence index do not count as completed fields.
     a.reasons=['Alasan bebas untuk A.','   '];
     a.evidenceIndices=[0,99];
-    expect(canComplete(decide,a)).toBe(false);
+    expect(canComplete(decide,a)).toBe(true);
     expect(missingAssessmentFields(decide,a)).toEqual(['Paragraf B — Bukti', 'Paragraf B — Alasan']);
 
     // All six fields filled with deliberately swapped classifications still pass.
@@ -147,4 +148,17 @@ describe('PIC D BI8 candidate — isolated local preview', () => {
     p.completedActivityIds.push(story.tasks[2].activity_id);
     expect(missionGuidance(p,'school.discussion_hall',null).heading).toContain('selesai');
   });
+});
+
+it('restores only the sequential activities with valid drafts and never restores dialogue', () => {
+  const [observe, investigate] = story.tasks;
+  const completed = { ...emptyAnswer(), viewedSourceIndices: [0] };
+  const restored = restorePreviewProgress(previewPlan(), {
+    unlockedMissionIds: [story.missions[0].mission_id, 'UNKNOWN'],
+    completedActivityIds: [observe.activity_id, investigate.activity_id],
+    activeDialogue: { npcId: 'UNKNOWN', nodeId: 'UNKNOWN' },
+  }, { [observe.activity_id]: completed, [investigate.activity_id]: emptyAnswer() });
+  expect(restored.completedActivityIds).toEqual([observe.activity_id]);
+  expect(restored.unlockedMissionIds).toEqual([story.missions[0].mission_id]);
+  expect(restored.activeDialogue).toBeNull();
 });

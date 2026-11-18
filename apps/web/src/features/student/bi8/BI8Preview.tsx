@@ -23,7 +23,7 @@ import {
 import {
   story, previewPlan, activityLabels, emptyAnswer, canComplete, evidenceOptionsForParagraph,
   serializeBi8Assessment, activeMission, isActivityAllowed, initialSpatialState, completedPreviewState,
-  newProgress, missionGuidance, missingAssessmentFields, type LocalAnswer,
+  newProgress, missionGuidance, missingAssessmentFields, restorePreviewProgress, type LocalAnswer,
 } from './bi8-model';
 
 const plan = previewPlan(); // Validates the *actual* C-03 JSON and D-06 slots before rendering.
@@ -32,6 +32,8 @@ type AnswerStore = Record<string, LocalAnswer>;
 const missionCount = story.missions.length;
 const note = 'DEMO LOKAL · PREVIEW BI8 · Respons tidak dikirim ke server dan belum dinilai';
 const draftStorageKey = `jejaknalar:bi8:local-drafts:${story.quest_version_id}:v2`;
+
+const progressStorageKey = draftStorageKey + ':progress';
 
 const taskLabel = (task: StoryTask) => activityLabels[task.activity_id] ?? task.instruction;
 const isLocalAnswer = (value: unknown): value is LocalAnswer => {
@@ -59,10 +61,17 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
   const [nearby, setNearby] = useState<Target | null>(null);
   const [room, setRoom] = useState(plan.startRoom);
   const [message, setMessage] = useState('');
-  const [progress, setProgress] = useState<StoryProgress>(newProgress);
+  const [storedAnswers, setStoredAnswers] = useState<AnswerStore>(loadLocalDrafts);
+  const [progress, setProgress] = useState<StoryProgress>(() => {
+    try {
+      const raw = window.localStorage.getItem(progressStorageKey);
+      return raw ? restorePreviewProgress(plan, JSON.parse(raw), storedAnswers) : newProgress();
+    } catch {
+      return newProgress();
+    }
+  });
   const [selectedTask, setSelectedTask] = useState<StoryTask | null>(null);
   const [answer, setAnswer] = useState<LocalAnswer>(emptyAnswer);
-  const [storedAnswers, setStoredAnswers] = useState<AnswerStore>(loadLocalDrafts);
   // Keep the latest local drafts available to stable Phaser callbacks without stale closures.
   const draftsRef = useRef<AnswerStore>(storedAnswers);
   draftsRef.current = storedAnswers;
@@ -73,7 +82,7 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
   const sceneHost = useRef<HTMLDivElement>(null);
   const scene = useRef<AdventureScene | null>(null);
   const joystick = useRef<Point>({x: 0, y: 0});
-  const spatial = useRef<State>(initialSpatialState(plan));
+  const spatial = useRef<State>(completedPreviewState(initialSpatialState(plan), progress));
   const [position, setPosition] = useState<Point>(() => ({...spatial.current.position}));
   const lastPositionRender = useRef(0);
   const progressRef = useRef(progress);
@@ -243,9 +252,14 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
   }, [setStory]);
 
   useEffect(() => {
-    try { window.localStorage.setItem(draftStorageKey, JSON.stringify(storedAnswers)); }
+    try {
+      window.localStorage.setItem(draftStorageKey, JSON.stringify(storedAnswers));
+      window.localStorage.setItem(progressStorageKey, JSON.stringify({
+        completedActivityIds: progress.completedActivityIds, unlockedMissionIds: progress.unlockedMissionIds,
+      }));
+    }
     catch { /* Drafts remain available in memory when browser storage is disabled. */ }
-  }, [storedAnswers]);
+  }, [storedAnswers, progress]);
 
   const updateAnswer = (patch: Partial<LocalAnswer>) => {
     const next = {...answer, ...patch};
@@ -287,7 +301,7 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
     spatial.current = initialSpatialState(plan);
     setStory(fresh);
     setStoredAnswers({});
-    try { window.localStorage.removeItem(draftStorageKey); } catch { /* Optional local recovery. */ }
+    try { window.localStorage.removeItem(draftStorageKey); window.localStorage.removeItem(progressStorageKey); } catch { /* Optional local recovery. */ }
     setRoom(plan.startRoom);
     setPosition({...spatial.current.position});
     setVisited([plan.startRoom]);
@@ -372,7 +386,7 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
     {modal && <div className="bi8-modal-shade" role="presentation"><section className="bi8-modal" role="dialog" aria-modal="true" aria-label={modal === 'task' ? 'Aktivitas redaksi' : 'Menu misi redaksi'}>
       <div className="bi8-modal-head"><span>{modal === 'task' ? 'AKTIVITAS PEMBELAJARAN' : modal === 'intro' ? 'PROLOG' : modal === 'dialogue' ? 'PERCAKAPAN' : modal === 'journal' ? 'JURNAL EVIDENCE' : modal === 'map' ? 'PETA SEKOLAH' : 'MISI SELESAI'}</span><button onClick={() => {setModal(null); setStory(closeStoryDialogue(progressRef.current));}}>Tutup ×</button></div>
 
-      {modal === 'intro' && <div className="bi8-modal-body"><p className="bi8-overline">BAHASA INDONESIA · KELAS VIII · DRAFT PIC C</p><h1>{story.title}</h1><p>{story.opening}</p><div className="bi8-note">Mulai di Perpustakaan. Dekati Bu Maya (pustakawan), tekan E, lalu pilih percakapan untuk membuka misi. Bergerak dengan WASD / panah atau joystick di ponsel.</div><button className="bi8-primary" onClick={() => setModal(null)}>Mulai menjelajah</button></div>}
+      {modal === 'intro' && <div className="bi8-modal-body"><p className="bi8-overline">BAHASA INDONESIA · KELAS VIII · DRAFT PIC C</p><h1>{story.title}</h1><p>{story.opening}</p><div className="bi8-note">Mulai di Perpustakaan. Dekati Bu Maya (pustakawan), tekan E, lalu pilih percakapan untuk membuka misi. Bergerak dengan WASD / panah atau joystick di ponsel.</div><button className="bi8-primary" onClick={() => setModal(null)}>{completed > 0 ? "Lanjutkan dari perpustakaan" : "Mulai menjelajah"}</button></div>}
 
       {modal === 'dialogue' && <div className="bi8-modal-body"><h2>Bu Maya · Pustakawan</h2>{currentDialogue ? <><p className="bi8-dialogue">{currentDialogue.node.text}</p><div className="bi8-choice-buttons">{currentDialogue.node.choices.map(choice => <button key={choice.choice_id} onClick={() => chooseDialogue(choice.choice_id)}>{choice.label}</button>)}</div></> : <p>Dialog berakhir. Silakan melanjutkan aktivitas.</p>}</div>}
 
@@ -410,11 +424,11 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
                 <legend>{i===0 ? 'Paragraf A · Sepeda Mira' : 'Paragraf B · Sepeda motor'}</legend>
                 <label>Jenis paragraf<select value={answer.categories[i]} onChange={e => updateAnswer({categories: i === 0 ? [e.target.value,answer.categories[1]] : [answer.categories[0],e.target.value]})} onKeyDownCapture={stopGameKeyCapture}><option value="">Pilih jenis paragraf</option><option value="deskripsi">Deskripsi</option><option value="eksposisi">Eksposisi</option></select></label>
                 <label>Bagian teks sebagai bukti<select value={answer.evidenceIndices[i]} onChange={e => updateAnswer({evidenceIndices: i === 0 ? [Number(e.target.value),answer.evidenceIndices[1]] : [answer.evidenceIndices[0],Number(e.target.value)]})} onKeyDownCapture={stopGameKeyCapture}><option value={-1}>Pilih kutipan dari paragraf</option>{evidenceOptions.map((quote, index) => <option value={index} key={`${i}-${index}`}>{quote}</option>)}</select></label>
-                <label>Alasan berdasarkan bukti<textarea rows={4} value={answer.reasons[i]} onChange={e => updateAnswer({reasons: i === 0 ? [e.target.value, answer.reasons[1]] : [answer.reasons[0],e.target.value]})} onKeyDownCapture={stopGameKeyCapture} placeholder="Jelaskan dengan kalimatmu sendiri. Jawaban tidak harus sama dengan contoh." /></label>
+                <label>Alasan berdasarkan bukti<textarea rows={4} maxLength={2000} value={answer.reasons[i]} onChange={e => updateAnswer({reasons: i === 0 ? [e.target.value, answer.reasons[1]] : [answer.reasons[0],e.target.value]})} onKeyDownCapture={stopGameKeyCapture} placeholder="Jelaskan dengan kalimatmu sendiri. Jawaban tidak harus sama dengan contoh." /></label>
               </fieldset>;
             })}
           </div>
-          <p className="bi8-note">Isi semua bagian untuk Paragraf A dan B: klasifikasi, bukti, dan alasan. Jawaban tidak harus benar atau sama dengan contoh. Permainan hanya memeriksa kelengkapan isian, bukan menilai benar atau salah.</p>
+          <p className="bi8-note">Berikan klasifikasi, bukti, dan alasan untuk Paragraf A dan B. Bagian yang belum bisa dijawab boleh dikosongkan. Respons dicatat tanpa penilaian pada preview ini.</p>
         </>}
         {selectedTask.template === 'investigate' && <p className="bi8-note">Kamu boleh menuliskan pengamatan dengan kata-katamu sendiri. Ini catatan aktivitas lokal, bukan nilai.</p>}
         {selectedTask.template === 'observe' && <p className="bi8-note">Baca materi sampai selesai, lalu tekan “Selesai membaca” pada tampilan buku untuk membuka tujuan berikutnya.</p>}
@@ -422,9 +436,9 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
           {selectedTask.template !== 'observe' && <button className="bi8-primary" disabled={!canRecord} onClick={() => completeTask()}>{selectedTask.template === 'decide' ? 'Kirim respons · DEMO LOKAL' : 'Catat hasil perbandingan'}</button>}
           <button className="bi8-secondary" onClick={() => setModal(null)}>Lanjutkan nanti</button>
         </div>
-        {selectedTask.template === 'decide' && <small className="bi8-input-hint" role="status" aria-live="polite">{canRecord
+        {selectedTask.template === 'decide' && <small className="bi8-input-hint" role="status" aria-live="polite">{missingFields.length === 0
           ? 'Semua enam bagian sudah terisi. Jawaban bebas; preview ini tidak menilai benar atau salah.'
-          : `Belum lengkap: ${missingFields.join(', ')}. Lengkapi semua bagian sebelum mengirim. Jawaban tidak harus benar.`}</small>}
+          : `Belum lengkap: ${missingFields.join(', ')}. Respons parsial boleh dicatat setelah setidaknya satu bagian terisi.`}</small>}
       </div>}
 
       {modal === 'journal' && <div className="bi8-modal-body"><h2>Jurnal perjalanan redaksi</h2><p>Progres lokal: {completed} dari {missionCount} aktivitas. Evidence berikut tidak menunjukkan penguasaan akademik.</p><ol className="bi8-journal">{story.missions.map(m => {const t = story.tasks.find(a => m.activity_ids.includes(a.activity_id)); const done = !!t && progress.completedActivityIds.includes(t.activity_id); const evidence = story.evidence.filter(e => e.mission_id === m.mission_id); return <li key={m.mission_id}><strong>{t ? taskLabel(t) : m.mission_id}</strong><span>{done ? '✓ Tercatat' : 'Belum selesai'}</span>{done && evidence.map(e => <div key={e.evidence_id}><b>{e.title}</b><p>{e.summary}</p></div>)}{done && t && storedAnswers[t.activity_id]?.comparison && <p><i>Catatan pengamatan:</i> {storedAnswers[t.activity_id].comparison}</p>}{done && t?.template === 'decide' && storedAnswers[t.activity_id] && <details className="bi8-local-response"><summary>Lihat respons yang dicatat · DEMO LOKAL</summary><pre>{serializeBi8Assessment(t, storedAnswers[t.activity_id])}</pre><small>Belum dikirim ke backend dan belum dinilai.</small></details>}</li>;})}</ol><button className="bi8-secondary" onClick={() => setModal(null)}>Kembali ke permainan</button></div>}
@@ -432,13 +446,13 @@ export function BI8Preview({pendingAssessment = null}: {pendingAssessment?: Pend
       {modal === 'map' && <div className="bi8-modal-body bi8-unified-map">
         <WorldAtlas
           world="school" room={ROOMS[room]} visited={visited}
-          position={position} heading={spatial.current.heading} guide={null}
+          position={position} heading={spatial.current.heading} guide={navigationGuide}
           openJournal={() => setModal('journal')} close={() => setModal(null)}
         />
         <p className="bi8-note">Peta menampilkan rute dan ruang untuk eksplorasi. Perpindahan tetap melalui pintu dalam game; peta tidak melakukan teleport.</p>
       </div>}
 
-      {modal === 'finished' && <div className="bi8-modal-body"><p className="bi8-overline">3/3 AKTIVITAS SELESAI</p><h2>Catatan redaksi selesai</h2><p>{story.endings.ready_for_extension ?? 'Semua aktivitas lokal selesai. Hasil belum dinilai.'}</p><p className="bi8-note">Ini adalah penyelesaian preview non-published, bukan hasil assessment resmi, mastery, atau BedaJalur produksi.</p><div className="bi8-modal-actions"><button className="bi8-primary" onClick={() => setModal('journal')}>Lihat jurnal</button><button className="bi8-secondary" onClick={resetPreview}>Ulangi preview</button><button className="bi8-secondary" onClick={() => setModal(null)}>Tetap menjelajah</button></div></div>}
+      {modal === 'finished' && <div className="bi8-modal-body"><p className="bi8-overline">3/3 AKTIVITAS SELESAI</p><h2>Catatan redaksi selesai</h2><p>Semua aktivitas lokal selesai. Hasil belum dinilai.</p><p className="bi8-note">Ini adalah penyelesaian preview non-published, bukan hasil assessment resmi, mastery, atau BedaJalur produksi.</p><div className="bi8-modal-actions"><button className="bi8-primary" onClick={() => setModal('journal')}>Lihat jurnal</button><button className="bi8-secondary" onClick={resetPreview}>Ulangi preview</button><button className="bi8-secondary" onClick={() => setModal(null)}>Tetap menjelajah</button></div></div>}
     </section></div>}
   </main>;
 }

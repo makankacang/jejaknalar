@@ -3,7 +3,7 @@ import candidate from './story-bi8.json';
 import { adaptStoryBundle, StoryContractError, type StoryBundle, type StoryPlan, type StoryTask, type QuestV1 } from '../../../game/sprint2/story-c03/adapter';
 import { REGISTRY_VERSION, ROOMS } from '../../../game/sprint2/world';
 import type { State } from '../../../game/sprint2/state';
-import { initialStoryProgress, type StoryProgress } from '../../../game/sprint2/story-c03/runtime';
+import { completeStoryInteraction, initialStoryProgress, type StoryProgress } from '../../../game/sprint2/story-c03/runtime';
 
 export const story = candidate as unknown as StoryBundle;
 export const BI8_ASSESSMENT_ITEM_ID = 'ITEM-BI8-B1S5-REDAKSI-KLASIFIKASI-001';
@@ -78,7 +78,7 @@ export function evidenceOptionsForParagraph(task: StoryTask, paragraphIndex: 0 |
   const canonical = story.tasks
     .filter(candidate => candidate.template === 'investigate')
     .flatMap(candidate => candidate.source_refs)
-    .filter(ref => ref.source_map_id === source.source_map_id)
+    .filter(ref => ref.source_map_id === source.source_map_id && ref.document_id === source.document_id && ref.text_version === source.text_version)
     .sort((a, b) => b.excerpt.length - a.excerpt.length)[0];
 
   return splitEvidenceSentences(canonical?.excerpt ?? source.excerpt);
@@ -110,7 +110,7 @@ export function toBi8AssessmentAnswer(task: StoryTask, answer: LocalAnswer): { i
 }
 
 /**
- * Required presentation fields for the BI8 two-paragraph task.
+ * Optional presentation fields still missing from the BI8 response.
  * This checks only that a choice, evidence quote, and reason exist for A and B.
  * It deliberately does not check whether any answer is academically correct.
  */
@@ -145,7 +145,7 @@ export function missingAssessmentFields(task: StoryTask, answer: LocalAnswer): s
 export function canComplete(task: StoryTask, answer: LocalAnswer): boolean {
   if (task.template === 'observe') return answer.viewedSourceIndices.includes(0);
   if (task.template === 'investigate') return answer.comparison.trim().length > 0;
-  if (task.template === 'decide') return missingAssessmentFields(task, answer).length === 0;
+  if (task.template === 'decide') return missingAssessmentFields(task, answer).length < 6 && serializeBi8Assessment(task, answer).length <= 5000;
   return false;
 }
 
@@ -174,6 +174,26 @@ export function completedPreviewState(before: State, progress: StoryProgress): S
 }
 
 export const newProgress = initialStoryProgress;
+
+export function restorePreviewProgress(
+  plan: StoryPlan, saved: unknown, drafts: Record<string, LocalAnswer>,
+): StoryProgress {
+  let progress = initialStoryProgress();
+  if (!saved || typeof saved !== 'object') return progress;
+  const raw = saved as Partial<StoryProgress>;
+  if (!Array.isArray(raw.completedActivityIds) || !Array.isArray(raw.unlockedMissionIds)) return progress;
+  const unlockable = new Set(plan.dialogues.flatMap(dialogue =>
+    dialogue.nodes.flatMap(node => node.choices.map(choice => choice.unlock_mission_id))));
+  progress.unlockedMissionIds = [...new Set(raw.unlockedMissionIds.filter(id => unlockable.has(id)))];
+
+  for (const id of raw.completedActivityIds) {
+    const task = plan.tasks.find(activity => activity.activity_id === id);
+    const draft = drafts[id];
+    if (!task || !draft || !isActivityAllowed(task, progress) || !canComplete(task, draft)) break;
+    progress = completeStoryInteraction(plan, progress, task.room_id, task.object_id);
+  }
+  return progress;
+}
 
 /** Dynamic, student-facing wayfinding. Guidance is advisory; it never skips proximity checks. */
 export type MissionGuidance = {
@@ -220,7 +240,7 @@ export function missionGuidance(progress: StoryProgress, currentRoom: string, ne
   const instructions: Record<string,string> = {
     observe: 'Buka buku, baca panduan, lalu tekan “Selesai membaca” untuk melanjutkan.',
     investigate: 'Baca contoh sepeda Mira dan sepeda motor, lalu tuliskan perbedaan cara keduanya menyajikan informasi.',
-    decide: 'Lengkapi klasifikasi, bukti, dan alasan untuk kedua paragraf. Jawaban tidak harus benar; permainan hanya memeriksa kelengkapan.',
+    decide: 'Isi klasifikasi, bukti, dan alasan yang bisa kamu berikan. Bagian yang belum bisa dijawab boleh dikosongkan.',
   };
   return {
     step, heading: titles[task.template] ?? task.instruction,
