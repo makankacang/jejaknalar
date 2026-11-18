@@ -1,0 +1,180 @@
+﻿room_id,object_id,kind,reference_pdf_page,renderer,collision
+school.courtyard,school.courtyard.building_west,school_wing,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.building_east,school_wing,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.building_central_roof,school_tower,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.facade_sign,building_sign,2,art.ts (existing kept),non-solid
+school.courtyard,school.courtyard.courtyard_flag,flagpole,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_0,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_1,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_2,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_3,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_4,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.tree_5,tree,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.garden_0,garden,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.garden_1,garden,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.garden_2,garden,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.garden_3,garden,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.parking,bike_rack,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.security,guard_house,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.notice,notice_board,2,reference-art.ts,solid
+school.courtyard,school.courtyard.school_map,map_board,2,reference-art.ts,solid
+school.courtyard,school.courtyard.bench_l,bench,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.bench_r,bench,2,art.ts (existing kept),solid
+school.courtyard,school.courtyard.sport_court,court,2,art.ts (existing kept),non-solid
+school.courtyard,school.courtyard.gate,gate,2,art.ts (existing kept),non-solid
+school.corridor,school.corridor.window_0,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_1,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_2,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_3,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_4,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_5,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_6,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_7,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.window_8,window,3,reference-art.ts,non-solid
+school.corridor,school.corridor.lockers_0,locker,3,reference-art.ts,solid
+school.corridor,school.corridor.lockers_1,locker,3,reference-art.ts,solid
+school.corridor,school.corridor.lockers_2,locker,3,reference-art.ts,solid
+school.corridor,school.corridor.lockers_3,locker,3,reference-art.ts,solid
+school.corridor,school.corridor.bench_0,bench,3,art.ts (existing kept),solid
+school.corridor,school.corridor.bench_1,bench,3,art.ts (existing kept),solid
+school.corridor,school.corridor.bench_2,bench,3,art.ts (existing kept),solid
+school.corridor,school.corridor.bench_3,bench,3,art.ts (existing kept),solid
+school.corridor,school.corridor.schedule,notice_board,3,reference-art.ts,solid
+school.corridor,school.corridor.student_board,notice_board,3,reference-art.ts,solid
+school.corridor,school.corridor.fire_extinguisher,extinguisher,3,art.ts (existing kept),solid
+school.corridor,school.corridor.plant_0,plant,3,art.ts (existing kept),solid
+school.corridor,school.corridor.plant_1,plant,3,art.ts (existing kept),solid
+school.corridor,school.corridor.plant_2,plant,3,art.ts (existing kept),solid
+school.corridor,school.corridor.plant_3,plant,3,art.ts (existing kept),solid
+school.classroom,school.classroom.whiteboard,whiteboard,4,reference-art.ts,non-solid
+school.classroom,school.classroom.teacher_desk,teacher_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.projector,projector,4,reference-art.ts,non-solid
+school.classroom,school.classroom.student_desk_0_0,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_0_0,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_0_1,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_0_1,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_0_2,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_0_2,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_0_3,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_0_3,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_1_0,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_1_0,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_1_1,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_1_1,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_1_2,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_1_2,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_1_3,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_1_3,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_2_0,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_2_0,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_2_1,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_2_1,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_2_2,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_2_2,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.student_desk_2_3,student_desk,4,reference-art.ts,solid
+school.classroom,school.classroom.student_chair_2_3,chair,4,reference-art.ts,solid
+school.classroom,school.classroom.cabinet,cabinet,4,reference-art.ts,solid
+school.classroom,school.classroom.class_library,shelf,4,reference-art.ts,solid
+school.classroom,school.classroom.attendance,attendance,4,reference-art.ts,solid
+school.classroom,school.classroom.class_poster,poster,4,reference-art.ts,non-solid
+school.library,school.library.bookshelf_island_0,shelf,5,reference-art.ts,solid
+school.library,school.library.bookshelf_island_1,shelf,5,reference-art.ts,solid
+school.library,school.library.bookshelf_island_2,shelf,5,reference-art.ts,solid
+school.library,school.library.bookshelf_wall_0,wall_shelf,5,reference-art.ts,solid
+school.library,school.library.bookshelf_wall_1,wall_shelf,5,reference-art.ts,solid
+school.library,school.library.bookshelf_wall_2,wall_shelf,5,reference-art.ts,solid
+school.library,school.library.librarian_desk,service_desk,5,reference-art.ts,solid
+school.library,school.library.guestbook,guestbook,5,reference-art.ts,non-solid
+school.library,school.library.return_rack,shelf,5,reference-art.ts,solid
+school.library,school.library.reading_table_0,reading_table,5,reference-art.ts,solid
+school.library,school.library.reading_table_1,reading_table,5,reference-art.ts,solid
+school.library,school.library.reading_table_2,reading_table,5,reference-art.ts,solid
+school.library,school.library.reading_table_3,reading_table,5,reference-art.ts,solid
+school.library,school.library.book_reference,book_pile,5,reference-art.ts,non-solid
+school.library,school.library.catalog_pc,pc_station,5,reference-art.ts,solid
+school.library,school.library.archive,archive,5,reference-art.ts,solid
+school.library,school.library.reading_clock,clock,5,art.ts (existing kept),non-solid
+school.library,school.library.plant_0,plant,5,art.ts (existing kept),solid
+school.library,school.library.plant_1,plant,5,art.ts (existing kept),solid
+school.library,school.library.plant_2,plant,5,art.ts (existing kept),solid
+school.staff_room,school.staff_room.cubicle_0_0,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.cubicle_0_1,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.cubicle_0_2,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.cubicle_1_0,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.cubicle_1_1,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.cubicle_1_2,cubicle,6,reference-art.ts,solid
+school.staff_room,school.staff_room.archive_wall,cabinet,6,reference-art.ts,solid
+school.staff_room,school.staff_room.book_schedule,document,6,reference-art.ts,solid
+school.staff_room,school.staff_room.teacher_note,document,6,reference-art.ts,solid
+school.staff_room,school.staff_room.admin_desk,service_desk,6,reference-art.ts,solid
+school.staff_room,school.staff_room.printer,printer,6,reference-art.ts,solid
+school.staff_room,school.staff_room.water_dispenser,dispenser,6,reference-art.ts,solid
+school.staff_room,school.staff_room.work_notice,notice_board,6,reference-art.ts,non-solid
+school.laboratory,school.laboratory.demo_table,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.demonstration_screen,whiteboard,7,reference-art.ts,non-solid
+school.laboratory,school.laboratory.lab_bench_0_0,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.lab_bench_0_1,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.lab_bench_0_2,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.lab_bench_1_0,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.lab_bench_1_1,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.lab_bench_1_2,lab_desk,7,reference-art.ts,solid
+school.laboratory,school.laboratory.microscope,microscope,7,reference-art.ts,non-solid
+school.laboratory,school.laboratory.sink_one,sink,7,reference-art.ts,solid
+school.laboratory,school.laboratory.sink_two,sink,7,reference-art.ts,solid
+school.laboratory,school.laboratory.tool_cabinet,cabinet,7,reference-art.ts,solid
+school.laboratory,school.laboratory.sample_cabinet,cabinet,7,reference-art.ts,solid
+school.laboratory,school.laboratory.safety,poster,7,reference-art.ts,non-solid
+school.knowledge_lab,school.knowledge_lab.interactive_screen,screen_board,8,reference-art.ts,non-solid
+school.knowledge_lab,school.knowledge_lab.computer_0_0,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.computer_0_1,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.computer_1_0,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.computer_1_1,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.computer_2_0,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.computer_2_1,computer_desk,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.reference_shelves,shelf,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.atlas,book_pile,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.globe,globe,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.central_table,collab_table,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.research_board,board,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.data_archive,cabinet,8,reference-art.ts,solid
+school.knowledge_lab,school.knowledge_lab.scanner,scanner,8,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.stage,stage,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.curtain,stage_curtain,9,reference-art.ts,non-solid
+school.discussion_hall,school.discussion_hall.projection,screen_board,9,reference-art.ts,non-solid
+school.discussion_hall,school.discussion_hall.podium,podium,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_0_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_0_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_0_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_0_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_0_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_0_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_0_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_0_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_1_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_1_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_1_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_1_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_1_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_1_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_1_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_1_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_2_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_2_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_2_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_2_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_2_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_2_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_2_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_2_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_3_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_3_0,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_3_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_3_1,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_3_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_3_2,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_0_3_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.chair_1_3_3,hall_chair,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.case_board,case_board,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.evidence_desk,reading_table,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.speaker_l,speaker,9,reference-art.ts,solid
+school.discussion_hall,school.discussion_hall.speaker_r,speaker,9,reference-art.ts,solid

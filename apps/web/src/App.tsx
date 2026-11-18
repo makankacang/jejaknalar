@@ -10,7 +10,7 @@ import TeacherForgotPasswordPage from './pages/TeacherForgotPasswordPage';
 import TeacherResetPasswordPage from './pages/TeacherResetPasswordPage';
 import TeacherModulesPage from './pages/TeacherModulesPage';
 import TeacherModulePreviewPage from './pages/TeacherModulePreviewPage';
-import StudentPlaceholderPage from './pages/StudentPlaceholderPage';
+import StudentClassPage from './pages/StudentClassPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TeacherModuleUploadPage from './pages/TeacherModuleUploadPage';
 import TopNavLayout from './shared-ui/layouts/TopNavLayout';
@@ -71,7 +71,7 @@ export default function App(): React.JSX.Element {
           {/* Student routes */}
           <Route
             path="/student/join"
-            element={<StudentPlaceholderPage />}
+            element={<StudentClassPage />}
           />
 
           {/* Catch-all */}

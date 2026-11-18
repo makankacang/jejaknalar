@@ -13,7 +13,7 @@ export default function StudentDemoPage(): React.JSX.Element {
         <strong>DEMO LOKAL / SIMULASI.</strong> Quest, penilaian, dan jalur BedaJalur di halaman ini menggunakan data sintetis.
         Tidak ada login siswa, publikasi Quest, penyimpanan progres, atau scoring resmi di server.
       </div>
-      <StudentQuestPage demoPath="developing" />
+      <StudentQuestPage />
     </div>
   );
 }

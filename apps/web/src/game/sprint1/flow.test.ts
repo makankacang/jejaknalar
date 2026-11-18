@@ -9,7 +9,7 @@ const setup = (path: ConstructorParameters<typeof MockAssessmentRepositoryV1>[0]
   return new QuestFlow(quest, content, new MockAssessmentRepositoryV1(path));
 };
 const advance = (f: QuestFlow) => {
-  f.start(); f.interactNpc(); f.closeInteraction(); f.openDocument(); f.closeInteraction(); f.openChallenge(); f.selectEvidence('P-002');
+  f.start(); f.interactNpc(); f.closeInteraction(); f.openDocument(); f.closeInteraction(); f.openChallenge(); f.selectEvidence('P-002'); f.selectAnswer('ITEM-002', 'I-A'); f.selectAnswer('ITEM-003', 'T-B');
 };
 
 describe('PIC D Sprint 1: Evidence Hunt vertical slice', () => {
@@ -74,3 +74,12 @@ describe('PIC D Sprint 1: Evidence Hunt vertical slice', () => {
     expect(f.getSnapshot().state).toBe('FEEDBACK');
   });
 });
+
+ it('requires inference and transfer, clears answers on retry, issues a new attempt key', async () => {
+   const f = setup(); f.start(); f.openDocument(); f.closeInteraction(); f.openChallenge();
+   f.selectEvidence('P-002'); await f.submit(); expect(f.getSnapshot().state).toBe('ASSESSMENT');
+   f.selectAnswer('ITEM-002', 'I-A'); f.selectAnswer('ITEM-003', 'T-B'); f.hint();
+   await f.submit(); f.retry();
+   expect(f.getSnapshot().answers).toEqual({}); expect(f.getSnapshot().hintsUsed).toBe(0);
+   expect(f.getSnapshot().attemptCount).toBe(2); expect(f.getSnapshot().state).toBe('ASSESSMENT');
+ });
