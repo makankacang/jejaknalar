@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { StudentApiClient, StudentApiError } from './client';
 import { pollAssessmentResult } from '../assessment/assessment-polling';
 import { InMemoryStudentCredential, StudentSessionApi } from './session';
+import { StudentQuestApi } from './quest';
 import {
   createSubmission, StudentAssessmentApi, StudentSubmitController,
   hasOfficialBedaJalur, type PublishedItemCatalog,
@@ -255,5 +256,46 @@ describe('B-05 UI checkpoint optimistic revision', () => {
   it('rejects scoring-shaped or invalid checkpoint UI payloads', () => {
     expect(() => parseUiProgress({ ...progress, score: 100 })).toThrow();
     expect(() => parseUiProgress({ ...progress, position: { x: Infinity, y: 20 } })).toThrow();
+  });
+});
+
+describe('published quest boundary', () => {
+  const published = {
+    schema_version: '1.0', template: 'evidence_hunt', scene_id: 'school_library',
+    quest_id: 'QUEST-REAL-01', quest_version_id: catalog.quest_version_id,
+    objective_ids: ['LO-REAL-01'],
+    steps: [
+      { id: 'read', type: 'read_document', ref: 'DOC-01' },
+      { id: 'choose', type: 'select_evidence', item_id: 'ITEM-REAL-1' },
+    ],
+    variants: { needs_support: 'V-1', developing: 'V-2', ready_for_extension: 'V-3' },
+  };
+
+  it('requests the exact published version and derives its assessment catalog', async () => {
+    const call = vi.fn(async (url: string, options: RequestInit) => {
+      expect(url).toMatch(/\/student\/quests\/QV-REAL-01$/);
+      expect(options.method).toBe('GET');
+      return response(ok(published));
+    });
+    await expect(new StudentQuestApi(client(call)).load(catalog.quest_version_id))
+      .resolves.toMatchObject({ quest: published, catalog });
+  });
+
+  it('rejects an unexpected version and a non-QuestV1 payload', async () => {
+    const versions = [{ ...published, quest_version_id: 'QV-OTHER' }, { ...published, steps: [] }];
+    for (const body of versions) {
+      const api = new StudentQuestApi(client(async () => response(ok(body))));
+      await expect(api.load(catalog.quest_version_id)).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    }
+  });
+
+  it('cancels an in-flight result request when its caller aborts', async () => {
+    const controller = new AbortController();
+    const service = new StudentAssessmentApi(client(async (_url, init) => {
+      controller.abort();
+      expect(init.signal?.aborted).toBe(true);
+      throw new DOMException('Aborted', 'AbortError');
+    }));
+    await expect(service.getResult(attempt, controller.signal)).rejects.toMatchObject({ code: 'NETWORK_ERROR' });
   });
 });

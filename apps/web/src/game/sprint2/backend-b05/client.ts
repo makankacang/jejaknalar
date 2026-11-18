@@ -20,7 +20,7 @@ export class StudentApiError extends Error {
 }
 
 type Method = 'GET' | 'POST' | 'PUT';
-type RequestOptions = { method: Method; expectedStatus: number; expectedStatuses?: readonly number[]; auth?: boolean; body?: unknown };
+type RequestOptions = { method: Method; expectedStatus: number; expectedStatuses?: readonly number[]; auth?: boolean; body?: unknown; signal?: AbortSignal };
 export type StudentApiConfig = {
   /** Full base path, e.g. https://PROJECT.supabase.co/functions/v1/student-api */
   baseUrl: string;
@@ -82,6 +82,8 @@ export class StudentApiClient {
       }
       headers['X-Student-Access-Code'] = code;
     }
+    const timeout = AbortSignal.timeout(10000);
+    const signal = opts.signal ? AbortSignal.any([opts.signal, timeout]) : timeout;
     let res: Response;
     try {
       res = await this.fetchFn(this.url + path, {
@@ -90,13 +92,17 @@ export class StudentApiClient {
         body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
         cache: 'no-store',
         credentials: 'omit',
+        signal,
       });
     } catch {
       throw new StudentApiError(0, 'NETWORK_ERROR', null, 'Koneksi terputus. Coba lagi tanpa mengganti idempotency key.');
     }
     let payload: unknown;
     try { payload = await res.json(); }
-    catch { throw new StudentApiError(502, 'BAD_RESPONSE', null, 'Server tidak mengembalikan JSON.'); }
+    catch {
+      if (signal.aborted) throw new StudentApiError(0, 'NETWORK_ERROR', null, 'Pembacaan respons terhenti. Coba lagi.');
+      throw new StudentApiError(502, 'BAD_RESPONSE', null, 'Server tidak mengembalikan JSON.');
+    }
     if (!res.ok) {
       const body = record(payload) ? payload : null;
       const error = body && record(body.error) ? body.error : null;

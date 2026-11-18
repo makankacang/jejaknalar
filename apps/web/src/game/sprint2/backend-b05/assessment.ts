@@ -68,7 +68,7 @@ export function parseSubmissionReceipt(raw: unknown): AssessmentReceipt {
       'Receipt assessment B-05 tidak sesuai kontrak.');
   }
   return { attempt_id: data.attempt_id as string, status: data.status as AssessmentReceipt['status'],
-    score: null, replayed: data.replayed, request_id: requestId };
+    replayed: data.replayed, request_id: requestId };
 }
 
 /** Backward-compatible export; accepts both HTTP 202 and final HTTP 200 replay. */
@@ -109,10 +109,10 @@ export class StudentAssessmentApi {
       replayed: receipt.replayed, request_id: receipt.request_id };
   }
 
-  async getResult(attemptId: string): Promise<AsyncSubmitData & { request_id?: string; quest_version_id?: string; scored_at?: string | null }> {
+  async getResult(attemptId: string, signal?: AbortSignal): Promise<OfficialAssessmentResult> {
     if (!uuid.test(attemptId)) throw new StudentApiError(422, 'VALIDATION_ERROR', null, 'attempt_id tidak valid.');
     const raw = await this.api.request(`/assessments/${encodeURIComponent(attemptId)}/result`, {
-      method: 'GET', expectedStatus: 200,
+      method: 'GET', expectedStatus: 200, signal,
     });
     return parseOfficialAssessmentResult(raw, attemptId);
   }

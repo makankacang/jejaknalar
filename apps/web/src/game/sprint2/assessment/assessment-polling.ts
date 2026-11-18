@@ -12,7 +12,7 @@ export function waitForPoll(ms: number, signal?: AbortSignal): Promise<void> {
 
 /** Poll only the existing attempt. This function never resubmits POST. */
 export async function pollAssessmentResult(
-  port: AssessmentPortAsync,
+  port: Pick<AssessmentPortAsync, 'getResult'>,
   attemptId: string,
   options: PollOptions = {},
 ): Promise<AsyncSubmitData & { status: 'scored' | 'insufficient_evidence' }> {
